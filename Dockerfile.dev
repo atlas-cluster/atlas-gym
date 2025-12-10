@@ -1,0 +1,19 @@
+# Development Dockerfile using Bun
+FROM oven/bun:1
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json bun.lock* ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN bun install
+
+# The rest will be mounted as a volume
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["bun", "run", "dev"]
