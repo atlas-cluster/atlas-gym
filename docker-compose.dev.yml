@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: atlas-gym-postgres-dev
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-atlas_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atlas_password}
+      POSTGRES_DB: ${POSTGRES_DB:-atlas_gym}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atlas_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - atlas-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: atlas-gym-app-dev
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_USER=${POSTGRES_USER:-atlas_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-atlas_password}
+      - POSTGRES_DB=${POSTGRES_DB:-atlas_gym}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - atlas-network
+    command: bun run dev
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  atlas-network:
+    driver: bridge
