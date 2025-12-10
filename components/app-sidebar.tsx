@@ -32,9 +32,14 @@ export function AppSidebar() {
     const checkConnection = async () => {
       try {
         const response = await fetch('/api/ping')
+        if (!response.ok) {
+          setDbConnected(false)
+          return
+        }
         const data = await response.json()
         setDbConnected(data.success)
-      } catch {
+      } catch (error) {
+        console.error('Database connection check failed:', error)
         setDbConnected(false)
       }
     }
