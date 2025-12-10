@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { BookUserIcon, LogOut, SettingsIcon, UserIcon } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function AppSidebarUser({
   username,
@@ -32,11 +33,12 @@ export default function AppSidebarUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <div
-                className={
-                  'flex size-8 items-center justify-center rounded-lg'
-                }>
-                <UserIcon className={'m-2 size-4'}></UserIcon>
+              <div className={'flex size-8 items-center justify-center'}>
+                <Avatar>
+                  <AvatarFallback>
+                    <UserIcon className={'size-4'} />
+                  </AvatarFallback>
+                </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
                 <span className="truncate font-medium">{username}</span>
@@ -53,11 +55,12 @@ export default function AppSidebarUser({
             sideOffset={4}>
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div
-                  className={
-                    'flex size-8 items-center justify-center rounded-lg border'
-                  }>
-                  <UserIcon className={'m-2 size-4'}></UserIcon>
+                <div className={'flex size-8 items-center justify-center'}>
+                  <Avatar>
+                    <AvatarFallback>
+                      <UserIcon className={'size-4'} />
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{username}</span>

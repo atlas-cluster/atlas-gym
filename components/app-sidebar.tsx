@@ -57,7 +57,8 @@ export function AppSidebar() {
           </div>
 
           <div
-            className={'grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0'
+            className={
+              'grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0'
             }>
             <span className="truncate font-medium">Atlas Gym</span>
             <div className="flex items-center gap-1.5">
