@@ -11,7 +11,11 @@ export async function GET() {
     
     // Get database info
     const result = await prisma.$queryRaw`SELECT version()` as any[]
-    const version = result[0]?.version || 'Unknown'
+    const versionString = result[0]?.version || 'Unknown'
+    
+    // Extract PostgreSQL version using regex
+    const versionMatch = versionString.match(/PostgreSQL [\d.]+/)
+    const version = versionMatch ? versionMatch[0] : 'PostgreSQL (Unknown version)'
     
     return NextResponse.json({
       status: 'success',
@@ -19,7 +23,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       database: {
         type: 'PostgreSQL',
-        version: version.split(' ')[0] + ' ' + version.split(' ')[1],
+        version: version,
       },
     })
   } catch (error) {
