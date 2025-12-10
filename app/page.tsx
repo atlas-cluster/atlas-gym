@@ -15,9 +15,7 @@ export default function Home() {
         <AppSidebar />
         <SidebarInset className={(!isMobile && 'mr-2') || 'mx-2'}>
           <SiteHeader />
-          <div className="p-4">
             <DatabaseStatus />
-          </div>
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>
