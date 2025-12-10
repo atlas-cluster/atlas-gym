@@ -22,10 +22,26 @@ import {
   MapPinIcon,
   UserStarIcon,
 } from 'lucide-react'
-import pkg from '../package.json'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 export function AppSidebar() {
+  const [dbConnected, setDbConnected] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const response = await fetch('/api/ping')
+        const data = await response.json()
+        setDbConnected(data.success)
+      } catch {
+        setDbConnected(false)
+      }
+    }
+
+    checkConnection()
+  }, [])
+
   return (
     <Sidebar collapsible={'icon'} variant={'floating'}>
       <SidebarHeader>
@@ -39,7 +55,24 @@ export function AppSidebar() {
           />
           <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
             <span className="truncate font-medium">Atlas Gym</span>
-            <span className="text-muted-foreground truncate text-xs">{`v${pkg.version}`}</span>
+            <div className="flex items-center gap-1.5">
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  dbConnected === null
+                    ? 'bg-gray-400'
+                    : dbConnected
+                      ? 'bg-green-500'
+                      : 'bg-red-500'
+                }`}
+              />
+              <span className="text-muted-foreground truncate text-xs">
+                {dbConnected === null
+                  ? 'Checking...'
+                  : dbConnected
+                    ? 'Connected'
+                    : 'Error'}
+              </span>
+            </div>
           </div>
         </div>
       </SidebarHeader>
