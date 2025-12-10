@@ -21,7 +21,7 @@ export function DatabaseStatus() {
   const checkConnection = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/db-ping')
+      const response = await fetch('/api/ping')
       const data = await response.json()
       setStatus(data)
     } catch (error) {
