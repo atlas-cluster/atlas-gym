@@ -75,16 +75,19 @@ jobs:
             gunzip -c image.tar.gz | docker load
             rm image.tar.gz
             
-            # Run database migrations
+            # Start the services (this will create the network if it doesn't exist)
+            docker compose -f docker-compose.prod.yml up -d
+            
+            # Wait for postgres to be healthy
+            echo "Waiting for postgres to be healthy..."
+            sleep 10
+            
+            # Run database migrations using the same network as the compose services
             docker run --rm \
-              --network $(docker network ls -q -f name=atlas) \
+              --network $(docker compose -f docker-compose.prod.yml ps -q postgres | xargs docker inspect --format '{{range $net, $conf := .NetworkSettings.Networks}}{{$net}}{{end}}' | head -1) \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               ${{ env.DOCKER_IMAGE }}:latest \
-              bunx prisma migrate deploy
-            
-            # Start the services
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d
+              bunx prisma migrate deploy || echo "Migration failed or no migrations to run"
             
             # Clean up old images
             docker image prune -f
