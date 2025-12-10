@@ -65,7 +65,7 @@ Open [http://localhost:3000](http://localhost:3000) and click "Ping Database" to
 ## 🏗️ Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
-- **Database:** PostgreSQL 15
+- **Database:** PostgreSQL 18
 - **ORM:** Prisma 7
 - **Styling:** Tailwind CSS 4
 - **UI Components:** Radix UI
@@ -114,7 +114,7 @@ The project includes Docker Compose for easy PostgreSQL setup:
 ```yaml
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:18-alpine
     ports:
       - '5432:5432'
     environment:

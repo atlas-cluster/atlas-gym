@@ -77,7 +77,7 @@ npm run dev
 
 The `docker compose.yml` configures:
 
-- **Image**: PostgreSQL 15 Alpine (lightweight)
+- **Image**: PostgreSQL 18 Alpine (lightweight)
 - **Database**: `atlas_gym`
 - **User**: `postgres`
 - **Password**: `postgres`

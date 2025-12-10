@@ -17,7 +17,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "db:setup": "npm run db:up && sleep 5 && npm run db:generate && npm run db:push"
+    "db:setup": "docker compose up -d && sleep 5 && prisma generate && prisma db push"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.1.0",
