@@ -46,14 +46,11 @@ jobs:
           script: |
             cd /var/www/atlas-gym
             
-            # Stop existing containers
             docker compose -f docker-compose.prod.yml down
             
-            # Build and start containers
             docker compose -f docker-compose.prod.yml build --no-cache
             docker compose -f docker-compose.prod.yml up -d
             
-            # Clean up old images
             docker system prune -f
             
             echo "Deployment completed successfully!"
