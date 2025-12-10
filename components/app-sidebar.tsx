@@ -37,7 +37,7 @@ export function AppSidebar() {
           return
         }
         const data = await response.json()
-        setDbConnected(data.success)
+        setDbConnected(typeof data === 'object' && data?.success === true)
       } catch (error) {
         console.error('Database connection check failed:', error)
         setDbConnected(false)
