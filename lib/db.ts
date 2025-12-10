@@ -10,9 +10,13 @@ export function getPool(): Pool {
       host: process.env.POSTGRES_HOST || 'localhost',
       port: parseInt(process.env.POSTGRES_PORT || '5432'),
       database: process.env.POSTGRES_DB || 'atlas_gym',
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      max: parseInt(process.env.DB_POOL_MAX || '20'),
+      idleTimeoutMillis: parseInt(
+        process.env.DB_IDLE_TIMEOUT_MS || '30000'
+      ),
+      connectionTimeoutMillis: parseInt(
+        process.env.DB_CONNECTION_TIMEOUT_MS || '2000'
+      ),
     })
   }
   return pool

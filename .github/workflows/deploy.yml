@@ -24,7 +24,7 @@ jobs:
           EOF
 
       - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.8
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -35,7 +35,7 @@ jobs:
           rm: false
 
       - name: Deploy application
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -46,9 +46,6 @@ jobs:
             
             # Stop existing containers
             docker compose -f docker-compose.prod.yml down
-            
-            # Pull latest changes
-            git pull origin main || true
             
             # Build and start containers
             docker compose -f docker-compose.prod.yml build --no-cache
