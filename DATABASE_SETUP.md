@@ -2,6 +2,29 @@
 
 This project uses Prisma with PostgreSQL for database management.
 
+## 🚀 Quick Start (Recommended - Docker)
+
+**The easiest way to get started is with Docker!**
+
+See **[DOCKER_SETUP.md](./DOCKER_SETUP.md)** for the quick Docker setup.
+
+**TL;DR:**
+```bash
+# Start PostgreSQL with Docker
+npm run db:setup
+
+# Start dev server
+npm run dev
+```
+
+That's it! Visit http://localhost:3000 and test the connection.
+
+---
+
+## Alternative: Manual PostgreSQL Installation
+
+If you prefer to install PostgreSQL manually without Docker:
+
 ## Prerequisites
 
 - PostgreSQL installed locally or access to a PostgreSQL server
