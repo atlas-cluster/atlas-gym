@@ -1,0 +1,244 @@
+-- ===========================================================
+--  1) Schema anlegen (falls nicht vorhanden)
+-- ===========================================================
+DROP SCHEMA IF EXISTS fitnessstudio CASCADE;
+CREATE SCHEMA fitnessstudio;
+SET search_path TO fitnessstudio;
+
+-- ===========================================================
+--  2) Existierende Tabellen löschen
+-- ===========================================================
+DROP TABLE IF EXISTS
+    payment,
+    payment_status,
+    payment_method,
+    contracts,
+    membership,
+    session,
+    course_equipment,
+    equipment,
+    course_reservation,
+    course,
+    rooms,
+    trainer,
+    trainer_license,
+    app_user
+CASCADE;
+
+-- ===========================================================
+--  3) Tabellen neu anlegen
+-- ===========================================================
+
+-- -----------------------------
+-- User (ohne user_is_trainer)
+-- -----------------------------
+CREATE TABLE app_user (
+    user_id         SERIAL PRIMARY KEY,
+    user_firstname  VARCHAR(50) NOT NULL,
+    user_lastname   VARCHAR(50) NOT NULL,
+    user_middlename VARCHAR(50),
+    user_email      VARCHAR(100) NOT NULL UNIQUE,
+    user_address    VARCHAR(100) NOT NULL,
+    user_birthdate  DATE NOT NULL,
+    user_phone      VARCHAR(40) NOT NULL
+);
+
+-- -----------------------------
+-- Trainer-License
+-- -----------------------------
+CREATE TABLE trainer_license (
+    trainer_license_id     SERIAL PRIMARY KEY,
+    trainer_license_name   VARCHAR(50) NOT NULL,
+    trainer_license_description VARCHAR(200)
+);
+
+-- -----------------------------
+-- Trainer
+-- -----------------------------
+CREATE TABLE trainer (
+    trainer_id         SERIAL PRIMARY KEY,
+    user_id            INT NOT NULL,
+    trainer_license_id INT NOT NULL,
+    trainer_start_date DATE NOT NULL,
+    trainer_end_date   DATE,
+
+    CONSTRAINT fk_trainer_user
+        FOREIGN KEY (user_id)
+        REFERENCES app_user (user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_trainer_license
+        FOREIGN KEY (trainer_license_id)
+        REFERENCES trainer_license (trainer_license_id)
+        ON DELETE RESTRICT
+);
+
+-- -----------------------------
+-- Rooms
+-- -----------------------------
+CREATE TABLE rooms (
+    room_id       SERIAL PRIMARY KEY,
+    room_name     VARCHAR(20) NOT NULL,
+    room_capacity INT NOT NULL
+);
+
+-- -----------------------------
+-- Course
+-- -----------------------------
+CREATE TABLE course (
+    course_id     SERIAL PRIMARY KEY,
+    trainer_id    INT NOT NULL,
+    room_id       INT NOT NULL,
+    course_name   VARCHAR(100) NOT NULL,
+    course_start_date DATE NOT NULL,
+    course_end_date   DATE NOT NULL,
+
+    CONSTRAINT fk_course_trainer
+        FOREIGN KEY (trainer_id)
+        REFERENCES trainer (trainer_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_course_room
+        FOREIGN KEY (room_id)
+        REFERENCES rooms (room_id)
+        ON DELETE RESTRICT
+);
+
+-- -----------------------------
+-- Course-Reservation
+-- -----------------------------
+CREATE TABLE course_reservation (
+    course_reservation_id SERIAL PRIMARY KEY,
+    user_id   INT NOT NULL,
+    course_id INT NOT NULL,
+
+    CONSTRAINT fk_course_reservation_user
+        FOREIGN KEY (user_id)
+        REFERENCES app_user (user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_course_reservation_course
+        FOREIGN KEY (course_id)
+        REFERENCES course (course_id)
+        ON DELETE CASCADE
+);
+
+-- -----------------------------
+-- Equipment
+-- -----------------------------
+CREATE TABLE equipment (
+    equipment_id          SERIAL PRIMARY KEY,
+    equipment_name        VARCHAR(50) NOT NULL,
+    equipment_manufacturer VARCHAR(50) NOT NULL,
+    equipment_buy_date    DATE NOT NULL,
+    equipment_is_operational BOOLEAN NOT NULL
+);
+
+-- -----------------------------
+-- Course-Equipment
+-- -----------------------------
+CREATE TABLE course_equipment (
+    course_equipment_id SERIAL PRIMARY KEY,
+    course_id           INT NOT NULL,
+    equipment_id        INT NOT NULL,
+
+    CONSTRAINT fk_course_equipment_course
+        FOREIGN KEY (course_id)
+        REFERENCES course (course_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_course_equipment_equipment
+        FOREIGN KEY (equipment_id)
+        REFERENCES equipment (equipment_id)
+        ON DELETE CASCADE
+);
+
+-- -----------------------------
+-- Session (OHNE session_type_id)
+-- -----------------------------
+CREATE TABLE session (
+    session_id       SERIAL PRIMARY KEY,
+    user_id          INT NOT NULL,
+    session_start_date DATE NOT NULL,
+    session_end_date   DATE NOT NULL,
+    session_duration   DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT fk_session_user
+        FOREIGN KEY (user_id)
+        REFERENCES app_user (user_id)
+        ON DELETE CASCADE
+);
+
+-- -----------------------------
+-- Membership
+-- -----------------------------
+CREATE TABLE membership (
+    membership_id SERIAL PRIMARY KEY,
+    membership_name VARCHAR(50) NOT NULL,
+    membership_price INT NOT NULL,
+    membership_min_duration DATE NOT NULL
+);
+
+-- -----------------------------
+-- Contracts
+-- -----------------------------
+CREATE TABLE contracts (
+    contract_id      SERIAL PRIMARY KEY,
+    user_id          INT NOT NULL,
+    membership_id    INT NOT NULL,
+    contract_cancellation_date DATE NOT NULL,
+    contract_start_date DATE NOT NULL,
+    contract_end_date   DATE,
+
+    CONSTRAINT fk_contract_user
+        FOREIGN KEY (user_id)
+        REFERENCES app_user (user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_contract_membership
+        FOREIGN KEY (membership_id)
+        REFERENCES membership (membership_id)
+        ON DELETE RESTRICT
+);
+
+-- -----------------------------
+-- Payment Method & Status
+-- -----------------------------
+CREATE TABLE payment_method (
+    payment_method_id SERIAL PRIMARY KEY,
+    payment_method_name VARCHAR(50) NOT NULL,
+    payment_method_description VARCHAR(200)
+);
+
+CREATE TABLE payment_status (
+    payment_status_id SERIAL PRIMARY KEY,
+    payment_status_label VARCHAR(50) NOT NULL,
+    payment_status_description VARCHAR(200)
+);
+
+-- -----------------------------
+-- Payment
+-- -----------------------------
+CREATE TABLE payment (
+    payment_id      SERIAL PRIMARY KEY,
+    contract_id     INT NOT NULL,
+    payment_date    DATE NOT null,
+    payment_amount  DECIMAL NOT NULL,
+    payment_method_id INT NOT NULL,
+    payment_status_id INT NOT NULL,
+
+    CONSTRAINT fk_payment_contract
+        FOREIGN KEY (contract_id)
+        REFERENCES contracts (contract_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_payment_method
+        FOREIGN KEY (payment_method_id)
+        REFERENCES payment_method (payment_method_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_payment_status
+        FOREIGN KEY (payment_status_id)
+        REFERENCES payment_status (payment_status_id)
+        ON DELETE RESTRICT
+);

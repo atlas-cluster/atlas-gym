@@ -1,0 +1,4 @@
+payment_method_id,payment_method_name,payment_method_description
+1,Credit Card,Visa / Mastercard
+2,SEPA,Bankeinzug
+3,PayPal,Online Payment

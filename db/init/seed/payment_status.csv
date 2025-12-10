@@ -1,0 +1,4 @@
+payment_status_id,payment_status_label,payment_status_description
+1,paid,Zahlung erfolgreich
+2,pending,Ausstehende Zahlung
+3,failed,Fehlgeschlagene Zahlung
