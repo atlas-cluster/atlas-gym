@@ -100,7 +100,8 @@ export function RegisterForm({
 
                 // Redirect to home page on success
                 router.push('/')
-            } catch {
+            } catch (error) {
+                console.error('Registration error:', error)
                 setError('An error occurred during registration')
                 setLoading(false)
             }

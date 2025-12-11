@@ -53,7 +53,8 @@ export function LoginForm({
 
       // Redirect to home page on success
       router.push('/')
-    } catch {
+    } catch (error) {
+      console.error('Login error:', error)
       setError('An error occurred during login')
       setLoading(false)
     }
