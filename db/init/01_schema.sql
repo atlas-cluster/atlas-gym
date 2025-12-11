@@ -14,9 +14,12 @@ CREATE TABLE users (
     user_lastname   VARCHAR(50)  NOT NULL,
     user_middlename VARCHAR(50),
     user_email      CITEXT       NOT NULL UNIQUE,
+    password_hash   TEXT         NOT NULL,
     user_address    TEXT,
     user_birthdate  DATE         NOT NULL,
     user_phone      VARCHAR(20),
+    payment_type    VARCHAR(20),  -- 'credit_card' or 'iban'
+    payment_info    TEXT,         -- Encrypted payment information
     CONSTRAINT valid_email CHECK (user_email <> '')
 );
 
