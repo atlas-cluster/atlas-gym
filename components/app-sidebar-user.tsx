@@ -14,7 +14,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { BookUserIcon, LogOut, SettingsIcon, UserIcon } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 export default function AppSidebarUser({
   username,
