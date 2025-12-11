@@ -131,6 +131,7 @@ export async function authenticateUser(
     }
 
     // Remove password_hash from returned user object
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = user
     return userWithoutPassword as User
   } catch (error) {

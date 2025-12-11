@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -54,7 +53,7 @@ export function LoginForm({
 
       // Redirect to home page on success
       router.push('/')
-    } catch (err) {
+    } catch {
       setError('An error occurred during login')
       setLoading(false)
     }
