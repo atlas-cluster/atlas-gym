@@ -1,6 +1,3 @@
--- Sample user for local development
--- Email: demo@atlas.gym
--- Password: password123
 INSERT INTO gym_manager.users (
     user_email,
     password_hash,
@@ -13,8 +10,8 @@ INSERT INTO gym_manager.users (
     payment_type,
     payment_info
 ) VALUES (
-    'demo@atlas.gym',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', -- password123
+    'admin@demo.com',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK', -- admin
     'Demo',
     'User',
     NULL,
