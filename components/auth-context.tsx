@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const fetchUser = async () => {
+  const fetchUser = React.useCallback(async () => {
     try {
       const data = (await apiClient.getSession()) as {
         authenticated: boolean
@@ -59,9 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsAuthenticated(false)
       return false
     }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = React.useCallback(async () => {
     try {
       await apiClient.logout()
       setUser(null)
@@ -73,11 +73,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsAuthenticated(false)
       router.push('/login')
     }
-  }
+  }, [router])
 
-  const refreshUser = async () => {
+  const refreshUser = React.useCallback(async () => {
     await fetchUser()
-  }
+  }, [fetchUser])
 
   useEffect(() => {
     let isMounted = true
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted = false
     }
-  }, [pathname, router])
+  }, [pathname, router, fetchUser])
 
   // Don't block rendering - show page immediately with loading states
   return (
