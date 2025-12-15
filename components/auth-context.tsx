@@ -86,82 +86,79 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
     let progressInterval: NodeJS.Timeout | null = null
 
-    // Separated progress animation utility - can be reused for different scenarios
-    const animateProgress = (
-      startValue: number,
-      targetValue: number,
-      duration: number
-    ): Promise<void> => {
-      return new Promise((resolve) => {
-        const steps = Math.ceil(duration / 30) // 30ms per step
-        const increment = (targetValue - startValue) / steps
-        let currentStep = 0
-        let currentValue = startValue
-
-        const interval = setInterval(() => {
-          if (!isMounted) {
-            clearInterval(interval)
-            resolve()
-            return
-          }
-
-          currentStep++
-          currentValue = Math.min(startValue + increment * currentStep, targetValue)
-          setProgress(Math.round(currentValue))
-
-          if (currentStep >= steps) {
-            clearInterval(interval)
-            resolve()
-          }
-        }, 30)
-      })
-    }
-
     const checkAuth = async () => {
       if (PUBLIC_ROUTES.includes(pathname)) {
         setLoading(false)
         return
       }
 
-      // Quick check: if no session cookie exists, show smooth redirect animation
-      const hasSessionCookie = document.cookie
-        .split('; ')
-        .some((cookie) => cookie.startsWith('session='))
-
-      if (!hasSessionCookie) {
-        // No cookie - animate progress while redirecting
-        await animateProgress(0, 100, 400)
-        if (isMounted) {
-          setLoading(false)
-          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-          router.push(loginUrl)
+      // Smooth progress animation to 60%
+      let currentProgress = 0
+      progressInterval = setInterval(() => {
+        if (!isMounted) return
+        currentProgress += 2
+        if (currentProgress <= 60) {
+          setProgress(currentProgress)
+        } else {
+          if (progressInterval) clearInterval(progressInterval)
         }
-        return
+      }, 50) // Update every 50ms for smooth animation
+
+      const authenticated = await fetchUser()
+
+      if (!isMounted) return
+
+      // Clear first interval
+      if (progressInterval) clearInterval(progressInterval)
+
+      // Continue progress smoothly from current position to 85%
+      const animateToTarget = (target: number, duration: number) => {
+        return new Promise<void>((resolve) => {
+          const startProgress = currentProgress
+          const diff = target - startProgress
+          const steps = Math.ceil(duration / 30) // 30ms per step
+          const increment = diff / steps
+
+          let step = 0
+          const interval = setInterval(() => {
+            if (!isMounted) {
+              clearInterval(interval)
+              resolve()
+              return
+            }
+
+            step++
+            currentProgress = Math.min(startProgress + increment * step, target)
+            setProgress(Math.round(currentProgress))
+
+            if (step >= steps) {
+              clearInterval(interval)
+              resolve()
+            }
+          }, 30)
+        })
       }
 
-      // Has cookie - validate session with progress animation
-      // Start progress animation to 60%
-      const progressPromise = animateProgress(0, 60, 800)
-      const authPromise = fetchUser()
-
-      // Wait for both to complete
-      const [, authenticated] = await Promise.all([progressPromise, authPromise])
+      // Animate to 85%
+      await animateToTarget(85, 400)
 
       if (!isMounted) return
 
       if (!authenticated) {
-        // Invalid session - animate to 100% and redirect
-        await animateProgress(60, 100, 400)
+        // Redirect to login with return URL
+        await animateToTarget(95, 200)
         if (isMounted) {
-          setLoading(false)
           const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
           router.push(loginUrl)
         }
       } else {
-        // Valid session - complete progress and show content
-        await animateProgress(60, 100, 400)
+        // Complete progress to 100%
+        await animateToTarget(100, 300)
         if (isMounted) {
-          setLoading(false)
+          // Small delay before showing content for smooth transition
+          setTimeout(() => {
+            if (isMounted) setLoading(false)
+          }, 200)
         }
       }
     }
