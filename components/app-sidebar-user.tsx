@@ -17,7 +17,7 @@ import {
 import { BookUserIcon, LogOut, SettingsIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuth } from '@/components/auth-provider'
+import { useAuth } from '@/lib/auth-context'
 
 const FALLBACK_EMAIL = 'No email'
 
