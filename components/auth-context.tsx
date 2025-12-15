@@ -92,20 +92,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // Quick check: if no session cookie exists, redirect immediately without loading screen
-      const hasSessionCookie = document.cookie
-        .split('; ')
-        .some((cookie) => cookie.startsWith('session='))
-
-      if (!hasSessionCookie) {
-        // No cookie means no session - instant redirect to login
-        setLoading(false)
-        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-        router.push(loginUrl)
-        return
-      }
-
-      // Has cookie - show loading screen and validate session
       // Smooth progress animation to 60%
       let currentProgress = 0
       progressInterval = setInterval(() => {
