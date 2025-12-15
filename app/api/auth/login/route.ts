@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     // Validate and sanitize input
     const validation = loginSchema.safeParse(body)
-    
+
     if (!validation.success) {
       return NextResponse.json(
         { error: validation.error.issues[0].message },

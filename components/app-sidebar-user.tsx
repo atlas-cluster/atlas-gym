@@ -20,8 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/components/auth-context'
 import { toast } from 'sonner'
 
-const FALLBACK_EMAIL = 'No email'
-
 export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
   const { user, loading, logout } = useAuth()
@@ -37,23 +35,23 @@ export default function AppSidebarUser() {
   }
 
   const getInitials = () => {
-    if (!user) return 'U'
-    const firstInitial = user.firstname?.[0] || ''
-    const lastInitial = user.lastname?.[0] || ''
-    return firstInitial || lastInitial
-      ? (firstInitial + lastInitial).toUpperCase()
-      : 'U'
+    // Assume `user` exists when this is called.
+    // Use optional chaining only to avoid runtime errors in unexpected cases.
+    const firstInitial = user?.firstname?.[0] || ''
+    const lastInitial = user?.lastname?.[0] || ''
+    return (firstInitial + lastInitial).toUpperCase()
   }
 
   const getFullName = () => {
-    if (!user) return 'User'
-    const parts = [user.firstname, user.middlename, user.lastname].filter(
+    // Assume `user` exists when this is called.
+    const parts = [user?.firstname , user?.middlename, user?.lastname].filter(
       Boolean
     )
-    return parts.join(' ') || 'User'
+    return parts.join(' ')
   }
 
-  if (loading) {
+  // Show skeleton while loading OR when user data is not present.
+  if (loading || !user) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -85,7 +83,7 @@ export default function AppSidebarUser() {
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
                 <span className="truncate font-medium">{getFullName()}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user?.email || FALLBACK_EMAIL}
+                  {user.email}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -105,7 +103,7 @@ export default function AppSidebarUser() {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{getFullName()}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user?.email || FALLBACK_EMAIL}
+                    {user.email}
                   </span>
                 </div>
               </div>

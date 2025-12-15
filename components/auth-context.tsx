@@ -42,7 +42,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUser = async () => {
     try {
-      const data = await apiClient.getSession() as { authenticated: boolean; user?: UserData }
+      const data = (await apiClient.getSession()) as {
+        authenticated: boolean
+        user?: UserData
+      }
 
       if (data.authenticated && data.user) {
         setUser(data.user)
@@ -125,7 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             step++
-            currentProgress = Math.min(startProgress + (increment * step), target)
+            currentProgress = Math.min(startProgress + increment * step, target)
             setProgress(Math.round(currentProgress))
 
             if (step >= steps) {
@@ -171,7 +174,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Show unified loading screen while checking auth or redirecting
   if (loading || (!PUBLIC_ROUTES.includes(pathname) && !isAuthenticated)) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background">
+      <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center gap-6">
           <Image
             src="/atlas_logo_rounded_m.png"
@@ -184,7 +187,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           <div className="w-64">
             <Progress value={progress} className="h-2" />
           </div>
-            <span className={"text-muted-foreground"}>Loading...</span>
+          <span className={'text-muted-foreground'}>Loading...</span>
         </div>
       </div>
     )

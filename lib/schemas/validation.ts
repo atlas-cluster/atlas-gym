@@ -28,14 +28,20 @@ export const nameSchema = z
   .string()
   .min(1, 'This field is required')
   .max(50, 'Name is too long')
-  .regex(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes are allowed')
+  .regex(
+    /^[a-zA-Z\s'-]+$/,
+    'Only letters, spaces, hyphens, and apostrophes are allowed'
+  )
   .trim()
 
 // Optional name validation
 export const optionalNameSchema = z
   .string()
   .max(50, 'Name is too long')
-  .regex(/^[a-zA-Z\s'-]*$/, 'Only letters, spaces, hyphens, and apostrophes are allowed')
+  .regex(
+    /^[a-zA-Z\s'-]*$/,
+    'Only letters, spaces, hyphens, and apostrophes are allowed'
+  )
   .trim()
   .optional()
   .or(z.literal(''))
@@ -84,22 +90,24 @@ export const loginSchema = z.object({
 })
 
 // Registration schema
-export const registrationSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-  passwordrepeat: z.string().min(1, 'Please confirm your password'),
-  firstname: nameSchema,
-  middlename: optionalNameSchema,
-  lastname: nameSchema,
-  birthdate: dateSchema,
-  phone: phoneSchema,
-  address: addressSchema,
-  paymentType: paymentTypeSchema.optional(),
-  paymentInfo: paymentInfoSchema,
-}).refine((data) => data.password === data.passwordrepeat, {
-  message: "Passwords don't match",
-  path: ['passwordrepeat'],
-})
+export const registrationSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    passwordrepeat: z.string().min(1, 'Please confirm your password'),
+    firstname: nameSchema,
+    middlename: optionalNameSchema,
+    lastname: nameSchema,
+    birthdate: dateSchema,
+    phone: phoneSchema,
+    address: addressSchema,
+    paymentType: paymentTypeSchema.optional(),
+    paymentInfo: paymentInfoSchema,
+  })
+  .refine((data) => data.password === data.passwordrepeat, {
+    message: "Passwords don't match",
+    path: ['passwordrepeat'],
+  })
 
 // Type exports
 export type LoginInput = z.infer<typeof loginSchema>

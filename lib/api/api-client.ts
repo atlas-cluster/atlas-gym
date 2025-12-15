@@ -46,22 +46,19 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config)
-      
+
       // Check if response is JSON
       const contentType = response.headers.get('content-type')
       const isJson = contentType && contentType.includes('application/json')
-      
+
       let data: any
-      
+
       if (isJson) {
         try {
           data = await response.json()
         } catch {
           // If JSON parsing fails, create a generic error
-          throw new ApiError(
-            'Invalid response from server',
-            response.status
-          )
+          throw new ApiError('Invalid response from server', response.status)
         }
       } else {
         // Non-JSON response (likely HTML error page)

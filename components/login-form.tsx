@@ -40,7 +40,7 @@ export function LoginForm({
 
     // Client-side validation
     const validation = loginSchema.safeParse({ email, password })
-    
+
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {}
       validation.error.issues.forEach((issue) => {
@@ -56,9 +56,9 @@ export function LoginForm({
 
     try {
       await apiClient.login(email, password)
-      
+
       toast.success('Login successful!')
-      
+
       // Redirect to the original page or home
       const redirect = searchParams.get('redirect') || '/'
       router.push(redirect)
@@ -70,7 +70,7 @@ export function LoginForm({
         toast.error('An unexpected error occurred')
         setErrors({ general: 'An unexpected error occurred' })
       }
-      
+
       setLoading(false)
     }
   }
@@ -98,20 +98,24 @@ export function LoginForm({
                   aria-invalid={!!errors.email}
                 />
                 {errors.email && (
-                  <div className="text-sm text-red-600 mt-1">{errors.email}</div>
+                  <div className="mt-1 text-sm text-red-600">
+                    {errors.email}
+                  </div>
                 )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input 
-                  id="password" 
+                <Input
+                  id="password"
                   name="password"
-                  type="password" 
+                  type="password"
                   required
                   aria-invalid={!!errors.password}
                 />
                 {errors.password && (
-                  <div className="text-sm text-red-600 mt-1">{errors.password}</div>
+                  <div className="mt-1 text-sm text-red-600">
+                    {errors.password}
+                  </div>
                 )}
               </Field>
               {errors.general && (
