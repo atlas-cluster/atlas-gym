@@ -145,7 +145,21 @@ export function RegisterForm({
             // Submit registration
             setLoading(true)
             try {
-                await apiClient.register(allData)
+                // Type the data properly for the API client
+                const registrationData = {
+                    email: allData.email,
+                    password: allData.password,
+                    firstname: allData.firstname,
+                    lastname: allData.lastname,
+                    middlename: allData.middlename || undefined,
+                    birthdate: allData.birthdate,
+                    address: allData.address || undefined,
+                    phone: allData.phone || undefined,
+                    paymentType: allData.paymentType || undefined,
+                    paymentInfo: allData.paymentInfo || undefined,
+                }
+                
+                await apiClient.register(registrationData)
                 
                 toast.success('Registration successful! Welcome to Atlas Gym!')
                 
