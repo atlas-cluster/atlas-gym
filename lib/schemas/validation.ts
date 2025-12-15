@@ -67,9 +67,7 @@ export const dateSchema = z
   }, 'Invalid date')
 
 // Payment type validation
-export const paymentTypeSchema = z.enum(['credit_card', 'iban'], {
-  errorMap: () => ({ message: 'Invalid payment type' }),
-})
+export const paymentTypeSchema = z.enum(['credit_card', 'iban'])
 
 // Payment info validation
 export const paymentInfoSchema = z
