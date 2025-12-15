@@ -1,29 +1,9 @@
 import bcrypt from 'bcryptjs'
 import { getPool } from './db'
+import { User, Session } from './types'
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
-
-export interface User {
-  id: string
-  created_at: Date
-  user_firstname: string
-  user_lastname: string
-  user_middlename?: string
-  user_email: string
-  user_address?: string
-  user_birthdate: Date
-  user_phone?: string
-  payment_type?: string
-  payment_info?: string
-}
-
-export interface Session {
-  id: string
-  user_id: string
-  expires_at: Date
-  created_at: Date
-}
 
 export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, SALT_ROUNDS)

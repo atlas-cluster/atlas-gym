@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { API_ENDPOINTS } from '@/lib/api-endpoints'
 
 interface DbStatus {
   success: boolean
@@ -21,7 +22,7 @@ export function DatabaseStatus() {
   const checkConnection = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/ping')
+      const response = await fetch(API_ENDPOINTS.ping)
       const data = await response.json()
       setStatus(data)
     } catch (error) {

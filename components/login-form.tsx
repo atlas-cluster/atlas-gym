@@ -16,6 +16,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { API_ENDPOINTS } from '@/lib/api-endpoints'
 
 export function LoginForm({
   className,
@@ -36,7 +37,7 @@ export function LoginForm({
     const password = formData.get('password') as string
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(API_ENDPOINTS.auth.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
