@@ -2,6 +2,9 @@ DROP SCHEMA IF EXISTS gym_manager CASCADE;
 CREATE SCHEMA gym_manager;
 SET search_path TO gym_manager;
 
+-- Enable CITEXT extension for case-insensitive text
+CREATE EXTENSION IF NOT EXISTS citext;
+
 DROP TABLE IF EXISTS
     users,
     sessions
@@ -14,9 +17,12 @@ CREATE TABLE users (
     user_lastname   VARCHAR(50)  NOT NULL,
     user_middlename VARCHAR(50),
     user_email      CITEXT       NOT NULL UNIQUE,
+    password_hash   TEXT         NOT NULL,
     user_address    TEXT,
     user_birthdate  DATE         NOT NULL,
     user_phone      VARCHAR(20),
+    payment_type    VARCHAR(20),  -- 'credit_card' or 'iban'
+    payment_info    TEXT,         -- Stored payment information
     CONSTRAINT valid_email CHECK (user_email <> '')
 );
 

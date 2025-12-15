@@ -1,3 +1,6 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +18,86 @@ import {
 } from '@/components/ui/sidebar'
 import { BookUserIcon, LogOut, SettingsIcon, UserIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export default function AppSidebarUser({
-  username,
-  email,
-}: {
-  username?: string
-  email?: string
-}) {
+interface UserData {
+  id: string
+  email: string
+  firstname: string
+  lastname: string
+  middlename?: string
+}
+
+const FALLBACK_EMAIL = 'No email'
+
+export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const [user, setUser] = useState<UserData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/auth/session')
+        const data = await response.json()
+
+        if (data.authenticated && data.user) {
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      })
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
+  const getInitials = () => {
+    if (!user) return 'U'
+    const firstInitial = user.firstname?.[0] || ''
+    const lastInitial = user.lastname?.[0] || ''
+    return firstInitial || lastInitial
+      ? (firstInitial + lastInitial).toUpperCase()
+      : 'U'
+  }
+
+  const getFullName = () => {
+    if (!user) return 'User'
+    const parts = [user.firstname, user.middlename, user.lastname].filter(
+      Boolean
+    )
+    return parts.join(' ') || 'User'
+  }
+
+  if (loading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
 
   return (
     <SidebarMenu>
@@ -35,15 +109,13 @@ export default function AppSidebarUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className={'flex size-8 items-center justify-center'}>
                 <Avatar>
-                  <AvatarFallback>
-                    <UserIcon className={'size-4'} />
-                  </AvatarFallback>
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
-                <span className="truncate font-medium">{username}</span>
+                <span className="truncate font-medium">{getFullName()}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {email}
+                  {user?.email || FALLBACK_EMAIL}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -57,15 +129,13 @@ export default function AppSidebarUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <div className={'flex size-8 items-center justify-center'}>
                   <Avatar>
-                    <AvatarFallback>
-                      <UserIcon className={'size-4'} />
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials()}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{username}</span>
+                  <span className="truncate font-medium">{getFullName()}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {email}
+                    {user?.email || FALLBACK_EMAIL}
                   </span>
                 </div>
               </div>
@@ -82,7 +152,7 @@ export default function AppSidebarUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
