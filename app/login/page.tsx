@@ -1,11 +1,7 @@
-'use client'
 import Image from 'next/image'
 import { LoginForm } from '@/components/login-form'
-import { useAuthRedirect } from '@/hooks/use-auth-redirect'
 
 export default function Page() {
-  useAuthRedirect()
-
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-2">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
