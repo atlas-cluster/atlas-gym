@@ -1,9 +1,7 @@
-'use client'
-
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { UserData } from './types'
-import { API_ENDPOINTS } from './api-endpoints'
+import { apiClient } from './api-client'
 
 interface AuthContextType {
   user: UserData | null
@@ -39,8 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUser = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.auth.session)
-      const data = await response.json()
+      const data = await apiClient.getSession() as { authenticated: boolean; user?: UserData }
 
       if (data.authenticated && data.user) {
         setUser(data.user)
@@ -61,9 +58,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      await fetch(API_ENDPOINTS.auth.logout, {
-        method: 'POST',
-      })
+      await apiClient.logout()
       setUser(null)
       setIsAuthenticated(false)
       router.push('/login')

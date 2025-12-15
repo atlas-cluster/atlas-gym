@@ -18,7 +18,17 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { defineStepper } from '@/components/ui/stepper'
-import { API_ENDPOINTS } from '@/lib/api-endpoints'
+import { apiClient, ApiError } from '@/lib/api-client'
+import {
+    emailSchema,
+    passwordSchema,
+    nameSchema,
+    optionalNameSchema,
+    dateSchema,
+    phoneSchema,
+    addressSchema,
+} from '@/lib/validation'
+import { toast } from 'sonner'
 
 const { useStepper, steps, utils } = defineStepper(
     {
@@ -51,12 +61,12 @@ export function RegisterForm({
     const currentIndex = utils.getIndex(stepper.current.id)
     const router = useRouter()
     const [formData, setFormData] = useState<Record<string, string>>({})
-    const [error, setError] = useState<string>('')
+    const [errors, setErrors] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(false)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        setError('')
+        setErrors({})
 
         const formDataObj = new FormData(e.currentTarget)
         const data = Object.fromEntries(formDataObj.entries()) as Record<string, string>
@@ -65,16 +75,68 @@ export function RegisterForm({
         const allData = { ...formData, ...data }
         setFormData(allData)
 
-        // Validate password match on account step
+        // Validate current step
+        const stepErrors: Record<string, string> = {}
+        
         if (currentIndex === 0) {
+            // Account step validation
+            const emailValidation = emailSchema.safeParse(data.email)
+            if (!emailValidation.success) {
+                stepErrors.email = emailValidation.error.errors[0].message
+            }
+            
+            const passwordValidation = passwordSchema.safeParse(data.password)
+            if (!passwordValidation.success) {
+                stepErrors.password = passwordValidation.error.errors[0].message
+            }
+            
             if (data.password !== data.passwordrepeat) {
-                setError('Passwords do not match')
-                return
+                stepErrors.passwordrepeat = 'Passwords do not match'
             }
-            if (data.password.length < 8) {
-                setError('Password must be at least 8 characters long')
-                return
+        } else if (currentIndex === 1) {
+            // Personal step validation
+            const firstnameValidation = nameSchema.safeParse(data.firstname)
+            if (!firstnameValidation.success) {
+                stepErrors.firstname = firstnameValidation.error.errors[0].message
             }
+            
+            const lastnameValidation = nameSchema.safeParse(data.lastname)
+            if (!lastnameValidation.success) {
+                stepErrors.lastname = lastnameValidation.error.errors[0].message
+            }
+            
+            if (data.middlename) {
+                const middlenameValidation = optionalNameSchema.safeParse(data.middlename)
+                if (!middlenameValidation.success) {
+                    stepErrors.middlename = middlenameValidation.error.errors[0].message
+                }
+            }
+            
+            const birthdateValidation = dateSchema.safeParse(data.birthdate)
+            if (!birthdateValidation.success) {
+                stepErrors.birthdate = birthdateValidation.error.errors[0].message
+            }
+        } else if (currentIndex === 2) {
+            // Contact step validation
+            if (data.phone) {
+                const phoneValidation = phoneSchema.safeParse(data.phone)
+                if (!phoneValidation.success) {
+                    stepErrors.phone = phoneValidation.error.errors[0].message
+                }
+            }
+            
+            if (data.address) {
+                const addressValidation = addressSchema.safeParse(data.address)
+                if (!addressValidation.success) {
+                    stepErrors.address = addressValidation.error.errors[0].message
+                }
+            }
+        }
+
+        if (Object.keys(stepErrors).length > 0) {
+            setErrors(stepErrors)
+            toast.error('Please fix the errors in the form')
+            return
         }
 
         if (!stepper.isLast) {
@@ -83,27 +145,23 @@ export function RegisterForm({
             // Submit registration
             setLoading(true)
             try {
-                const response = await fetch(API_ENDPOINTS.auth.register, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(allData),
-                })
-
-                const result = await response.json()
-
-                if (!response.ok) {
-                    setError(result.error || 'Registration failed')
-                    setLoading(false)
-                    return
-                }
-
+                await apiClient.register(allData)
+                
+                toast.success('Registration successful! Welcome to Atlas Gym!')
+                
                 // Redirect to home page on success
                 router.push('/')
             } catch (error) {
                 console.error('Registration error:', error)
-                setError('An error occurred during registration')
+                
+                if (error instanceof ApiError) {
+                    toast.error(error.message)
+                    setErrors({ general: error.message })
+                } else {
+                    toast.error('An unexpected error occurred')
+                    setErrors({ general: 'An unexpected error occurred' })
+                }
+                
                 setLoading(false)
             }
         }
@@ -123,13 +181,13 @@ export function RegisterForm({
             <CardContent>
                 <form onSubmit={handleSubmit}>
                     <FieldGroup>
-                        {currentIndex === 0 && <AccountStep formData={formData} />}
-                        {currentIndex === 1 && <PersonalStep formData={formData} />}
-                        {currentIndex === 2 && <ContactStep formData={formData} />}
+                        {currentIndex === 0 && <AccountStep formData={formData} errors={errors} />}
+                        {currentIndex === 1 && <PersonalStep formData={formData} errors={errors} />}
+                        {currentIndex === 2 && <ContactStep formData={formData} errors={errors} />}
                         {currentIndex === 3 && <PaymentStep formData={formData} />}
-                        {error && (
+                        {errors.general && (
                             <Field>
-                                <div className="text-sm text-red-600">{error}</div>
+                                <div className="text-sm text-red-600">{errors.general}</div>
                             </Field>
                         )}
                         <Field>
@@ -164,7 +222,7 @@ export function RegisterForm({
     )
 }
 
-function AccountStep({ formData }: { formData: Record<string, string> }) {
+function AccountStep({ formData, errors }: { formData: Record<string, string>; errors: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -176,11 +234,15 @@ function AccountStep({ formData }: { formData: Record<string, string> }) {
                     placeholder="mail@example.com"
                     defaultValue={formData.email || ''}
                     required
+                    aria-invalid={!!errors.email}
                 />
+                {errors.email && (
+                    <div className="text-sm text-red-600 mt-1">{errors.email}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <FieldDescription>Must be at least 8 characters long</FieldDescription>
+                <FieldDescription>Must contain uppercase, lowercase, and a number. At least 8 characters.</FieldDescription>
                 <Input
                     id="password"
                     name="password"
@@ -188,7 +250,11 @@ function AccountStep({ formData }: { formData: Record<string, string> }) {
                     minLength={8}
                     defaultValue={formData.password || ''}
                     required
+                    aria-invalid={!!errors.password}
                 />
+                {errors.password && (
+                    <div className="text-sm text-red-600 mt-1">{errors.password}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="passwordrepeat">Repeat Password</FieldLabel>
@@ -199,13 +265,17 @@ function AccountStep({ formData }: { formData: Record<string, string> }) {
                     minLength={8}
                     defaultValue={formData.passwordrepeat || ''}
                     required
+                    aria-invalid={!!errors.passwordrepeat}
                 />
+                {errors.passwordrepeat && (
+                    <div className="text-sm text-red-600 mt-1">{errors.passwordrepeat}</div>
+                )}
             </Field>
         </>
     )
 }
 
-function PersonalStep({ formData }: { formData: Record<string, string> }) {
+function PersonalStep({ formData, errors }: { formData: Record<string, string>; errors: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -218,7 +288,11 @@ function PersonalStep({ formData }: { formData: Record<string, string> }) {
                     maxLength={50}
                     defaultValue={formData.firstname || ''}
                     required
+                    aria-invalid={!!errors.firstname}
                 />
+                {errors.firstname && (
+                    <div className="text-sm text-red-600 mt-1">{errors.firstname}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="middlename">Middle Name</FieldLabel>
@@ -229,7 +303,11 @@ function PersonalStep({ formData }: { formData: Record<string, string> }) {
                     placeholder="Pork"
                     maxLength={50}
                     defaultValue={formData.middlename || ''}
+                    aria-invalid={!!errors.middlename}
                 />
+                {errors.middlename && (
+                    <div className="text-sm text-red-600 mt-1">{errors.middlename}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="lastname">Last Name</FieldLabel>
@@ -241,7 +319,11 @@ function PersonalStep({ formData }: { formData: Record<string, string> }) {
                     maxLength={50}
                     defaultValue={formData.lastname || ''}
                     required
+                    aria-invalid={!!errors.lastname}
                 />
+                {errors.lastname && (
+                    <div className="text-sm text-red-600 mt-1">{errors.lastname}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="birthdate">Date of Birth</FieldLabel>
@@ -251,13 +333,17 @@ function PersonalStep({ formData }: { formData: Record<string, string> }) {
                     type="date"
                     defaultValue={formData.birthdate || ''}
                     required
+                    aria-invalid={!!errors.birthdate}
                 />
+                {errors.birthdate && (
+                    <div className="text-sm text-red-600 mt-1">{errors.birthdate}</div>
+                )}
             </Field>
         </>
     )
 }
 
-function ContactStep({ formData }: { formData: Record<string, string> }) {
+function ContactStep({ formData, errors }: { formData: Record<string, string>; errors: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -269,7 +355,11 @@ function ContactStep({ formData }: { formData: Record<string, string> }) {
                     placeholder="+1 234 567 8900"
                     maxLength={20}
                     defaultValue={formData.phone || ''}
+                    aria-invalid={!!errors.phone}
                 />
+                {errors.phone && (
+                    <div className="text-sm text-red-600 mt-1">{errors.phone}</div>
+                )}
             </Field>
             <Field>
                 <FieldLabel htmlFor="address">Address</FieldLabel>
@@ -279,7 +369,11 @@ function ContactStep({ formData }: { formData: Record<string, string> }) {
                     type="text"
                     placeholder="123 Main St, City, Country"
                     defaultValue={formData.address || ''}
+                    aria-invalid={!!errors.address}
                 />
+                {errors.address && (
+                    <div className="text-sm text-red-600 mt-1">{errors.address}</div>
+                )}
             </Field>
         </>
     )

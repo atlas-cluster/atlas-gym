@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUser, createSession } from '@/lib/auth'
+import { registrationSchema } from '@/lib/validation'
+import { getSecureCookieOptions } from '@/lib/cookies'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Validate required fields
+    // Validate and sanitize input
+    const validation = registrationSchema.safeParse(body)
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.errors[0].message },
+        { status: 400 }
+      )
+    }
+
     const {
       email,
       password,
@@ -17,31 +28,7 @@ export async function POST(request: NextRequest) {
       phone,
       paymentType,
       paymentInfo,
-    } = body
-
-    if (!email || !password || !firstname || !lastname || !birthdate) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
-    }
-
-    // Validate password length
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters long' },
-        { status: 400 }
-      )
-    }
+    } = validation.data
 
     // Create user
     const user = await createUser({
@@ -88,14 +75,8 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
 
-    // Set session cookie
-    response.cookies.set('session', session.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    })
+    // Set secure session cookie
+    response.cookies.set('session', session.id, getSecureCookieOptions())
 
     return response
   } catch (error) {

@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react'
-import { API_ENDPOINTS } from '@/lib/api-endpoints'
+import { apiClient, ApiError } from '@/lib/api-client'
+import { toast } from 'sonner'
 
 interface DbStatus {
   success: boolean
@@ -22,14 +23,20 @@ export function DatabaseStatus() {
   const checkConnection = async () => {
     setLoading(true)
     try {
-      const response = await fetch(API_ENDPOINTS.ping)
-      const data = await response.json()
+      const data = await apiClient.ping() as DbStatus
       setStatus(data)
+      if (data.success) {
+        toast.success('Database connection successful!')
+      } else {
+        toast.error('Database connection failed')
+      }
     } catch (error) {
+      const errorMessage = error instanceof ApiError ? error.message : 'Failed to connect'
       setStatus({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to connect',
+        message: errorMessage,
       })
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

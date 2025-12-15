@@ -16,7 +16,9 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { API_ENDPOINTS } from '@/lib/api-endpoints'
+import { apiClient, ApiError } from '@/lib/api-client'
+import { loginSchema } from '@/lib/validation'
+import { toast } from 'sonner'
 
 export function LoginForm({
   className,
@@ -24,41 +26,53 @@ export function LoginForm({
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [error, setError] = useState<string>('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setError('')
+    setErrors({})
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
-    try {
-      const response = await fetch(API_ENDPOINTS.auth.login, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+    // Client-side validation
+    const validation = loginSchema.safeParse({ email, password })
+    
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {}
+      validation.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0].toString()] = error.message
+        }
       })
+      setErrors(fieldErrors)
+      setLoading(false)
+      toast.error('Please fix the errors in the form')
+      return
+    }
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        setError(result.error || 'Login failed')
-        setLoading(false)
-        return
-      }
-
+    try {
+      await apiClient.login(email, password)
+      
+      toast.success('Login successful!')
+      
       // Redirect to the original page or home
       const redirect = searchParams.get('redirect') || '/'
       router.push(redirect)
     } catch (error) {
       console.error('Login error:', error)
-      setError('An error occurred during login')
+      
+      if (error instanceof ApiError) {
+        toast.error(error.message)
+        setErrors({ general: error.message })
+      } else {
+        toast.error('An unexpected error occurred')
+        setErrors({ general: 'An unexpected error occurred' })
+      }
+      
       setLoading(false)
     }
   }
@@ -83,7 +97,11 @@ export function LoginForm({
                   type="email"
                   placeholder="mail@example.com"
                   required
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && (
+                  <div className="text-sm text-red-600 mt-1">{errors.email}</div>
+                )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -91,16 +109,20 @@ export function LoginForm({
                   id="password" 
                   name="password"
                   type="password" 
-                  required 
+                  required
+                  aria-invalid={!!errors.password}
                 />
+                {errors.password && (
+                  <div className="text-sm text-red-600 mt-1">{errors.password}</div>
+                )}
               </Field>
-              {error && (
+              {errors.general && (
                 <Field>
-                  <div className="text-sm text-red-600">{error}</div>
+                  <div className="text-sm text-red-600">{errors.general}</div>
                 </Field>
               )}
               <Field>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className="w-full">
                   {loading ? 'Logging in...' : 'Login'}
                 </Button>
                 <FieldDescription className="text-center">
