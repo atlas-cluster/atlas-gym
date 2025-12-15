@@ -103,6 +103,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     )
   }
 
+  // Don't render children if not authenticated on protected routes
+  if (!PUBLIC_ROUTES.includes(pathname) && !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-muted-foreground">Redirecting...</div>
+      </div>
+    )
+  }
+
   return (
     <AuthContext.Provider
       value={{
