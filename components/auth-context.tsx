@@ -77,54 +77,92 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   useEffect(() => {
+    let isMounted = true
+    let progressInterval: NodeJS.Timeout | null = null
+
     const checkAuth = async () => {
       if (PUBLIC_ROUTES.includes(pathname)) {
         setLoading(false)
         return
       }
 
-      // Smooth progress animation
+      // Smooth progress animation to 60%
       let currentProgress = 0
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
+        if (!isMounted) return
         currentProgress += 2
         if (currentProgress <= 60) {
           setProgress(currentProgress)
+        } else {
+          if (progressInterval) clearInterval(progressInterval)
         }
       }, 50) // Update every 50ms for smooth animation
       
       const authenticated = await fetchUser()
-      clearInterval(progressInterval)
       
-      // Continue smooth progress to 80%
-      const continueProgress = setInterval(() => {
-        currentProgress += 2
-        if (currentProgress <= 80) {
-          setProgress(currentProgress)
-        } else {
-          clearInterval(continueProgress)
-        }
-      }, 30)
+      if (!isMounted) return
+      
+      // Clear first interval
+      if (progressInterval) clearInterval(progressInterval)
+      
+      // Continue progress smoothly from current position to 85%
+      const animateToTarget = (target: number, duration: number) => {
+        return new Promise<void>((resolve) => {
+          const startProgress = currentProgress
+          const diff = target - startProgress
+          const steps = Math.ceil(duration / 30) // 30ms per step
+          const increment = diff / steps
+          
+          let step = 0
+          const interval = setInterval(() => {
+            if (!isMounted) {
+              clearInterval(interval)
+              resolve()
+              return
+            }
+            
+            step++
+            currentProgress = Math.min(startProgress + (increment * step), target)
+            setProgress(Math.round(currentProgress))
+            
+            if (step >= steps) {
+              clearInterval(interval)
+              resolve()
+            }
+          }, 30)
+        })
+      }
+
+      // Animate to 85%
+      await animateToTarget(85, 400)
+      
+      if (!isMounted) return
 
       if (!authenticated) {
         // Redirect to login with return URL
-        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-        
-        // Progress to 95% before redirect
-        setTimeout(() => {
-          setProgress(95)
+        await animateToTarget(95, 200)
+        if (isMounted) {
+          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
           router.push(loginUrl)
-        }, 200)
+        }
       } else {
         // Complete progress to 100%
-        setTimeout(() => {
-          setProgress(100)
+        await animateToTarget(100, 300)
+        if (isMounted) {
           // Small delay before showing content for smooth transition
-          setTimeout(() => setLoading(false), 150)
-        }, 200)
+          setTimeout(() => {
+            if (isMounted) setLoading(false)
+          }, 200)
+        }
       }
     }
 
     checkAuth()
+
+    return () => {
+      isMounted = false
+      if (progressInterval) clearInterval(progressInterval)
+    }
   }, [pathname, router])
 
   // Show unified loading screen while checking auth or redirecting
