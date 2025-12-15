@@ -1,28 +1,25 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { apiClient } from '@/lib/api'
 
 /**
  * Hook to redirect authenticated users away from public pages
  * Used on login/register pages to redirect logged-in users to home
+ * 
+ * Checks for session cookie existence for instant redirect.
+ * If the cookie is invalid, the user will be redirected back by the auth provider.
  */
 export function useAuthRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const data = (await apiClient.getSession()) as {
-          authenticated: boolean
-        }
-        if (data.authenticated) {
-          router.push('/')
-        }
-      } catch {
-        // User is not authenticated, stay on current page
-      }
+    // Check if session cookie exists for instant redirect
+    const hasSessionCookie = document.cookie
+      .split('; ')
+      .some((cookie) => cookie.startsWith('session='))
+
+    if (hasSessionCookie) {
+      router.push('/')
     }
-    checkSession()
   }, [router])
 }
