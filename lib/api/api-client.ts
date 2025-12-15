@@ -16,7 +16,9 @@ export class ApiError extends Error {
   }
 }
 
-interface ApiRequestOptions extends RequestInit {
+interface ApiRequestOptions {
+  method?: string
+  headers?: HeadersInit
   body?: unknown
 }
 
@@ -28,10 +30,10 @@ class ApiClient {
     url: string,
     options: ApiRequestOptions = {}
   ): Promise<T> {
-    const { body, headers, ...restOptions } = options
+    const { body, headers, method, ...restOptions } = options
 
     const config: RequestInit = {
-      ...restOptions,
+      method,
       headers: {
         'Content-Type': 'application/json',
         ...headers,

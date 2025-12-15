@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     
     if (!validation.success) {
       return NextResponse.json(
-        { error: validation.error.errors[0].message },
+        { error: validation.error.issues[0].message },
         { status: 400 }
       )
     }
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
     response.cookies.set('session', session.id, getSecureCookieOptions())
 
     return response
-  } catch (error) {
-    console.error('Registration error:', error)
+  } catch (err) {
+    console.error('Registration error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

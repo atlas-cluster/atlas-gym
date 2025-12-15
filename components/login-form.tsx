@@ -43,9 +43,9 @@ export function LoginForm({
     
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {}
-      validation.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0].toString()] = error.message
+      validation.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          fieldErrors[issue.path[0].toString()] = issue.message
         }
       })
       setErrors(fieldErrors)
@@ -62,12 +62,12 @@ export function LoginForm({
       // Redirect to the original page or home
       const redirect = searchParams.get('redirect') || '/'
       router.push(redirect)
-    } catch (error) {
-      console.error('Login error:', error)
+    } catch (err) {
+      console.error('Login error:', err)
       
-      if (error instanceof ApiError) {
-        toast.error(error.message)
-        setErrors({ general: error.message })
+      if (err instanceof ApiError) {
+        toast.error(err.message)
+        setErrors({ general: err.message })
       } else {
         toast.error('An unexpected error occurred')
         setErrors({ general: 'An unexpected error occurred' })

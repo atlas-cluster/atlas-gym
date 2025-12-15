@@ -151,12 +151,12 @@ export function RegisterForm({
                 
                 // Redirect to home page on success
                 router.push('/')
-            } catch (error) {
-                console.error('Registration error:', error)
+            } catch (err) {
+                console.error('Registration error:', err)
                 
-                if (error instanceof ApiError) {
-                    toast.error(error.message)
-                    setErrors({ general: error.message })
+                if (err instanceof ApiError) {
+                    toast.error(err.message)
+                    setErrors({ general: err.message })
                 } else {
                     toast.error('An unexpected error occurred')
                     setErrors({ general: 'An unexpected error occurred' })

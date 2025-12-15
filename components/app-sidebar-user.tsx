@@ -17,7 +17,8 @@ import {
 import { BookUserIcon, LogOut, SettingsIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/components/auth-context'
+import { toast } from 'sonner'
 
 const FALLBACK_EMAIL = 'No email'
 
@@ -26,7 +27,13 @@ export default function AppSidebarUser() {
   const { user, loading, logout } = useAuth()
 
   const handleLogout = async () => {
-    await logout()
+    try {
+      await logout()
+      toast.success('Logged out successfully')
+    } catch (err) {
+      console.error('Logout error:', err)
+      toast.error('Failed to logout')
+    }
   }
 
   const getInitials = () => {
