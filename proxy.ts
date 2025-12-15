@@ -9,7 +9,7 @@ import { getSession } from '@/lib/auth'
  * Validates session cookie to prevent infinite loops with broken/expired cookies.
  * If cookie is invalid, allows access to login/register pages.
  */
-export default async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
   const pathname = request.nextUrl.pathname
 
@@ -29,7 +29,7 @@ export default async function proxy(request: NextRequest) {
   return NextResponse.next()
 }
 
-// Configure which routes this proxy should run on
+// Configure which routes this middleware should run on
 export const config = {
   matcher: ['/login', '/register'],
 }
