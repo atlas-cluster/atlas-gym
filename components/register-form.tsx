@@ -289,8 +289,14 @@ function PaymentStep({ formData }: { formData: Record<string, string> }) {
     // Validate and set payment type with fallback
     const validPaymentTypes = ['credit_card', 'iban'] as const
     type PaymentType = typeof validPaymentTypes[number]
-    const initialType = validPaymentTypes.includes(formData.paymentType as PaymentType)
-        ? (formData.paymentType as PaymentType)
+    
+    // Type guard to check if a string is a valid PaymentType
+    const isValidPaymentType = (value: string): value is PaymentType => {
+        return validPaymentTypes.includes(value as PaymentType)
+    }
+    
+    const initialType: PaymentType = isValidPaymentType(formData.paymentType)
+        ? formData.paymentType
         : 'credit_card'
     
     const [paymentType, setPaymentType] = useState<PaymentType>(initialType)
