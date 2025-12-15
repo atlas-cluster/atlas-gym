@@ -161,6 +161,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Valid session - complete progress and show content
         await animateProgress(60, 100, 400)
         if (isMounted) {
+          // Small delay to let the 100% progress be visible before hiding
+          await new Promise(resolve => setTimeout(resolve, 150))
           setLoading(false)
         }
       }
