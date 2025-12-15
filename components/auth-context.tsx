@@ -36,7 +36,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
+  
+  // Check for cookie existence synchronously to avoid showing loading screen unnecessarily
+  const hasSessionCookie = () => {
+    if (typeof document === 'undefined') return false
+    return document.cookie.split('; ').some((cookie) => cookie.startsWith('session='))
+  }
+  
+  // Only show loading if we're on a protected route AND have a cookie to validate
+  const shouldShowLoading = !PUBLIC_ROUTES.includes(pathname) && hasSessionCookie()
+  const [loading, setLoading] = useState(shouldShowLoading)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [progress, setProgress] = useState(0)
 
