@@ -122,10 +122,10 @@ export function RegisterForm({
             <CardContent>
                 <form onSubmit={handleSubmit}>
                     <FieldGroup>
-                        {currentIndex === 0 && <AccountStep />}
-                        {currentIndex === 1 && <PersonalStep />}
-                        {currentIndex === 2 && <ContactStep />}
-                        {currentIndex === 3 && <PaymentStep />}
+                        {currentIndex === 0 && <AccountStep formData={formData} />}
+                        {currentIndex === 1 && <PersonalStep formData={formData} />}
+                        {currentIndex === 2 && <ContactStep formData={formData} />}
+                        {currentIndex === 3 && <PaymentStep formData={formData} />}
                         {error && (
                             <Field>
                                 <div className="text-sm text-red-600">{error}</div>
@@ -163,7 +163,7 @@ export function RegisterForm({
     )
 }
 
-function AccountStep() {
+function AccountStep({ formData }: { formData: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -173,6 +173,7 @@ function AccountStep() {
                     name="email"
                     type="email"
                     placeholder="mail@example.com"
+                    defaultValue={formData.email || ''}
                     required
                 />
             </Field>
@@ -184,6 +185,7 @@ function AccountStep() {
                     name="password"
                     type="password"
                     minLength={8}
+                    defaultValue={formData.password || ''}
                     required
                 />
             </Field>
@@ -194,6 +196,7 @@ function AccountStep() {
                     name="passwordrepeat"
                     type="password"
                     minLength={8}
+                    defaultValue={formData.passwordrepeat || ''}
                     required
                 />
             </Field>
@@ -201,7 +204,7 @@ function AccountStep() {
     )
 }
 
-function PersonalStep() {
+function PersonalStep({ formData }: { formData: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -212,6 +215,7 @@ function PersonalStep() {
                     type="text"
                     placeholder="John"
                     maxLength={50}
+                    defaultValue={formData.firstname || ''}
                     required
                 />
             </Field>
@@ -223,6 +227,7 @@ function PersonalStep() {
                     type="text"
                     placeholder="Pork"
                     maxLength={50}
+                    defaultValue={formData.middlename || ''}
                 />
             </Field>
             <Field>
@@ -233,6 +238,7 @@ function PersonalStep() {
                     type="text"
                     placeholder="Doe"
                     maxLength={50}
+                    defaultValue={formData.lastname || ''}
                     required
                 />
             </Field>
@@ -242,6 +248,7 @@ function PersonalStep() {
                     id="birthdate"
                     name="birthdate"
                     type="date"
+                    defaultValue={formData.birthdate || ''}
                     required
                 />
             </Field>
@@ -249,7 +256,7 @@ function PersonalStep() {
     )
 }
 
-function ContactStep() {
+function ContactStep({ formData }: { formData: Record<string, string> }) {
     return (
         <>
             <Field>
@@ -260,6 +267,7 @@ function ContactStep() {
                     type="tel"
                     placeholder="+1 234 567 8900"
                     maxLength={20}
+                    defaultValue={formData.phone || ''}
                 />
             </Field>
             <Field>
@@ -269,14 +277,17 @@ function ContactStep() {
                     name="address"
                     type="text"
                     placeholder="123 Main St, City, Country"
+                    defaultValue={formData.address || ''}
                 />
             </Field>
         </>
     )
 }
 
-function PaymentStep() {
-    const [paymentType, setPaymentType] = useState<'credit_card' | 'iban'>('credit_card')
+function PaymentStep({ formData }: { formData: Record<string, string> }) {
+    const [paymentType, setPaymentType] = useState<'credit_card' | 'iban'>(
+        (formData.paymentType as 'credit_card' | 'iban') || 'credit_card'
+    )
 
     return (
         <>
@@ -307,6 +318,7 @@ function PaymentStep() {
                     name="paymentInfo"
                     type="text"
                     placeholder={paymentType === 'credit_card' ? '1234 5678 9012 3456' : 'DE89 3704 0044 0532 0130 00'}
+                    defaultValue={formData.paymentInfo || ''}
                 />
             </Field>
         </>
