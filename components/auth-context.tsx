@@ -36,16 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<UserData | null>(null)
-  
-  // Check for cookie existence synchronously to avoid showing loading screen unnecessarily
-  const hasSessionCookie = () => {
-    if (typeof document === 'undefined') return false
-    return document.cookie.split('; ').some((cookie) => cookie.startsWith('session='))
-  }
-  
-  // Only show loading if we're on a protected route AND have a cookie to validate
-  const shouldShowLoading = !PUBLIC_ROUTES.includes(pathname) && hasSessionCookie()
-  const [loading, setLoading] = useState(shouldShowLoading)
+  const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [progress, setProgress] = useState(0)
 
@@ -101,22 +92,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // Quick check: if no session cookie exists, redirect immediately without loading screen
-      const hasSessionCookie = document.cookie
-        .split('; ')
-        .some((cookie) => cookie.startsWith('session='))
-
-      if (!hasSessionCookie) {
-        // No cookie means no session - instant redirect to login
-        if (isMounted) {
-          setLoading(false)
-          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-          router.push(loginUrl)
-        }
-        return
-      }
-
-      // Has cookie - show loading screen and validate session
       // Smooth progress animation to 60%
       let currentProgress = 0
       progressInterval = setInterval(() => {
