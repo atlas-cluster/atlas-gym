@@ -15,10 +15,13 @@ export async function GET(request: NextRequest) {
     const user = await getUserBySessionId(sessionId)
 
     if (!user) {
-      return NextResponse.json(
+      // Invalid/expired session - clear the cookie
+      const response = NextResponse.json(
         { authenticated: false, user: null },
         { status: 200 }
       )
+      response.cookies.delete('session')
+      return response
     }
 
     return NextResponse.json(
