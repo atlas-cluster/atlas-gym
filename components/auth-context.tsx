@@ -24,8 +24,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Auth pages that don't require session validation
-const AUTH_ROUTES = ['/login', '/register']
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = ['/login', '/register']
 
 export function useAuth() {
   const context = useContext(AuthContext)
@@ -39,19 +39,12 @@ interface AuthProviderProps {
   children: React.ReactNode
 }
 
-// Check if session cookie exists (client-side only)
-function hasSessionCookie(): boolean {
-  if (typeof document === 'undefined') return false
-  return document.cookie.split('; ').some((c) => c.startsWith('session='))
-}
-
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showLoadingScreen, setShowLoadingScreen] = useState(false)
   const [progress, setProgress] = useState(0)
 
   // Refs for smooth progress animation (disconnected from auth logic)
@@ -144,60 +137,68 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      const isAuthRoute = AUTH_ROUTES.includes(pathname)
-
-      // On auth pages - no loading screen needed
-      // Middleware handles redirect if user has valid session
-      if (isAuthRoute) {
+      // On public routes - no loading screen needed
+      if (PUBLIC_ROUTES.includes(pathname)) {
         if (isMounted) {
           setLoading(false)
         }
         return
       }
 
-      // On protected routes - validate session with loading screen
-      // Middleware already ensures we have a session cookie to get here
-      const hasCookie = hasSessionCookie()
+      // On protected routes - check for session cookie first
+      // Note: This runs in useEffect which only runs client-side, so document is safe to access
+      const hasSessionCookie = document.cookie
+        .split('; ')
+        .some((cookie) => cookie.startsWith('session='))
 
-      if (hasCookie) {
-        // Show loading screen and validate session
-        if (!isMounted) return
-        
-        setShowLoadingScreen(true)
-        startProgressAnimation()
-
-        const authenticated = await fetchUser()
-
-        if (!isMounted) return
-
-        stopProgressAnimation()
-
-        if (!authenticated) {
-          // Session invalid - redirect to login
-          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-          router.replace(loginUrl)
-        } else {
-          // Wait for progress animation to complete before showing content
-          const waitForProgress = () => {
-            if (progressRef.current >= 100) {
-              if (isMounted) {
-                setLoading(false)
-                setShowLoadingScreen(false)
-              }
-            } else {
-              requestAnimationFrame(waitForProgress)
-            }
-          }
-          waitForProgress()
-        }
-      } else {
-        // No cookie but on protected route - middleware should have redirected
-        // This is a fallback for client-side navigation edge cases
+      if (!hasSessionCookie) {
+        // No cookie - redirect to login immediately (no loading screen needed)
         if (isMounted) {
           setLoading(false)
           const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
           router.replace(loginUrl)
         }
+        return
+      }
+
+      // Has cookie - show loading screen and validate session
+      if (!isMounted) return
+
+      // Start smooth progress animation
+      startProgressAnimation()
+
+      const authenticated = await fetchUser()
+
+      if (!isMounted) return
+
+      // Signal animation to complete to 100%
+      stopProgressAnimation()
+
+      if (!authenticated) {
+        // Session invalid - wait for animation then redirect
+        const waitAndRedirect = () => {
+          if (progressRef.current >= 100) {
+            if (isMounted) {
+              const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+              router.replace(loginUrl)
+            }
+          } else {
+            requestAnimationFrame(waitAndRedirect)
+          }
+        }
+        waitAndRedirect()
+      } else {
+        // Authenticated - wait for animation then show content
+        const waitForProgress = () => {
+          if (progressRef.current >= 100) {
+            if (isMounted) {
+              setLoading(false)
+            }
+          } else {
+            requestAnimationFrame(waitForProgress)
+          }
+        }
+        waitForProgress()
       }
     }
 
@@ -211,8 +212,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [pathname, router, startProgressAnimation, stopProgressAnimation, fetchUser])
 
-  // Show loading screen with smooth progress bar
-  if (showLoadingScreen && loading) {
+  // Show loading screen while checking auth on protected routes
+  if (loading && !PUBLIC_ROUTES.includes(pathname)) {
     return (
       <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center gap-6">
@@ -231,11 +232,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         </div>
       </div>
     )
-  }
-
-  // Show nothing while loading on protected routes (prevents flash)
-  if (loading && !AUTH_ROUTES.includes(pathname)) {
-    return null
   }
 
   return (
