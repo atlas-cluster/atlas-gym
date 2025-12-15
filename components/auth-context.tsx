@@ -83,21 +83,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // Simulate progress for better UX
-      setProgress(30)
+      // Smooth progress animation
+      let currentProgress = 0
+      const progressInterval = setInterval(() => {
+        currentProgress += 2
+        if (currentProgress <= 60) {
+          setProgress(currentProgress)
+        }
+      }, 50) // Update every 50ms for smooth animation
       
       const authenticated = await fetchUser()
-      setProgress(70)
+      clearInterval(progressInterval)
+      
+      // Continue smooth progress to 80%
+      const continueProgress = setInterval(() => {
+        currentProgress += 2
+        if (currentProgress <= 80) {
+          setProgress(currentProgress)
+        } else {
+          clearInterval(continueProgress)
+        }
+      }, 30)
 
       if (!authenticated) {
         // Redirect to login with return URL
         const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-        setProgress(90)
-        router.push(loginUrl)
+        
+        // Progress to 95% before redirect
+        setTimeout(() => {
+          setProgress(95)
+          router.push(loginUrl)
+        }, 200)
+      } else {
+        // Complete progress to 100%
+        setTimeout(() => {
+          setProgress(100)
+          // Small delay before showing content for smooth transition
+          setTimeout(() => setLoading(false), 150)
+        }, 200)
       }
-
-      setProgress(100)
-      setLoading(false)
     }
 
     checkAuth()
@@ -116,11 +140,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             priority
             className="animate-pulse"
           />
-          <div className="w-64 space-y-2">
+          <div className="w-64">
             <Progress value={progress} className="h-2" />
-            <p className="text-center text-sm text-muted-foreground">
-              {progress < 100 ? 'Loading...' : 'Redirecting...'}
-            </p>
           </div>
         </div>
       </div>
