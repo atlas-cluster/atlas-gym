@@ -94,6 +94,11 @@ The middleware handles route protection:
 // Redirected to: http://localhost:3000/login?redirect=/dashboard
 ```
 
+**Note on Performance:** The middleware validates sessions by making an HTTP call to `/api/auth/session` on every protected route request. For production use with high traffic, consider optimizing this by:
+- Implementing direct database session validation in the middleware
+- Using JWT tokens for stateless session validation
+- Caching session validation results
+
 ### Updated Components
 
 #### `components/app-sidebar-user.tsx`
