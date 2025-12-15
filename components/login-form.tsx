@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -22,6 +22,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
 
@@ -51,8 +52,9 @@ export function LoginForm({
         return
       }
 
-      // Redirect to home page on success
-      router.push('/')
+      // Redirect to the original page or home
+      const redirect = searchParams.get('redirect') || '/'
+      router.push(redirect)
     } catch (error) {
       console.error('Login error:', error)
       setError('An error occurred during login')

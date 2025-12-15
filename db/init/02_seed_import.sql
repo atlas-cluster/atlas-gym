@@ -1,13 +1,27 @@
--- COPY fitnessstudio.app_user FROM '/docker-entrypoint-initdb.d/seed/app_user.csv' CSV HEADER;
--- COPY fitnessstudio.trainer_license FROM '/docker-entrypoint-initdb.d/seed/trainer_license.csv' CSV HEADER;
--- COPY fitnessstudio.trainer FROM '/docker-entrypoint-initdb.d/seed/trainer.csv' CSV HEADER;
--- COPY fitnessstudio.rooms FROM '/docker-entrypoint-initdb.d/seed/rooms.csv' CSV HEADER;
--- COPY fitnessstudio.equipment FROM '/docker-entrypoint-initdb.d/seed/equipment.csv' CSV HEADER;
--- COPY fitnessstudio.course FROM '/docker-entrypoint-initdb.d/seed/course.csv' CSV HEADER;
--- COPY fitnessstudio.course_reservation FROM '/docker-entrypoint-initdb.d/seed/course_reservation.csv' CSV HEADER;
--- COPY fitnessstudio.membership FROM '/docker-entrypoint-initdb.d/seed/membership.csv' CSV HEADER;
--- COPY fitnessstudio.contracts FROM '/docker-entrypoint-initdb.d/seed/contracts.csv' CSV HEADER;
--- COPY fitnessstudio.payment_method FROM '/docker-entrypoint-initdb.d/seed/payment_method.csv' CSV HEADER;
--- COPY fitnessstudio.payment_status FROM '/docker-entrypoint-initdb.d/seed/payment_status.csv' CSV HEADER;
--- COPY fitnessstudio.payment FROM '/docker-entrypoint-initdb.d/seed/payment.csv' CSV HEADER;
--- COPY fitnessstudio.session FROM '/docker-entrypoint-initdb.d/seed/session.csv' CSV HEADER;
+-- Sample user for local development
+-- Email: demo@atlas.gym
+-- Password: password123
+INSERT INTO gym_manager.users (
+    user_email,
+    password_hash,
+    user_firstname,
+    user_lastname,
+    user_middlename,
+    user_birthdate,
+    user_address,
+    user_phone,
+    payment_type,
+    payment_info
+) VALUES (
+    'demo@atlas.gym',
+    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', -- password123
+    'Demo',
+    'User',
+    NULL,
+    '1990-01-01',
+    '123 Demo Street, Atlas City',
+    '+1234567890',
+    'credit_card',
+    '4111 1111 1111 1111'
+);
+
