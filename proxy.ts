@@ -4,11 +4,11 @@ import type { NextRequest } from 'next/server'
 /**
  * Middleware to handle authentication redirects
  * Runs on the Edge Runtime before the page loads, preventing flash of login/register pages
- * 
+ *
  * Simply checks for session cookie existence for fast redirects.
  * Invalid cookies are handled by the AuthProvider on the client side.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
   const pathname = request.nextUrl.pathname
 
