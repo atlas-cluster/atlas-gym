@@ -86,6 +86,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setProgress(Math.round(progressRef.current))
           if (progressRef.current < 100) {
             animationFrameRef.current = requestAnimationFrame(animate)
+          } else {
+            // Clear ref when animation completes
+            animationFrameRef.current = null
           }
         }
       }
@@ -158,10 +161,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (hasCookie) {
         // Show loading screen and validate session
-        if (isMounted) {
-          setShowLoadingScreen(true)
-          startProgressAnimation()
-        }
+        if (!isMounted) return
+        
+        setShowLoadingScreen(true)
+        startProgressAnimation()
 
         const authenticated = await fetchUser()
 
