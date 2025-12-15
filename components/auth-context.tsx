@@ -89,12 +89,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      console.log('[AuthContext] checkAuth started, pathname:', pathname, 'loading:', loading)
+      console.log('[AuthContext] checkAuth started, pathname:', pathname)
       
       // On public routes, just mark as not loading
       if (PUBLIC_ROUTES.includes(pathname)) {
         console.log('[AuthContext] Public route, setting loading to false')
-        setLoading(false)
+        if (isMounted) setLoading(false)
         return
       }
 
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (!hasSessionCookie) {
         // No cookie means no session - instant redirect to login
+        console.log('[AuthContext] No session cookie, redirecting to login')
         if (isMounted) {
-          console.log('[AuthContext] No session cookie, redirecting to login')
           setLoading(false)
           const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
           router.push(loginUrl)

@@ -52,9 +52,11 @@ export default function AppSidebarUser() {
     return parts.join(' ')
   }
 
-  // Show skeleton while loading OR when user data is not present.
-  if (loading || !user) {
-    console.log('[AppSidebarUser] Showing skeleton')
+  // Show skeleton only while actively loading
+  // If loading is complete but there's no user, that's an error state
+  // and the AuthProvider should handle redirecting
+  if (loading) {
+    console.log('[AppSidebarUser] Showing skeleton - loading in progress')
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -64,6 +66,20 @@ export default function AppSidebarUser() {
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-3 w-32" />
             </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  // If not loading but no user, something went wrong
+  if (!user) {
+    console.log('[AppSidebarUser] Error: not loading but no user data')
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <span className="text-muted-foreground text-sm">Error loading user</span>
           </div>
         </SidebarMenuItem>
       </SidebarMenu>
