@@ -23,6 +23,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       try {
         const response = await fetch('/api/auth/session')
+        
+        if (!response.ok) {
+          // API error, redirect to login
+          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+          router.push(loginUrl)
+          return
+        }
+        
         const data = await response.json()
 
         if (data.authenticated) {

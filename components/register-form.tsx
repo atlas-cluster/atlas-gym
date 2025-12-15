@@ -285,9 +285,13 @@ function ContactStep({ formData }: { formData: Record<string, string> }) {
 }
 
 function PaymentStep({ formData }: { formData: Record<string, string> }) {
-    const [paymentType, setPaymentType] = useState<'credit_card' | 'iban'>(
-        (formData.paymentType as 'credit_card' | 'iban') || 'credit_card'
-    )
+    // Validate and set payment type with fallback
+    const validPaymentTypes = ['credit_card', 'iban'] as const
+    const initialType = validPaymentTypes.includes(formData.paymentType as any)
+        ? (formData.paymentType as 'credit_card' | 'iban')
+        : 'credit_card'
+    
+    const [paymentType, setPaymentType] = useState<'credit_card' | 'iban'>(initialType)
 
     return (
         <>
