@@ -1,6 +1,4 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,53 +14,25 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { BookUserIcon, LogOut, SettingsIcon, UserIcon } from 'lucide-react'
+import { BookUserIcon, LogOut, SettingsIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-
-interface UserData {
-  id: string
-  email: string
-  firstname: string
-  lastname: string
-  middlename?: string
-}
+import { useAuth } from '@/components/auth-context'
+import { toast } from 'sonner'
 
 const FALLBACK_EMAIL = 'No email'
 
 export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
-  const router = useRouter()
-  const [user, setUser] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch('/api/auth/session')
-        const data = await response.json()
-
-        if (data.authenticated && data.user) {
-          setUser(data.user)
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUser()
-  }, [])
+  const { user, loading, logout } = useAuth()
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-      })
-      router.push('/login')
-    } catch (error) {
-      console.error('Logout failed:', error)
+      await logout()
+      toast.success('Logged out successfully')
+    } catch (err) {
+      console.error('Logout error:', err)
+      toast.error('Failed to logout')
     }
   }
 

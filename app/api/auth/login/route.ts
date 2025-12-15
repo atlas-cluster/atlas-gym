@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateUser, createSession } from '@/lib/auth'
+import { loginSchema } from '@/lib/schemas'
+import { getSecureCookieOptions } from '@/lib/config'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password } = body
 
-    // Validate required fields
-    if (!email || !password) {
+    // Validate and sanitize input
+    const validation = loginSchema.safeParse(body)
+    
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: validation.error.issues[0].message },
         { status: 400 }
       )
     }
+
+    const { email, password } = validation.data
 
     // Authenticate user
     const user = await authenticateUser(email, password)
@@ -48,18 +53,12 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
 
-    // Set session cookie
-    response.cookies.set('session', session.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    })
+    // Set secure session cookie
+    response.cookies.set('session', session.id, getSecureCookieOptions())
 
     return response
-  } catch (error) {
-    console.error('Login error:', error)
+  } catch (err) {
+    console.error('Login error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

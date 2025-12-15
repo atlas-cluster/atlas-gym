@@ -10,7 +10,7 @@ INSERT INTO gym_manager.users (
     payment_type,
     payment_info
 ) VALUES (
-    'admin@demo.com',
+    'admin@admin.com',
     '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK', -- admin
     'Demo',
     'User',

@@ -11,7 +11,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { CircleAlertIcon } from 'lucide-react'
-import { AuthProvider } from '@/components/auth-provider'
+import { AuthProvider } from '@/components/auth-context'
 
 export default function Home() {
   return (
