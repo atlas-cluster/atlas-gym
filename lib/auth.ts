@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { getPool } from './db'
-import { User, Session } from './types'
+import { User, Session } from './schemas'
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds

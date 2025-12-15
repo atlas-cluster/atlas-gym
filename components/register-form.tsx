@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { defineStepper } from '@/components/ui/stepper'
-import { apiClient, ApiError } from '@/lib/api-client'
+import { apiClient, ApiError } from '@/lib/api'
 import {
     emailSchema,
     passwordSchema,
@@ -27,7 +27,7 @@ import {
     dateSchema,
     phoneSchema,
     addressSchema,
-} from '@/lib/validation'
+} from '@/lib/schemas'
 import { toast } from 'sonner'
 
 const { useStepper, steps, utils } = defineStepper(

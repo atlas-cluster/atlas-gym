@@ -16,8 +16,8 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { apiClient, ApiError } from '@/lib/api-client'
-import { loginSchema } from '@/lib/validation'
+import { apiClient, ApiError } from '@/lib/api'
+import { loginSchema } from '@/lib/schemas'
 import { toast } from 'sonner'
 
 export function LoginForm({

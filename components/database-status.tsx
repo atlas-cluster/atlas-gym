@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react'
-import { apiClient, ApiError } from '@/lib/api-client'
+import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 
 interface DbStatus {

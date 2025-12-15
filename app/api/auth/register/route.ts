@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUser, createSession } from '@/lib/auth'
-import { registrationSchema } from '@/lib/validation'
-import { getSecureCookieOptions } from '@/lib/cookies'
+import { registrationSchema } from '@/lib/schemas'
+import { getSecureCookieOptions } from '@/lib/config'
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { UserData } from './types'
-import { apiClient } from './api-client'
+import { UserData } from './schemas'
+import { apiClient } from './api'
 
 interface AuthContextType {
   user: UserData | null
