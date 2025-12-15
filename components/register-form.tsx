@@ -82,12 +82,12 @@ export function RegisterForm({
             // Account step validation
             const emailValidation = emailSchema.safeParse(data.email)
             if (!emailValidation.success) {
-                stepErrors.email = emailValidation.error.errors[0].message
+                stepErrors.email = emailValidation.error.issues[0].message
             }
             
             const passwordValidation = passwordSchema.safeParse(data.password)
             if (!passwordValidation.success) {
-                stepErrors.password = passwordValidation.error.errors[0].message
+                stepErrors.password = passwordValidation.error.issues[0].message
             }
             
             if (data.password !== data.passwordrepeat) {
@@ -97,38 +97,38 @@ export function RegisterForm({
             // Personal step validation
             const firstnameValidation = nameSchema.safeParse(data.firstname)
             if (!firstnameValidation.success) {
-                stepErrors.firstname = firstnameValidation.error.errors[0].message
+                stepErrors.firstname = firstnameValidation.error.issues[0].message
             }
             
             const lastnameValidation = nameSchema.safeParse(data.lastname)
             if (!lastnameValidation.success) {
-                stepErrors.lastname = lastnameValidation.error.errors[0].message
+                stepErrors.lastname = lastnameValidation.error.issues[0].message
             }
             
             if (data.middlename) {
                 const middlenameValidation = optionalNameSchema.safeParse(data.middlename)
                 if (!middlenameValidation.success) {
-                    stepErrors.middlename = middlenameValidation.error.errors[0].message
+                    stepErrors.middlename = middlenameValidation.error.issues[0].message
                 }
             }
             
             const birthdateValidation = dateSchema.safeParse(data.birthdate)
             if (!birthdateValidation.success) {
-                stepErrors.birthdate = birthdateValidation.error.errors[0].message
+                stepErrors.birthdate = birthdateValidation.error.issues[0].message
             }
         } else if (currentIndex === 2) {
             // Contact step validation
             if (data.phone) {
                 const phoneValidation = phoneSchema.safeParse(data.phone)
                 if (!phoneValidation.success) {
-                    stepErrors.phone = phoneValidation.error.errors[0].message
+                    stepErrors.phone = phoneValidation.error.issues[0].message
                 }
             }
             
             if (data.address) {
                 const addressValidation = addressSchema.safeParse(data.address)
                 if (!addressValidation.success) {
-                    stepErrors.address = addressValidation.error.errors[0].message
+                    stepErrors.address = addressValidation.error.issues[0].message
                 }
             }
         }
