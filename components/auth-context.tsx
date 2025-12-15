@@ -97,14 +97,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (progressInterval) clearInterval(progressInterval)
         }
       }, 50) // Update every 50ms for smooth animation
-      
+
       const authenticated = await fetchUser()
-      
+
       if (!isMounted) return
-      
+
       // Clear first interval
       if (progressInterval) clearInterval(progressInterval)
-      
+
       // Continue progress smoothly from current position to 85%
       const animateToTarget = (target: number, duration: number) => {
         return new Promise<void>((resolve) => {
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const diff = target - startProgress
           const steps = Math.ceil(duration / 30) // 30ms per step
           const increment = diff / steps
-          
+
           let step = 0
           const interval = setInterval(() => {
             if (!isMounted) {
@@ -120,11 +120,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
               resolve()
               return
             }
-            
+
             step++
             currentProgress = Math.min(startProgress + (increment * step), target)
             setProgress(Math.round(currentProgress))
-            
+
             if (step >= steps) {
               clearInterval(interval)
               resolve()
@@ -135,7 +135,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Animate to 85%
       await animateToTarget(85, 400)
-      
+
       if (!isMounted) return
 
       if (!authenticated) {
@@ -181,6 +181,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           <div className="w-64">
             <Progress value={progress} className="h-2" />
           </div>
+            <span className={"text-muted-foreground"}>Loading...</span>
         </div>
       </div>
     )
