@@ -15,6 +15,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = ['/login', '/register']
+
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -75,10 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Public routes that don't require authentication
-      const publicRoutes = ['/login', '/register']
-
-      if (publicRoutes.includes(pathname)) {
+      if (PUBLIC_ROUTES.includes(pathname)) {
         setLoading(false)
         return
       }

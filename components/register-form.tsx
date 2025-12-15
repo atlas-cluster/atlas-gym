@@ -310,7 +310,12 @@ function PaymentStep({ formData }: { formData: Record<string, string> }) {
                     name="paymentType"
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                     value={paymentType}
-                    onChange={(e) => setPaymentType(e.target.value as PaymentType)}
+                    onChange={(e) => {
+                        const value = e.target.value
+                        if (isValidPaymentType(value)) {
+                            setPaymentType(value)
+                        }
+                    }}
                 >
                     <option value="credit_card">Credit Card</option>
                     <option value="iban">IBAN</option>
