@@ -63,8 +63,6 @@ export function LoginForm({
       const redirect = searchParams.get('redirect') || '/'
       router.push(redirect)
     } catch (err) {
-      console.error('Login error:', err)
-      
       if (err instanceof ApiError) {
         toast.error(err.message)
         setErrors({ general: err.message })

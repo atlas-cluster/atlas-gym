@@ -166,8 +166,6 @@ export function RegisterForm({
                 // Redirect to home page on success
                 router.push('/')
             } catch (err) {
-                console.error('Registration error:', err)
-                
                 if (err instanceof ApiError) {
                     toast.error(err.message)
                     setErrors({ general: err.message })

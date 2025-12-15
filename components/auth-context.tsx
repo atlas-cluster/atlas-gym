@@ -54,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false
       }
     } catch (error) {
-      console.error('Failed to fetch user:', error)
+      // Silently handle auth errors - user will be redirected to login
       setUser(null)
       setIsAuthenticated(false)
       return false
@@ -67,8 +67,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null)
       setIsAuthenticated(false)
       router.push('/login')
-    } catch (error) {
-      console.error('Logout failed:', error)
+    } catch (err) {
+      // Even if logout API fails, clear local state
+      setUser(null)
+      setIsAuthenticated(false)
+      router.push('/login')
     }
   }
 

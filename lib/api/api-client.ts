@@ -30,7 +30,7 @@ class ApiClient {
     url: string,
     options: ApiRequestOptions = {}
   ): Promise<T> {
-    const { body, headers, method, ...restOptions } = options
+    const { body, headers, method } = options
 
     const config: RequestInit = {
       method,
@@ -46,7 +46,30 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config)
-      const data = await response.json()
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type')
+      const isJson = contentType && contentType.includes('application/json')
+      
+      let data: any
+      
+      if (isJson) {
+        try {
+          data = await response.json()
+        } catch {
+          // If JSON parsing fails, create a generic error
+          throw new ApiError(
+            'Invalid response from server',
+            response.status
+          )
+        }
+      } else {
+        // Non-JSON response (likely HTML error page)
+        throw new ApiError(
+          response.ok ? 'Invalid response format' : 'Server error occurred',
+          response.status
+        )
+      }
 
       if (!response.ok) {
         throw new ApiError(
@@ -61,6 +84,7 @@ class ApiClient {
       if (error instanceof ApiError) {
         throw error
       }
+      // Network errors or other unexpected errors
       throw new ApiError(
         error instanceof Error ? error.message : 'Network error occurred',
         0
