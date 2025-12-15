@@ -71,12 +71,12 @@ export default function AppSidebarUser() {
 
   // If not loading but no user, something went wrong
   if (!user) {
-    console.error('[AppSidebarUser] Error: loading complete but no user data')
+    console.error('[AppSidebarUser] Error: loading complete but no user data - this should not happen as AuthProvider should redirect')
     return (
       <SidebarMenu>
         <SidebarMenuItem>
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <span className="text-muted-foreground text-sm">Error loading user</span>
+            <span className="text-muted-foreground text-sm">Loading user...</span>
           </div>
         </SidebarMenuItem>
       </SidebarMenu>
