@@ -3,11 +3,11 @@ import type { NextRequest } from 'next/server'
 import { getSession } from '@/lib/auth'
 
 /**
- * Proxy to handle authentication redirects
+ * Proxy to handle authentication redirects and cookie cleanup
  * Runs on the server before the page loads, preventing flash of login/register pages
  * 
  * Validates session cookie to prevent infinite loops with broken/expired cookies.
- * If cookie is invalid, allows access to login/register pages.
+ * Clears invalid cookies when user accesses login/register pages.
  */
 export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
@@ -21,9 +21,12 @@ export async function middleware(request: NextRequest) {
     if (session) {
       // Valid session - redirect to home
       return NextResponse.redirect(new URL('/', request.url))
+    } else {
+      // Invalid/expired session - clear the cookie and allow access to login/register
+      const response = NextResponse.next()
+      response.cookies.delete('session')
+      return response
     }
-    // Invalid/expired session - let them access login/register
-    // (could also clear the cookie here, but AuthProvider will handle it)
   }
 
   return NextResponse.next()
