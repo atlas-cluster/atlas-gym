@@ -15,14 +15,24 @@ export async function middleware(request: NextRequest) {
 
   // If user has a session cookie and tries to access login/register
   if (sessionCookie && (pathname === '/login' || pathname === '/register')) {
-    // Validate the session to prevent infinite loops with broken cookies
-    const session = await getSession(sessionCookie.value)
-    
-    if (session) {
-      // Valid session - redirect to home
-      return NextResponse.redirect(new URL('/', request.url))
-    } else {
-      // Invalid/expired session - clear the cookie and allow access to login/register
+    try {
+      // Validate the session to prevent infinite loops with broken cookies
+      const session = await getSession(sessionCookie.value)
+      
+      if (session) {
+        // Valid session - redirect to home
+        console.log('[Proxy] Valid session found, redirecting to home')
+        return NextResponse.redirect(new URL('/', request.url))
+      } else {
+        // Invalid/expired session - clear the cookie and allow access to login/register
+        console.log('[Proxy] Invalid session, clearing cookie')
+        const response = NextResponse.next()
+        response.cookies.delete('session')
+        return response
+      }
+    } catch (error) {
+      // If validation fails, log error and clear cookie to be safe
+      console.error('[Proxy] Error validating session:', error)
       const response = NextResponse.next()
       response.cookies.delete('session')
       return response
