@@ -24,6 +24,8 @@ export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
   const { user, loading, logout } = useAuth()
 
+  console.log('[AppSidebarUser] Render - loading:', loading, 'user:', user ? 'present' : 'null')
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -52,6 +54,7 @@ export default function AppSidebarUser() {
 
   // Show skeleton while loading OR when user data is not present.
   if (loading || !user) {
+    console.log('[AppSidebarUser] Showing skeleton')
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -66,6 +69,8 @@ export default function AppSidebarUser() {
       </SidebarMenu>
     )
   }
+
+  console.log('[AppSidebarUser] Showing user info for:', user.email)
 
   return (
     <SidebarMenu>
