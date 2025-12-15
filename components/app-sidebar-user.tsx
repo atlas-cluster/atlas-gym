@@ -24,8 +24,6 @@ export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
   const { user, loading, logout } = useAuth()
 
-  console.log('[AppSidebarUser] Render - loading:', loading, 'user:', user ? 'present' : 'null')
-
   const handleLogout = async () => {
     try {
       await logout()
@@ -56,7 +54,6 @@ export default function AppSidebarUser() {
   // If loading is complete but there's no user, that's an error state
   // and the AuthProvider should handle redirecting
   if (loading) {
-    console.log('[AppSidebarUser] Showing skeleton - loading in progress')
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -74,7 +71,7 @@ export default function AppSidebarUser() {
 
   // If not loading but no user, something went wrong
   if (!user) {
-    console.log('[AppSidebarUser] Error: not loading but no user data')
+    console.error('[AppSidebarUser] Error: loading complete but no user data')
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -85,8 +82,6 @@ export default function AppSidebarUser() {
       </SidebarMenu>
     )
   }
-
-  console.log('[AppSidebarUser] Showing user info for:', user.email)
 
   return (
     <SidebarMenu>

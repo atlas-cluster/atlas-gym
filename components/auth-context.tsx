@@ -38,29 +38,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const fetchUser = React.useCallback(async () => {
-    console.log('[AuthContext] fetchUser called')
     try {
       const data = (await apiClient.getSession()) as {
         authenticated: boolean
         user?: UserData
       }
 
-      console.log('[AuthContext] Session data:', data)
-
       if (data.authenticated && data.user) {
-        console.log('[AuthContext] Setting user:', data.user)
         setUser(data.user)
         setIsAuthenticated(true)
         return true
       } else {
-        console.log('[AuthContext] Not authenticated')
         setUser(null)
         setIsAuthenticated(false)
         return false
       }
     } catch (error) {
-      // Silently handle auth errors - user will be redirected to login
-      console.error('[AuthContext] fetchUser error:', error)
+      console.error('[Auth] Session fetch error:', error)
       setUser(null)
       setIsAuthenticated(false)
       return false
@@ -89,11 +83,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      console.log('[AuthContext] checkAuth started, pathname:', pathname)
-      
       // On public routes, just mark as not loading
       if (PUBLIC_ROUTES.includes(pathname)) {
-        console.log('[AuthContext] Public route, setting loading to false')
         if (isMounted) setLoading(false)
         return
       }
@@ -103,11 +94,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         .split('; ')
         .some((cookie) => cookie.startsWith('session='))
 
-      console.log('[AuthContext] Has session cookie:', hasSessionCookie)
-
       if (!hasSessionCookie) {
         // No cookie means no session - instant redirect to login
-        console.log('[AuthContext] No session cookie, redirecting to login')
         if (isMounted) {
           setLoading(false)
           const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
@@ -117,34 +105,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // Has cookie - validate session in background
-      console.log('[AuthContext] Validating session...')
       const authenticated = await fetchUser()
 
-      if (!isMounted) {
-        console.log('[AuthContext] Component unmounted, aborting')
-        return
-      }
-
-      console.log('[AuthContext] Validation complete, authenticated:', authenticated)
+      if (!isMounted) return
 
       // Mark loading as complete
       setLoading(false)
-      console.log('[AuthContext] Loading set to false')
 
       if (!authenticated) {
         // Redirect to login with return URL
-        console.log('[AuthContext] Not authenticated, redirecting to login')
         const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
-      } else {
-        console.log('[AuthContext] Authenticated, staying on page')
       }
     }
 
     checkAuth()
 
     return () => {
-      console.log('[AuthContext] Cleanup, setting isMounted to false')
       isMounted = false
     }
   }, [pathname, router, fetchUser])
