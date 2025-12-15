@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getSession } from '@/lib/auth'
 
 /**
- * Proxy to handle authentication redirects and cookie cleanup
+ * Middleware to handle authentication redirects and cookie cleanup
  * Runs on the server before the page loads, preventing flash of login/register pages
  * 
  * Validates session cookie to prevent infinite loops with broken/expired cookies.
@@ -21,18 +21,18 @@ export async function middleware(request: NextRequest) {
       
       if (session) {
         // Valid session - redirect to home
-        console.log('[Proxy] Valid session found, redirecting to home')
+        console.log('[Middleware] Valid session found, redirecting to home')
         return NextResponse.redirect(new URL('/', request.url))
       } else {
         // Invalid/expired session - clear the cookie and allow access to login/register
-        console.log('[Proxy] Invalid session, clearing cookie')
+        console.log('[Middleware] Invalid session, clearing cookie')
         const response = NextResponse.next()
         response.cookies.delete('session')
         return response
       }
     } catch (error) {
       // If validation fails, log error and clear cookie to be safe
-      console.error('[Proxy] Error validating session:', error)
+      console.error('[Middleware] Error validating session:', error)
       const response = NextResponse.next()
       response.cookies.delete('session')
       return response
