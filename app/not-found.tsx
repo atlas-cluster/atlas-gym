@@ -13,7 +13,7 @@ export default function NotFound() {
           className="animate-pulse"
         />
         <h1 className="text-6xl font-bold">404</h1>
-        <span className={'text-muted-foreground'}>Page not found</span>
+        <span className="text-muted-foreground">Page not found</span>
       </div>
     </div>
   )

@@ -1,28 +1,10 @@
 'use client'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { RegisterForm } from '@/components/register-form'
-import { apiClient } from '@/lib/api'
+import { useAuthRedirect } from '@/hooks/use-auth-redirect'
 
 export default function Page() {
-  const router = useRouter()
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const data = (await apiClient.getSession()) as {
-          authenticated: boolean
-        }
-        if (data.authenticated) {
-          router.push('/')
-        }
-      } catch {
-        // User is not authenticated, stay on register page
-      }
-    }
-    checkSession()
-  }, [router])
+  useAuthRedirect()
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-2">
