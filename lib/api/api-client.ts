@@ -100,14 +100,13 @@ class ApiClient {
 
       if (!response.ok) {
         const errorMessage =
-          (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string')
+          data &&
+          typeof data === 'object' &&
+          'error' in data &&
+          typeof data.error === 'string'
             ? data.error
             : 'An error occurred'
-        throw new ApiError(
-          errorMessage,
-          response.status,
-          data
-        )
+        throw new ApiError(errorMessage, response.status, data)
       }
 
       return data as T

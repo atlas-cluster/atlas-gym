@@ -266,7 +266,9 @@ function AccountStep({
           aria-describedby={errors.email ? 'email-error' : undefined}
         />
         {errors.email && (
-          <div id="email-error" className="mt-1 text-sm text-red-600">{errors.email}</div>
+          <div id="email-error" className="mt-1 text-sm text-red-600">
+            {errors.email}
+          </div>
         )}
       </Field>
       <Field>
@@ -286,7 +288,9 @@ function AccountStep({
           aria-describedby={errors.password ? 'password-error' : undefined}
         />
         {errors.password && (
-          <div id="password-error" className="mt-1 text-sm text-red-600">{errors.password}</div>
+          <div id="password-error" className="mt-1 text-sm text-red-600">
+            {errors.password}
+          </div>
         )}
       </Field>
       <Field>
@@ -299,7 +303,9 @@ function AccountStep({
           defaultValue={formData.passwordrepeat || ''}
           required
           aria-invalid={!!errors.passwordrepeat}
-          aria-describedby={errors.passwordrepeat ? 'passwordrepeat-error' : undefined}
+          aria-describedby={
+            errors.passwordrepeat ? 'passwordrepeat-error' : undefined
+          }
         />
         {errors.passwordrepeat && (
           <div id="passwordrepeat-error" className="mt-1 text-sm text-red-600">
@@ -334,7 +340,9 @@ function PersonalStep({
           aria-describedby={errors.firstname ? 'firstname-error' : undefined}
         />
         {errors.firstname && (
-          <div id="firstname-error" className="mt-1 text-sm text-red-600">{errors.firstname}</div>
+          <div id="firstname-error" className="mt-1 text-sm text-red-600">
+            {errors.firstname}
+          </div>
         )}
       </Field>
       <Field>
@@ -350,7 +358,9 @@ function PersonalStep({
           aria-describedby={errors.middlename ? 'middlename-error' : undefined}
         />
         {errors.middlename && (
-          <div id="middlename-error" className="mt-1 text-sm text-red-600">{errors.middlename}</div>
+          <div id="middlename-error" className="mt-1 text-sm text-red-600">
+            {errors.middlename}
+          </div>
         )}
       </Field>
       <Field>
@@ -367,7 +377,9 @@ function PersonalStep({
           aria-describedby={errors.lastname ? 'lastname-error' : undefined}
         />
         {errors.lastname && (
-          <div id="lastname-error" className="mt-1 text-sm text-red-600">{errors.lastname}</div>
+          <div id="lastname-error" className="mt-1 text-sm text-red-600">
+            {errors.lastname}
+          </div>
         )}
       </Field>
       <Field>
@@ -382,7 +394,9 @@ function PersonalStep({
           aria-describedby={errors.birthdate ? 'birthdate-error' : undefined}
         />
         {errors.birthdate && (
-          <div id="birthdate-error" className="mt-1 text-sm text-red-600">{errors.birthdate}</div>
+          <div id="birthdate-error" className="mt-1 text-sm text-red-600">
+            {errors.birthdate}
+          </div>
         )}
       </Field>
     </>
@@ -411,7 +425,9 @@ function ContactStep({
           aria-describedby={errors.phone ? 'phone-error' : undefined}
         />
         {errors.phone && (
-          <div id="phone-error" className="mt-1 text-sm text-red-600">{errors.phone}</div>
+          <div id="phone-error" className="mt-1 text-sm text-red-600">
+            {errors.phone}
+          </div>
         )}
       </Field>
       <Field>
@@ -426,7 +442,9 @@ function ContactStep({
           aria-describedby={errors.address ? 'address-error' : undefined}
         />
         {errors.address && (
-          <div id="address-error" className="mt-1 text-sm text-red-600">{errors.address}</div>
+          <div id="address-error" className="mt-1 text-sm text-red-600">
+            {errors.address}
+          </div>
         )}
       </Field>
     </>

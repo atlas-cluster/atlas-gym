@@ -111,10 +111,14 @@ export function LoginForm({
                   type="password"
                   required
                   aria-invalid={!!errors.password}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  aria-describedby={
+                    errors.password ? 'password-error' : undefined
+                  }
                 />
                 {errors.password && (
-                  <div id="password-error" className="mt-1 text-sm text-red-600">
+                  <div
+                    id="password-error"
+                    className="mt-1 text-sm text-red-600">
                     {errors.password}
                   </div>
                 )}
