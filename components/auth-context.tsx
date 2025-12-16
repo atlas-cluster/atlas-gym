@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { UserData } from '@/lib/schemas'
+import { userDataSchema } from '@/lib/schemas/validation'
 import { apiClient } from '@/lib/api'
 
 interface AuthContextType {
@@ -21,6 +22,10 @@ const PUBLIC_ROUTES = ['/login', '/register']
 // Local storage keys
 const AUTH_STATE_KEY = 'atlas_auth_state'
 const USER_DATA_KEY = 'atlas_user_data'
+
+// Delay before redirecting when session is expired but cached state exists
+// This provides a brief moment for the user to see the UI before redirect
+const EXPIRED_SESSION_REDIRECT_DELAY = 100 // milliseconds
 
 export function useAuth() {
   const context = useContext(AuthContext)
@@ -45,13 +50,31 @@ function getCachedAuthState(): { isAuthenticated: boolean; user: UserData | null
     const userData = localStorage.getItem(USER_DATA_KEY)
     
     if (authState === 'true' && userData) {
-      return {
-        isAuthenticated: true,
-        user: JSON.parse(userData) as UserData,
+      const parsedData = JSON.parse(userData)
+      
+      // Validate parsed data against schema
+      const validationResult = userDataSchema.safeParse(parsedData)
+      if (validationResult.success) {
+        return {
+          isAuthenticated: true,
+          user: validationResult.data as UserData,
+        }
+      } else {
+        // Invalid data in localStorage - clear it
+        console.warn('Invalid cached user data, clearing:', validationResult.error)
+        localStorage.removeItem(AUTH_STATE_KEY)
+        localStorage.removeItem(USER_DATA_KEY)
       }
     }
   } catch (error) {
     console.error('Error reading cached auth state:', error)
+    // Clear potentially corrupted data
+    try {
+      localStorage.removeItem(AUTH_STATE_KEY)
+      localStorage.removeItem(USER_DATA_KEY)
+    } catch {
+      // Ignore errors when clearing
+    }
   }
   
   return { isAuthenticated: false, user: null }
@@ -160,7 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setTimeout(() => {
             const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
             router.push(loginUrl)
-          }, 100)
+          }, EXPIRED_SESSION_REDIRECT_DELAY)
         }
       }
       
