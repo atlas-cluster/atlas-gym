@@ -23,10 +23,6 @@ const PUBLIC_ROUTES = ['/login', '/register']
 const AUTH_STATE_KEY = 'atlas_auth_state'
 const USER_DATA_KEY = 'atlas_user_data'
 
-// Delay before redirecting when session is expired but cached state exists
-// This provides a brief moment for the user to see the UI before redirect
-const EXPIRED_SESSION_REDIRECT_DELAY = 100 // milliseconds
-
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -107,13 +103,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Initialize with cached state for instant rendering
-  const cachedState = getCachedAuthState()
-  const [user, setUser] = useState<UserData | null>(cachedState.user)
+  // Initialize with null to ensure server/client hydration match
+  // Cached data will be loaded in useEffect after hydration
+  const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    cachedState.isAuthenticated
-  )
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const fetchUser = async () => {
     try {
@@ -172,27 +166,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
+      // Load cached data first for instant display (after hydration)
+      const cached = getCachedAuthState()
+      if (cached.isAuthenticated && cached.user) {
+        setUser(cached.user)
+        setIsAuthenticated(true)
+      }
+
       // For protected routes, validate session in background
       const authenticated = await fetchUser()
 
       if (!isMounted) return
 
-      // If session is invalid and we don't have cached auth, redirect
+      // If session is invalid, redirect
       if (!authenticated) {
-        // Only redirect if we also don't have a cached authenticated state
-        // This prevents flash when session expires but localStorage still has data
-        const cached = getCachedAuthState()
-        if (!cached.isAuthenticated) {
-          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-          router.push(loginUrl)
-        } else {
-          // Session expired but we had cached state - redirect after brief moment
-          // This allows the user to see the UI briefly before redirect
-          setTimeout(() => {
-            const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-            router.push(loginUrl)
-          }, EXPIRED_SESSION_REDIRECT_DELAY)
-        }
+        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+        router.push(loginUrl)
       }
 
       setLoading(false)

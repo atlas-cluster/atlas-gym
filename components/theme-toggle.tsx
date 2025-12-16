@@ -69,13 +69,12 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon-sm"
       onClick={mounted ? toggleTheme : undefined}
-      aria-label="Toggle theme">
-      {mounted && (
-        <IconSwitcher
-          theme={currentTheme}
-          baseClass="absolute inset-0 m-auto transition-opacity duration-200 ease-in-out motion-reduce:transition-none"
-        />
-      )}
+      aria-label="Toggle theme"
+      suppressHydrationWarning>
+      <IconSwitcher
+        theme={currentTheme}
+        baseClass="absolute inset-0 m-auto transition-opacity duration-200 ease-in-out motion-reduce:transition-none"
+      />
     </Button>
   )
 }
