@@ -160,14 +160,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      // Load cached data immediately on client mount for better UX
-      // This happens after initial render, so no hydration mismatch
-      const cached = getCachedAuthState()
-      if (cached.isAuthenticated && cached.user) {
-        setUser(cached.user)
-        setIsAuthenticated(cached.isAuthenticated)
-      }
-
       // For public routes, just mark as not loading
       if (PUBLIC_ROUTES.includes(pathname)) {
         setLoading(false)
@@ -194,6 +186,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isMounted = false
     }
   }, [pathname, router])
+
+  // Load cached data once on component mount for better UX
+  // This runs only once and happens after initial render, so no hydration mismatch
+  useEffect(() => {
+    const cached = getCachedAuthState()
+    if (cached.isAuthenticated && cached.user) {
+      setUser(cached.user)
+      setIsAuthenticated(cached.isAuthenticated)
+    }
+  }, [])
 
   // Always render children - no loading screen
   // Components will use skeleton states while loading is true
