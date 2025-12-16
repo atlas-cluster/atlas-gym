@@ -42,10 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUser = async () => {
     try {
-      const data = (await apiClient.getSession()) as {
-        authenticated: boolean
-        user?: UserData
-      }
+      const data = await apiClient.getSession()
 
       if (data.authenticated && data.user) {
         setUser(data.user)

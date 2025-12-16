@@ -96,9 +96,10 @@ export function LoginForm({
                   placeholder="mail@example.com"
                   required
                   aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
                 />
                 {errors.email && (
-                  <div className="mt-1 text-sm text-red-600">
+                  <div id="email-error" className="mt-1 text-sm text-red-600">
                     {errors.email}
                   </div>
                 )}
@@ -111,9 +112,10 @@ export function LoginForm({
                   type="password"
                   required
                   aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
                 />
                 {errors.password && (
-                  <div className="mt-1 text-sm text-red-600">
+                  <div id="password-error" className="mt-1 text-sm text-red-600">
                     {errors.password}
                   </div>
                 )}
