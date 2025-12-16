@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     logout: '/api/auth/logout',
     register: '/api/auth/register',
     session: '/api/auth/session',
+    checkEmail: '/api/auth/check-email',
   },
   ping: '/api/ping',
 } as const

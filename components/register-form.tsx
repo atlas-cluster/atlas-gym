@@ -97,6 +97,25 @@ export function RegisterForm({
     }
 
     const result = await form.trigger(fieldsToValidate)
+    
+    // For the account step, also check if email exists
+    if (result && stepper.current.id === 'account') {
+      const email = form.getValues('email')
+      try {
+        const { exists } = await apiClient.checkEmail(email)
+        if (exists) {
+          setError('email', {
+            type: 'server',
+            message: 'This email is already registered',
+          })
+          return false
+        }
+      } catch (err) {
+        console.error('Error checking email:', err)
+        // Continue even if check fails to avoid blocking the user
+      }
+    }
+    
     return result
   }
 
@@ -113,9 +132,9 @@ export function RegisterForm({
     setLoading(true)
 
     try {
-      await apiClient.login(data.email, data.password)
+      await apiClient.register(data)
 
-      toast.success('Login successful!')
+      toast.success('Registration successful!')
       setLoading(false)
 
       // Redirect to the original page or home
@@ -123,13 +142,15 @@ export function RegisterForm({
     } catch (err) {
       if (err instanceof ApiError) {
         // Map server status codes to specific field errors
-        if (err.status === 404) {
-          setError('email', { type: 'server', message: err.message })
-        } else if (err.status === 401) {
-          setError('password', { type: 'server', message: err.message })
+        if (err.status === 400) {
+          // Could be duplicate email or validation error
+          if (err.message.toLowerCase().includes('email')) {
+            setError('email', { type: 'server', message: err.message })
+          } else {
+            toast.error(err.message)
+          }
         } else {
-          // Fallback: attach to password (or choose a global banner)
-          setError('password', { type: 'server', message: err.message })
+          toast.error(err.message)
         }
         setLoading(false)
       } else {
@@ -141,7 +162,7 @@ export function RegisterForm({
 
   return (
     <>
-      <form id="login" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="register" onSubmit={form.handleSubmit(onSubmit)}>
         <CardHeader className={className} {...props}>
           <CardTitle>{stepper.current.title}</CardTitle>
           <CardDescription>{stepper.current.description}</CardDescription>
@@ -171,6 +192,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="mail@example.com"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('email')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -195,6 +222,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         type="password"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('password')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -219,6 +252,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         type="password"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('passwordrepeat')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />

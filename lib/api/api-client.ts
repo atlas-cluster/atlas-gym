@@ -35,6 +35,10 @@ interface PingResponse {
   details?: unknown
 }
 
+interface CheckEmailResponse {
+  exists: boolean
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -157,6 +161,13 @@ class ApiClient {
 
   async getSession(): Promise<SessionResponse> {
     return this.request<SessionResponse>(API_ENDPOINTS.auth.session)
+  }
+
+  async checkEmail(email: string): Promise<CheckEmailResponse> {
+    return this.request<CheckEmailResponse>(API_ENDPOINTS.auth.checkEmail, {
+      method: 'POST',
+      body: { email },
+    })
   }
 
   // Utility methods
