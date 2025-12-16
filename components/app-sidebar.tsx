@@ -25,8 +25,8 @@ import Image from 'next/image'
 import pkg from '../package.json'
 
 export function AppSidebar() {
-    const version = pkg.version;
-    const env = process.env.NODE_ENV;
+  const version = pkg.version
+  const env = process.env.NODE_ENV
   return (
     <Sidebar collapsible={'icon'} variant={'floating'}>
       <SidebarHeader>
@@ -46,9 +46,9 @@ export function AppSidebar() {
               'grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0'
             }>
             <span className="truncate font-medium">Atlas Gym</span>
-              <span className="text-muted-foreground truncate text-xs">
-                  {`v${version} (${env})`}
-                  </span>
+            <span className="text-muted-foreground truncate text-xs">
+              {`v${version} (${env})`}
+            </span>
           </div>
         </div>
       </SidebarHeader>
