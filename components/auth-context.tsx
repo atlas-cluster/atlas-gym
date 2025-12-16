@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { UserData } from '@/lib/schemas'
-import { userDataSchema } from '@/lib/schemas/validation'
 import { apiClient } from '@/lib/api'
 
 interface AuthContextType {
@@ -19,14 +18,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = ['/login', '/register']
 
-// Local storage keys
-const AUTH_STATE_KEY = 'atlas_auth_state'
-const USER_DATA_KEY = 'atlas_user_data'
-
-// Delay before redirecting when session is expired but cached state exists
-// This provides a brief moment for the user to see the UI before redirect
-const EXPIRED_SESSION_REDIRECT_DELAY = 100 // milliseconds
-
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -39,81 +30,15 @@ interface AuthProviderProps {
   children: React.ReactNode
 }
 
-// Helper to get cached auth state from localStorage
-function getCachedAuthState(): {
-  isAuthenticated: boolean
-  user: UserData | null
-} {
-  if (typeof window === 'undefined') {
-    return { isAuthenticated: false, user: null }
-  }
-
-  try {
-    const authState = localStorage.getItem(AUTH_STATE_KEY)
-    const userData = localStorage.getItem(USER_DATA_KEY)
-
-    if (authState === 'true' && userData) {
-      const parsedData = JSON.parse(userData)
-
-      // Validate parsed data against schema
-      const validationResult = userDataSchema.safeParse(parsedData)
-      if (validationResult.success) {
-        return {
-          isAuthenticated: true,
-          user: validationResult.data as UserData,
-        }
-      } else {
-        // Invalid data in localStorage - clear it
-        console.warn(
-          'Invalid cached user data, clearing:',
-          validationResult.error
-        )
-        localStorage.removeItem(AUTH_STATE_KEY)
-        localStorage.removeItem(USER_DATA_KEY)
-      }
-    }
-  } catch (error) {
-    console.error('Error reading cached auth state:', error)
-    // Clear potentially corrupted data
-    try {
-      localStorage.removeItem(AUTH_STATE_KEY)
-      localStorage.removeItem(USER_DATA_KEY)
-    } catch {
-      // Ignore errors when clearing
-    }
-  }
-
-  return { isAuthenticated: false, user: null }
-}
-
-// Helper to cache auth state to localStorage
-function cacheAuthState(isAuthenticated: boolean, user: UserData | null) {
-  if (typeof window === 'undefined') return
-
-  try {
-    if (isAuthenticated && user) {
-      localStorage.setItem(AUTH_STATE_KEY, 'true')
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(user))
-    } else {
-      localStorage.removeItem(AUTH_STATE_KEY)
-      localStorage.removeItem(USER_DATA_KEY)
-    }
-  } catch (error) {
-    console.error('Error caching auth state:', error)
-  }
-}
-
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Initialize with cached state for instant rendering
-  const cachedState = getCachedAuthState()
-  const [user, setUser] = useState<UserData | null>(cachedState.user)
+  // Initialize with no user data to ensure server and client render the same
+  // This prevents hydration errors caused by localStorage being unavailable on server
+  const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    cachedState.isAuthenticated
-  )
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const fetchUser = async () => {
     try {
@@ -125,19 +50,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (data.authenticated && data.user) {
         setUser(data.user)
         setIsAuthenticated(true)
-        cacheAuthState(true, data.user)
         return true
       } else {
         setUser(null)
         setIsAuthenticated(false)
-        cacheAuthState(false, null)
         return false
       }
     } catch {
       // Silently handle auth errors - user will be redirected to login
       setUser(null)
       setIsAuthenticated(false)
-      cacheAuthState(false, null)
       return false
     }
   }
@@ -147,13 +69,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await apiClient.logout()
       setUser(null)
       setIsAuthenticated(false)
-      cacheAuthState(false, null)
       router.push('/login')
     } catch {
       // Even if logout API fails, clear local state
       setUser(null)
       setIsAuthenticated(false)
-      cacheAuthState(false, null)
       router.push('/login')
     }
   }
@@ -172,27 +92,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // For protected routes, validate session in background
+      // For protected routes, validate session with server
       const authenticated = await fetchUser()
 
       if (!isMounted) return
 
-      // If session is invalid and we don't have cached auth, redirect
+      // If session is invalid, redirect to login
       if (!authenticated) {
-        // Only redirect if we also don't have a cached authenticated state
-        // This prevents flash when session expires but localStorage still has data
-        const cached = getCachedAuthState()
-        if (!cached.isAuthenticated) {
-          const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-          router.push(loginUrl)
-        } else {
-          // Session expired but we had cached state - redirect after brief moment
-          // This allows the user to see the UI briefly before redirect
-          setTimeout(() => {
-            const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
-            router.push(loginUrl)
-          }, EXPIRED_SESSION_REDIRECT_DELAY)
-        }
+        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+        router.push(loginUrl)
       }
 
       setLoading(false)
