@@ -77,6 +77,36 @@ export function RegisterForm({
 
   const { setError } = form
 
+  // Validate current step before allowing to proceed
+  const validateCurrentStep = async () => {
+    let fieldsToValidate: (keyof z.infer<typeof registrationSchema>)[] = []
+
+    switch (stepper.current.id) {
+      case 'account':
+        fieldsToValidate = ['email', 'password', 'passwordrepeat']
+        break
+      case 'personal':
+        fieldsToValidate = ['firstname', 'middlename', 'lastname', 'birthdate']
+        break
+      case 'contact':
+        fieldsToValidate = ['phone', 'address']
+        break
+      case 'payment':
+        fieldsToValidate = ['paymentType', 'paymentInfo']
+        break
+    }
+
+    const result = await form.trigger(fieldsToValidate)
+    return result
+  }
+
+  const handleNext = async () => {
+    const isValid = await validateCurrentStep()
+    if (isValid) {
+      stepper.next()
+    }
+  }
+
   const onSubmit = async (data: z.infer<typeof registrationSchema>) => {
     if (loading) return
 
@@ -123,76 +153,276 @@ export function RegisterForm({
         </CardHeader>
         <CardContent className={'mt-4'}>
           <FieldGroup>
-            <Controller
-              name="email"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">
-                    <span>
-                      Email<sup className={'text-destructive'}>*</sup>
-                    </span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id="email"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="mail@example.com"
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+            {stepper.current.id === 'account' && (
+              <>
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="email">
+                        <span>
+                          Email<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="email"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="mail@example.com"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
+                />
 
-            <Controller
-              name="password"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">
-                    <span>
-                      Password<sup className={'text-destructive'}>*</sup>
-                    </span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id="password"
-                    aria-invalid={fieldState.invalid}
-                    type="password"
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="password">
+                        <span>
+                          Password<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="password"
+                        aria-invalid={fieldState.invalid}
+                        type="password"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="passwordrepeat"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="passwordrepeat">
-                    <span>
-                      Repeat Password<sup className={'text-destructive'}>*</sup>
-                    </span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id="passwordrepeat"
-                    aria-invalid={fieldState.invalid}
-                    type="password"
-                    autoComplete="off"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+                />
+                <Controller
+                  name="passwordrepeat"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="passwordrepeat">
+                        <span>
+                          Repeat Password
+                          <sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="passwordrepeat"
+                        aria-invalid={fieldState.invalid}
+                        type="password"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'personal' && (
+              <>
+                <Controller
+                  name="firstname"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="firstname">
+                        <span>
+                          First Name<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="firstname"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="John"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="middlename"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="middlename">
+                        <span>Middle Name</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="middlename"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Michael"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="lastname"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="lastname">
+                        <span>
+                          Last Name<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="lastname"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Doe"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="birthdate"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="birthdate">
+                        <span>
+                          Birth Date<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="birthdate"
+                        type="date"
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'contact' && (
+              <>
+                <Controller
+                  name="phone"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="phone">
+                        <span>Phone Number</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="phone"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="+1 (555) 123-4567"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="address"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="address">
+                        <span>Address</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="address"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="123 Main St, City, State"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'payment' && (
+              <>
+                <Controller
+                  name="paymentType"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="paymentType">
+                        <span>Payment Type</span>
+                      </FieldLabel>
+                      <select
+                        {...field}
+                        id="paymentType"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        aria-invalid={fieldState.invalid}>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="iban">IBAN</option>
+                      </select>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="paymentInfo"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="paymentInfo">
+                        <span>Payment Information</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="paymentInfo"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Card number or IBAN"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
           </FieldGroup>
         </CardContent>
         <CardFooter className={'mt-6 w-full'}>
@@ -209,7 +439,9 @@ export function RegisterForm({
                 {loading ? 'Creating...' : 'Create Account'}
               </Button>
             ) : (
-              <Button onClick={stepper.next}>Next</Button>
+              <Button type={'button'} onClick={handleNext}>
+                Next
+              </Button>
             )}
           </div>
         </CardFooter>
