@@ -1,7 +1,7 @@
-import { Suspense } from 'react'
 import Image from 'next/image'
 import { LoginForm } from '@/components/login-form'
-import { AuthFormSkeleton } from '@/components/auth-form-skeleton'
+
+export const dynamic = 'force-dynamic'
 
 export default function Page() {
   return (
@@ -13,9 +13,7 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <Suspense fallback={<AuthFormSkeleton />}>
-          <LoginForm className="w-full" />
-        </Suspense>
+        <LoginForm className="w-full" />
       </div>
     </div>
   )
