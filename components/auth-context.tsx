@@ -16,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Public routes that don't require authentication
-const PUBLIC_ROUTES = ['/login', '/register']
+const AUTH_ROUTE = '/auth'
 
 export function useAuth() {
   const context = useContext(AuthContext)
@@ -66,12 +66,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await apiClient.logout()
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/login')
+      router.push('/auth')
     } catch {
       // Even if logout API fails, clear local state
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/login')
+      router.push('/auth')
     }
   }
 
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const checkAuth = async () => {
       // For public routes, just mark as not loading
-      if (PUBLIC_ROUTES.includes(pathname)) {
+      if (pathname === AUTH_ROUTE) {
         setLoading(false)
         return
       }
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // If session is invalid, redirect to login
       if (!authenticated) {
-        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+        const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
       }
 

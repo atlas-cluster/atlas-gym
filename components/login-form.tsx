@@ -1,145 +1,124 @@
-'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+"use client"
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { apiClient, ApiError } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { ComponentProps, useState } from 'react'
+import { Controller, FieldErrors, useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema } from '@/lib/schemas'
+import { z } from 'zod'
+import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 export function LoginForm({
   className,
   redirectTo = '/',
   ...props
-}: React.ComponentProps<'div'> & { redirectTo?: string }) {
+}: ComponentProps<'div'> & { redirectTo?: string }) {
   const router = useRouter()
-  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setErrors({})
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  const { setError } = form
+
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    if (loading) return
+
     setLoading(true)
 
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    // Client-side validation
-    const validation = loginSchema.safeParse({ email, password })
-
-    if (!validation.success) {
-      const fieldErrors: Record<string, string> = {}
-      validation.error.issues.forEach((issue) => {
-        if (issue.path[0]) {
-          fieldErrors[issue.path[0].toString()] = issue.message
-        }
-      })
-      setErrors(fieldErrors)
-      setLoading(false)
-      toast.error('Please fix the errors in the form')
-      return
-    }
-
     try {
-      await apiClient.login(email, password)
+      await apiClient.login(data.email, data.password)
 
       toast.success('Login successful!')
+      setLoading(false)
 
       // Redirect to the original page or home
       router.push(redirectTo)
     } catch (err) {
       if (err instanceof ApiError) {
-        toast.error(err.message)
-        setErrors({ general: err.message })
+        // Map server status codes to specific field errors
+        if (err.status === 404) {
+          setError('email', { type: 'server', message: err.message })
+        } else if (err.status === 401) {
+          setError('password', { type: 'server', message: err.message })
+        } else {
+          // Fallback: attach to password (or choose a global banner)
+          setError('password', { type: 'server', message: err.message })
+        }
+        setLoading(false)
       } else {
         toast.error('An unexpected error occurred')
-        setErrors({ general: 'An unexpected error occurred' })
+        setLoading(false)
       }
-
-      setLoading(false)
     }
   }
 
   return (
-    <div className={className} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+    <CardHeader className={className} {...props}>
+      <CardTitle>Login to your Account</CardTitle>
+      <CardDescription>Enter your email below to login to your account</CardDescription>
+      <CardContent className={"p-0"}>
+        <form id="login" onSubmit={form.handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="email">
+                  <span>Email<sup className={"text-destructive"}>*</sup></span>
+                </FieldLabel>
                 <Input
+                  {...field}
                   id="email"
-                  name="email"
-                  type="email"
+                  aria-invalid={fieldState.invalid}
                   placeholder="mail@example.com"
-                  required
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  autoComplete="off"
                 />
-                {errors.email && (
-                  <div id="email-error" className="mt-1 text-sm text-red-600">
-                    {errors.email}
-                  </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
                 )}
               </Field>
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
+            )}
+          />
+
+          <Controller
+            name="password"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="password">
+                  <span>Password<sup className={"text-destructive"}>*</sup></span>
+                </FieldLabel>
                 <Input
+                  {...field}
                   id="password"
-                  name="password"
+                  aria-invalid={fieldState.invalid}
                   type="password"
-                  required
-                  aria-invalid={!!errors.password}
-                  aria-describedby={
-                    errors.password ? 'password-error' : undefined
-                  }
+                  autoComplete="off"
                 />
-                {errors.password && (
-                  <div
-                    id="password-error"
-                    className="mt-1 text-sm text-red-600">
-                    {errors.password}
-                  </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
                 )}
               </Field>
-              {errors.general && (
-                <Field>
-                  <div className="text-sm text-red-600">{errors.general}</div>
-                </Field>
-              )}
-              <Field>
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? 'Logging in...' : 'Login'}
-                </Button>
-                <FieldDescription className="text-center">
-                  Not a member yet? <a href="/register">Register</a>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            )}
+          />
+        </FieldGroup>
+          <Button type="submit" className={"w-full mt-6"} disabled={loading}>
+            Login
+          </Button>
+        </form>
+      </CardContent>
+    </CardHeader>
   )
 }
