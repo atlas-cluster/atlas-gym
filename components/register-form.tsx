@@ -286,6 +286,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="John"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('firstname')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -308,6 +314,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="Michael"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('middlename')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -332,6 +344,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="Doe"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('lastname')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -356,6 +374,12 @@ export function RegisterForm({
                         type="date"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('birthdate')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -382,6 +406,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="+1 (555) 123-4567"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('phone')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -404,6 +434,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="123 Main St, City, State"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('address')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -428,7 +464,13 @@ export function RegisterForm({
                         {...field}
                         id="paymentType"
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                        aria-invalid={fieldState.invalid}>
+                        aria-invalid={fieldState.invalid}
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('paymentType')
+                          }
+                        }}>
                         <option value="credit_card">Credit Card</option>
                         <option value="iban">IBAN</option>
                       </select>
@@ -453,6 +495,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         placeholder="Card number or IBAN"
                         autoComplete="off"
+                        onChange={(e) => {
+                          field.onChange(e)
+                          if (fieldState.error) {
+                            form.clearErrors('paymentInfo')
+                          }
+                        }}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
