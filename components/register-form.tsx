@@ -262,9 +262,10 @@ function AccountStep({
           defaultValue={formData.email || ''}
           required
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'email-error' : undefined}
         />
         {errors.email && (
-          <div className="mt-1 text-sm text-red-600">{errors.email}</div>
+          <div id="email-error" className="mt-1 text-sm text-red-600">{errors.email}</div>
         )}
       </Field>
       <Field>
@@ -281,9 +282,10 @@ function AccountStep({
           defaultValue={formData.password || ''}
           required
           aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? 'password-error' : undefined}
         />
         {errors.password && (
-          <div className="mt-1 text-sm text-red-600">{errors.password}</div>
+          <div id="password-error" className="mt-1 text-sm text-red-600">{errors.password}</div>
         )}
       </Field>
       <Field>
@@ -296,9 +298,10 @@ function AccountStep({
           defaultValue={formData.passwordrepeat || ''}
           required
           aria-invalid={!!errors.passwordrepeat}
+          aria-describedby={errors.passwordrepeat ? 'passwordrepeat-error' : undefined}
         />
         {errors.passwordrepeat && (
-          <div className="mt-1 text-sm text-red-600">
+          <div id="passwordrepeat-error" className="mt-1 text-sm text-red-600">
             {errors.passwordrepeat}
           </div>
         )}
@@ -327,9 +330,10 @@ function PersonalStep({
           defaultValue={formData.firstname || ''}
           required
           aria-invalid={!!errors.firstname}
+          aria-describedby={errors.firstname ? 'firstname-error' : undefined}
         />
         {errors.firstname && (
-          <div className="mt-1 text-sm text-red-600">{errors.firstname}</div>
+          <div id="firstname-error" className="mt-1 text-sm text-red-600">{errors.firstname}</div>
         )}
       </Field>
       <Field>
@@ -342,9 +346,10 @@ function PersonalStep({
           maxLength={50}
           defaultValue={formData.middlename || ''}
           aria-invalid={!!errors.middlename}
+          aria-describedby={errors.middlename ? 'middlename-error' : undefined}
         />
         {errors.middlename && (
-          <div className="mt-1 text-sm text-red-600">{errors.middlename}</div>
+          <div id="middlename-error" className="mt-1 text-sm text-red-600">{errors.middlename}</div>
         )}
       </Field>
       <Field>
@@ -358,9 +363,10 @@ function PersonalStep({
           defaultValue={formData.lastname || ''}
           required
           aria-invalid={!!errors.lastname}
+          aria-describedby={errors.lastname ? 'lastname-error' : undefined}
         />
         {errors.lastname && (
-          <div className="mt-1 text-sm text-red-600">{errors.lastname}</div>
+          <div id="lastname-error" className="mt-1 text-sm text-red-600">{errors.lastname}</div>
         )}
       </Field>
       <Field>
@@ -372,9 +378,10 @@ function PersonalStep({
           defaultValue={formData.birthdate || ''}
           required
           aria-invalid={!!errors.birthdate}
+          aria-describedby={errors.birthdate ? 'birthdate-error' : undefined}
         />
         {errors.birthdate && (
-          <div className="mt-1 text-sm text-red-600">{errors.birthdate}</div>
+          <div id="birthdate-error" className="mt-1 text-sm text-red-600">{errors.birthdate}</div>
         )}
       </Field>
     </>
@@ -400,9 +407,10 @@ function ContactStep({
           maxLength={20}
           defaultValue={formData.phone || ''}
           aria-invalid={!!errors.phone}
+          aria-describedby={errors.phone ? 'phone-error' : undefined}
         />
         {errors.phone && (
-          <div className="mt-1 text-sm text-red-600">{errors.phone}</div>
+          <div id="phone-error" className="mt-1 text-sm text-red-600">{errors.phone}</div>
         )}
       </Field>
       <Field>
@@ -414,9 +422,10 @@ function ContactStep({
           placeholder="123 Main St, City, Country"
           defaultValue={formData.address || ''}
           aria-invalid={!!errors.address}
+          aria-describedby={errors.address ? 'address-error' : undefined}
         />
         {errors.address && (
-          <div className="mt-1 text-sm text-red-600">{errors.address}</div>
+          <div id="address-error" className="mt-1 text-sm text-red-600">{errors.address}</div>
         )}
       </Field>
     </>

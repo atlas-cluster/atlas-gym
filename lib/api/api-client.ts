@@ -4,6 +4,36 @@
  */
 
 import { API_ENDPOINTS } from './api-endpoints'
+import { UserData } from '@/lib/schemas'
+
+/**
+ * API Response types
+ */
+interface LoginResponse {
+  success: boolean
+  user: UserData
+}
+
+interface RegisterResponse {
+  success: boolean
+  message: string
+}
+
+interface LogoutResponse {
+  success: boolean
+  message: string
+}
+
+interface SessionResponse {
+  authenticated: boolean
+  user?: UserData
+}
+
+interface PingResponse {
+  success: boolean
+  message: string
+  details?: unknown
+}
 
 export class ApiError extends Error {
   constructor(
@@ -51,7 +81,7 @@ class ApiClient {
       const contentType = response.headers.get('content-type')
       const isJson = contentType && contentType.includes('application/json')
 
-      let data: any
+      let data: unknown
 
       if (isJson) {
         try {
@@ -69,8 +99,12 @@ class ApiClient {
       }
 
       if (!response.ok) {
+        const errorMessage =
+          (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string')
+            ? data.error
+            : 'An error occurred'
         throw new ApiError(
-          data.error || 'An error occurred',
+          errorMessage,
           response.status,
           data
         )
@@ -90,8 +124,8 @@ class ApiClient {
   }
 
   // Auth methods
-  async login(email: string, password: string) {
-    return this.request(API_ENDPOINTS.auth.login, {
+  async login(email: string, password: string): Promise<LoginResponse> {
+    return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
       body: { email, password },
     })
@@ -108,26 +142,26 @@ class ApiClient {
     phone?: string
     paymentType?: string
     paymentInfo?: string
-  }) {
-    return this.request(API_ENDPOINTS.auth.register, {
+  }): Promise<RegisterResponse> {
+    return this.request<RegisterResponse>(API_ENDPOINTS.auth.register, {
       method: 'POST',
       body: data,
     })
   }
 
-  async logout() {
-    return this.request(API_ENDPOINTS.auth.logout, {
+  async logout(): Promise<LogoutResponse> {
+    return this.request<LogoutResponse>(API_ENDPOINTS.auth.logout, {
       method: 'POST',
     })
   }
 
-  async getSession() {
-    return this.request(API_ENDPOINTS.auth.session)
+  async getSession(): Promise<SessionResponse> {
+    return this.request<SessionResponse>(API_ENDPOINTS.auth.session)
   }
 
   // Utility methods
-  async ping() {
-    return this.request(API_ENDPOINTS.ping)
+  async ping(): Promise<PingResponse> {
+    return this.request<PingResponse>(API_ENDPOINTS.ping)
   }
 }
 
