@@ -134,6 +134,7 @@ class ApiClient {
   async register(data: {
     email: string
     password: string
+    passwordrepeat: string
     firstname: string
     lastname: string
     middlename?: string

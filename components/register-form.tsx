@@ -154,6 +154,7 @@ export function RegisterForm({
         const registrationData = {
           email: allData.email,
           password: allData.password,
+          passwordrepeat: allData.passwordrepeat,
           firstname: allData.firstname,
           lastname: allData.lastname,
           middlename: allData.middlename || undefined,
