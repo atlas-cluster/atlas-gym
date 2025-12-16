@@ -1,7 +1,32 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { RegisterForm } from '@/components/register-form'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export const dynamic = 'force-dynamic'
+function RegisterFormSkeleton() {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function Page() {
   return (
@@ -13,7 +38,9 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <RegisterForm className="w-full" />
+        <Suspense fallback={<RegisterFormSkeleton />}>
+          <RegisterForm className="w-full" />
+        </Suspense>
       </div>
     </div>
   )
