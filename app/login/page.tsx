@@ -1,8 +1,14 @@
-import { Suspense } from 'react'
 import Image from 'next/image'
 import { LoginForm } from '@/components/login-form'
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string }>
+}) {
+  const params = await searchParams
+  const redirectTo = params.redirect || '/'
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-2">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
@@ -12,9 +18,7 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <Suspense>
-          <LoginForm className="w-full" />
-        </Suspense>
+        <LoginForm className="w-full" redirectTo={redirectTo} />
       </div>
     </div>
   )
