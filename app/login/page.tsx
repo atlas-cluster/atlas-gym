@@ -1,7 +1,6 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { LoginForm } from '@/components/login-form'
-
-export const dynamic = 'force-dynamic'
 
 export default function Page() {
   return (
@@ -13,7 +12,9 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <LoginForm className="w-full" />
+        <Suspense>
+          <LoginForm className="w-full" />
+        </Suspense>
       </div>
     </div>
   )
