@@ -57,25 +57,25 @@ export function ThemeToggle() {
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
 
-  // Use 'system' as default for SSR to avoid hydration mismatch
-  const currentTheme = mounted ? ((theme ?? resolvedTheme ?? 'system') as Theme) : 'system'
+  const currentTheme = (theme ?? resolvedTheme ?? 'system') as Theme
 
   const toggleTheme = React.useCallback(() => {
-    if (!mounted) return
     const next = NEXT_THEME[currentTheme]
     setTheme(next)
-  }, [mounted, currentTheme, setTheme])
+  }, [currentTheme, setTheme])
 
   return (
     <Button
       variant="ghost"
       size="icon-sm"
-      onClick={toggleTheme}
+      onClick={mounted ? toggleTheme : undefined}
       aria-label="Toggle theme">
-      <IconSwitcher
-        theme={currentTheme}
-        baseClass="absolute inset-0 m-auto transition-opacity duration-200 ease-in-out motion-reduce:transition-none"
-      />
+      {mounted && (
+        <IconSwitcher
+          theme={currentTheme}
+          baseClass="absolute inset-0 m-auto transition-opacity duration-200 ease-in-out motion-reduce:transition-none"
+        />
+      )}
     </Button>
   )
 }

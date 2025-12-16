@@ -65,7 +65,9 @@ export default function AppSidebarUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className={'flex size-8 items-center justify-center'}>
                 <Avatar>
-                  <AvatarFallback>{getInitials()}</AvatarFallback>
+                  <AvatarFallback>
+                    {userExists ? getInitials() : ''}
+                  </AvatarFallback>
                 </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
@@ -95,7 +97,9 @@ export default function AppSidebarUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <div className={'flex size-8 items-center justify-center'}>
                   <Avatar>
-                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                    <AvatarFallback>
+                      {userExists ? getInitials() : ''}
+                    </AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
