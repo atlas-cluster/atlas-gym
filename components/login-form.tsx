@@ -1,11 +1,22 @@
-"use client"
-import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
+import {
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { ComponentProps, useState } from 'react'
-import { Controller, FieldErrors, useForm } from 'react-hook-form'
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema } from '@/lib/schemas'
 import { z } from 'zod'
 import { apiClient, ApiError } from '@/lib/api'
@@ -64,61 +75,71 @@ export function LoginForm({
   }
 
   return (
-    <CardHeader className={className} {...props}>
-      <CardTitle>Login to your Account</CardTitle>
-      <CardDescription>Enter your email below to login to your account</CardDescription>
-      <CardContent className={"p-0"}>
-        <form id="login" onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <Controller
-            name="email"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="email">
-                  <span>Email<sup className={"text-destructive"}>*</sup></span>
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="email"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="mail@example.com"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+    <>
+      <form id="login" onSubmit={form.handleSubmit(onSubmit)}>
+        <CardHeader className={className} {...props}>
+          <CardTitle>Login to your Account</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className={'mt-4'}>
+          <FieldGroup>
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="email">
+                    <span>
+                      Email<sup className={'text-destructive'}>*</sup>
+                    </span>
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="email"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="mail@example.com"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-          <Controller
-            name="password"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="password">
-                  <span>Password<sup className={"text-destructive"}>*</sup></span>
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="password"
-                  aria-invalid={fieldState.invalid}
-                  type="password"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-        </FieldGroup>
-          <Button type="submit" className={"w-full mt-6"} disabled={loading}>
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="password">
+                    <span>
+                      Password<sup className={'text-destructive'}>*</sup>
+                    </span>
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="password"
+                    aria-invalid={fieldState.invalid}
+                    type="password"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </CardContent>
+        <CardFooter className={'mt-6'}>
+          <Button type="submit" className={'w-full'} disabled={loading}>
             Login
           </Button>
-        </form>
-      </CardContent>
-    </CardHeader>
+        </CardFooter>
+      </form>
+    </>
   )
 }

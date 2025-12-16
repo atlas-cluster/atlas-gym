@@ -1,7 +1,8 @@
 import Image from 'next/image'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { LoginForm} from '@/components/login-form'
+import { Card } from '@/components/ui/card'
+import { LoginForm } from '@/components/login-form'
+import { RegisterForm } from '@/components/register-form'
 
 export default async function Page({
   searchParams,
@@ -12,7 +13,7 @@ export default async function Page({
   const redirectTo = params.redirect || '/'
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-2">
+    <div className="flex min-h-screen w-full justify-center px-2 pt-20 pb-2">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
         <Image
           src={'/atlas_logo_rounded_m.png'}
@@ -20,22 +21,19 @@ export default async function Page({
           height={100}
           alt={'Logo'}
         />
-        <Card className={"pt-0 w-full"}>
+        <Card className={'w-full pt-0'}>
           <Tabs defaultValue="login">
-            <TabsList className={"flex mb-8 w-full"}>
+            <TabsList className={'mb-8 flex w-full'}>
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-              <LoginForm redirectTo={redirectTo}/>
+              <LoginForm redirectTo={redirectTo} />
             </TabsContent>
             <TabsContent value="register">
-              <CardHeader>
-                <CardTitle>Register</CardTitle>
-              </CardHeader>
+              <RegisterForm />
             </TabsContent>
           </Tabs>
-
         </Card>
       </div>
     </div>

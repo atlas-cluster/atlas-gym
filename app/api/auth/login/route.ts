@@ -24,12 +24,21 @@ export async function POST(request: NextRequest) {
 
     if (authResult.user === null) {
       if (authResult.error === 'NOT_FOUND') {
-        return NextResponse.json({ error: 'Email does not exist' }, { status: 404 })
+        return NextResponse.json(
+          { error: 'Email does not exist' },
+          { status: 404 }
+        )
       }
       if (authResult.error === 'INVALID_PASSWORD') {
-        return NextResponse.json({ error: 'Incorrect password' }, { status: 401 })
+        return NextResponse.json(
+          { error: 'Incorrect password' },
+          { status: 401 }
+        )
       }
-      return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Authentication error' },
+        { status: 500 }
+      )
     }
     const user = authResult.user
     const session = await createSession(user.id)
