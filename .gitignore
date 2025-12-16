@@ -10,7 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 
-# package managers (using bun.lock)
+# other package managers (using bun.lock)
 package-lock.json
 yarn.lock
 
