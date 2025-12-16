@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -22,10 +22,10 @@ import { toast } from 'sonner'
 
 export function LoginForm({
   className,
+  redirectTo = '/',
   ...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<'div'> & { redirectTo?: string }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
@@ -60,8 +60,7 @@ export function LoginForm({
       toast.success('Login successful!')
 
       // Redirect to the original page or home
-      const redirect = searchParams.get('redirect') || '/'
-      router.push(redirect)
+      router.push(redirectTo)
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message)
