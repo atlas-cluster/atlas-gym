@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { UserData } from '@/lib/schemas'
 import { apiClient } from '@/lib/api'
-import { Progress } from '@/components/ui/progress'
 
 interface AuthContextType {
   user: UserData | null
@@ -182,11 +181,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
             width={120}
             height={120}
             priority
-            className="animate-pulse"
+            className="animate-bounce"
           />
-          <div className="w-64">
+          {/*<div className="w-64">
             <Progress value={progress} className="h-2" />
-          </div>
+          </div>*/}
           <span className={'text-muted-foreground'}>Loading...</span>
         </div>
       </div>
