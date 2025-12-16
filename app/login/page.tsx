@@ -1,32 +1,7 @@
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { LoginForm } from '@/components/login-form'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-
-function LoginFormSkeleton() {
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-4 w-64" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+import { AuthFormSkeleton } from '@/components/auth-form-skeleton'
 
 export default function Page() {
   return (
@@ -38,7 +13,7 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <Suspense fallback={<LoginFormSkeleton />}>
+        <Suspense fallback={<AuthFormSkeleton />}>
           <LoginForm className="w-full" />
         </Suspense>
       </div>
