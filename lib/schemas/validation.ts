@@ -109,6 +109,18 @@ export const registrationSchema = z
     path: ['passwordrepeat'],
   })
 
+// UserData validation schema for cached data
+export const userDataSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  firstname: z.string(),
+  lastname: z.string(),
+  middlename: z.string().optional(),
+  birthdate: z.union([z.date(), z.string()]).optional(),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+})
+
 // Type exports
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegistrationInput = z.infer<typeof registrationSchema>
