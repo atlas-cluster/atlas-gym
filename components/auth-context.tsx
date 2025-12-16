@@ -40,18 +40,21 @@ interface AuthProviderProps {
 }
 
 // Helper to get cached auth state from localStorage
-function getCachedAuthState(): { isAuthenticated: boolean; user: UserData | null } {
+function getCachedAuthState(): {
+  isAuthenticated: boolean
+  user: UserData | null
+} {
   if (typeof window === 'undefined') {
     return { isAuthenticated: false, user: null }
   }
-  
+
   try {
     const authState = localStorage.getItem(AUTH_STATE_KEY)
     const userData = localStorage.getItem(USER_DATA_KEY)
-    
+
     if (authState === 'true' && userData) {
       const parsedData = JSON.parse(userData)
-      
+
       // Validate parsed data against schema
       const validationResult = userDataSchema.safeParse(parsedData)
       if (validationResult.success) {
@@ -61,7 +64,10 @@ function getCachedAuthState(): { isAuthenticated: boolean; user: UserData | null
         }
       } else {
         // Invalid data in localStorage - clear it
-        console.warn('Invalid cached user data, clearing:', validationResult.error)
+        console.warn(
+          'Invalid cached user data, clearing:',
+          validationResult.error
+        )
         localStorage.removeItem(AUTH_STATE_KEY)
         localStorage.removeItem(USER_DATA_KEY)
       }
@@ -76,14 +82,14 @@ function getCachedAuthState(): { isAuthenticated: boolean; user: UserData | null
       // Ignore errors when clearing
     }
   }
-  
+
   return { isAuthenticated: false, user: null }
 }
 
 // Helper to cache auth state to localStorage
 function cacheAuthState(isAuthenticated: boolean, user: UserData | null) {
   if (typeof window === 'undefined') return
-  
+
   try {
     if (isAuthenticated && user) {
       localStorage.setItem(AUTH_STATE_KEY, 'true')
@@ -100,12 +106,14 @@ function cacheAuthState(isAuthenticated: boolean, user: UserData | null) {
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
-  
+
   // Initialize with cached state for instant rendering
   const cachedState = getCachedAuthState()
   const [user, setUser] = useState<UserData | null>(cachedState.user)
   const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(cachedState.isAuthenticated)
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    cachedState.isAuthenticated
+  )
 
   const fetchUser = async () => {
     try {
@@ -186,7 +194,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }, EXPIRED_SESSION_REDIRECT_DELAY)
         }
       }
-      
+
       setLoading(false)
     }
 

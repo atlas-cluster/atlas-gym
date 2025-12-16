@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
   const { user, loading, logout } = useAuth()
+  const userExists = Boolean(user && !loading)
 
   const handleLogout = async () => {
     try {
@@ -44,27 +45,14 @@ export default function AppSidebarUser() {
 
   const getFullName = () => {
     // Assume `user` exists when this is called.
-    const parts = [user?.firstname , user?.middlename, user?.lastname].filter(
+    const parts = [user?.firstname, user?.middlename, user?.lastname].filter(
       Boolean
     )
     return parts.join(' ')
   }
 
-  // Show skeleton while loading OR when user data is not present.
-  if (loading || !user) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <Skeleton className="h-8 w-8 rounded-full" />
-            <div className="flex-1 space-y-1">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-32" />
-            </div>
-          </div>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    )
+  const getEmail = () => {
+    return user?.email || ''
   }
 
   return (
@@ -81,9 +69,19 @@ export default function AppSidebarUser() {
                 </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
-                <span className="truncate font-medium">{getFullName()}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                <span className="h-[12pt] truncate font-medium">
+                  {userExists ? (
+                    getFullName()
+                  ) : (
+                    <Skeleton className={'w-f m-1 h-full'} />
+                  )}
+                </span>
+                <span className="text-muted-foreground h-[10pt] truncate text-xs">
+                  {userExists ? (
+                    getEmail()
+                  ) : (
+                    <Skeleton className={'m-1 h-full w-4/5'} />
+                  )}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -101,9 +99,19 @@ export default function AppSidebarUser() {
                   </Avatar>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{getFullName()}</span>
+                  <span className="truncate font-medium">
+                    {userExists ? (
+                      getFullName()
+                    ) : (
+                      <Skeleton className={'w-f m-1 h-full'} />
+                    )}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {userExists ? (
+                      getEmail()
+                    ) : (
+                      <Skeleton className={'m-1 h-full w-4/5'} />
+                    )}
                   </span>
                 </div>
               </div>
