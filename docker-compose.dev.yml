@@ -9,9 +9,9 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres_data_dev:/var/lib/postgresql
-      - ./db/init/base:/docker-entrypoint-initdb.d:ro
-      - ./db/init/development:/docker-entrypoint-initdb.d:ro
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./db/init/base/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/init/development/01_users.sql:/docker-entrypoint-initdb.d/02_users.sql:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
