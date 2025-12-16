@@ -16,7 +16,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { ComponentProps, Fragment, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registrationSchema } from '@/lib/schemas'
 import { z } from 'zod'
@@ -24,6 +24,14 @@ import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { defineStepper } from '@stepperize/react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { ChevronDownIcon } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import { CreditCardInput } from '@/components/credit-card-input'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -57,6 +65,7 @@ export function RegisterForm({
   const currentIndex = utils.getIndex(stepper.current.id)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   const form = useForm<z.infer<typeof registrationSchema>>({
     resolver: zodResolver(registrationSchema),
@@ -75,7 +84,8 @@ export function RegisterForm({
     },
   })
 
-  const { setError } = form
+  const { setError, control } = form
+  const paymentType = useWatch({ control, name: 'paymentType' })
 
   // Validate current step before allowing to proceed
   const validateCurrentStep = async () => {
@@ -97,7 +107,7 @@ export function RegisterForm({
     }
 
     const result = await form.trigger(fieldsToValidate)
-    
+
     // For the account step, also check if email exists
     if (result && stepper.current.id === 'account') {
       const email = form.getValues('email')
@@ -115,7 +125,7 @@ export function RegisterForm({
         // Continue even if check fails to avoid blocking the user
       }
     }
-    
+
     return result
   }
 
@@ -368,19 +378,46 @@ export function RegisterForm({
                           Birth Date<sup className={'text-destructive'}>*</sup>
                         </span>
                       </FieldLabel>
-                      <Input
-                        {...field}
-                        id="birthdate"
-                        type="date"
-                        aria-invalid={fieldState.invalid}
-                        autoComplete="off"
-                        onChange={(e) => {
-                          field.onChange(e)
-                          if (fieldState.error) {
-                            form.clearErrors('birthdate')
-                          }
-                        }}
-                      />
+                      <Popover
+                        open={calendarOpen}
+                        onOpenChange={setCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            id="date"
+                            className="w-48 justify-between font-normal">
+                            {field.value ? field.value : 'Select date'}
+                            <ChevronDownIcon />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto overflow-hidden p-0"
+                          align="start">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            captionLayout="dropdown"
+                            onSelect={(date) => {
+                              if (date) {
+                                // Adjust for timezone offset to prevent off-by-one error
+                                const timezoneOffset =
+                                  date.getTimezoneOffset() * 60000
+                                const adjustedDate = new Date(
+                                  date.getTime() - timezoneOffset
+                                )
+                                field.onChange(
+                                  adjustedDate.toISOString().split('T')[0]
+                                )
+                              } else {
+                                field.onChange(undefined)
+                              }
+                              setCalendarOpen(false)
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
@@ -463,7 +500,7 @@ export function RegisterForm({
                       <select
                         {...field}
                         id="paymentType"
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        className="border-input file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         aria-invalid={fieldState.invalid}
                         onChange={(e) => {
                           field.onChange(e)
@@ -481,33 +518,48 @@ export function RegisterForm({
                   )}
                 />
 
-                <Controller
-                  name="paymentInfo"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="paymentInfo">
-                        <span>Payment Information</span>
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        id="paymentInfo"
-                        aria-invalid={fieldState.invalid}
-                        placeholder="Card number or IBAN"
-                        autoComplete="off"
-                        onChange={(e) => {
-                          field.onChange(e)
-                          if (fieldState.error) {
-                            form.clearErrors('paymentInfo')
-                          }
-                        }}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
+                {paymentType === 'credit_card' ? (
+                  <Controller
+                    name="paymentInfo"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <CreditCardInput {...field} error={fieldState.error} />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                ) : (
+                  <Controller
+                    name="paymentInfo"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="paymentInfo">
+                          <span>IBAN</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="paymentInfo"
+                          aria-invalid={fieldState.invalid}
+                          placeholder="DE89 3704 0044 0532 0130 00"
+                          autoComplete="off"
+                          onChange={(e) => {
+                            field.onChange(e)
+                            if (fieldState.error) {
+                              form.clearErrors('paymentInfo')
+                            }
+                          }}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                )}
               </>
             )}
           </FieldGroup>
