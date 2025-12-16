@@ -1,3 +1,4 @@
+'use client'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,17 +14,46 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { BookUserIcon, LogOut, SettingsIcon, UserIcon } from 'lucide-react'
+import { BookUserIcon, LogOut, SettingsIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useAuth } from '@/components/auth-context'
+import { toast } from 'sonner'
 
-export default function AppSidebarUser({
-  username,
-  email,
-}: {
-  username?: string
-  email?: string
-}) {
+export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
+  const { user, loading, logout } = useAuth()
+  const userExists = Boolean(user && !loading)
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast.success('Logged out successfully')
+    } catch (err) {
+      console.error('Logout error:', err)
+      toast.error('Failed to logout')
+    }
+  }
+
+  const getInitials = () => {
+    // Assume `user` exists when this is called.
+    // Use optional chaining only to avoid runtime errors in unexpected cases.
+    const firstInitial = user?.firstname?.[0] || ''
+    const lastInitial = user?.lastname?.[0] || ''
+    return (firstInitial + lastInitial).toUpperCase()
+  }
+
+  const getFullName = () => {
+    // Assume `user` exists when this is called.
+    const parts = [user?.firstname, user?.middlename, user?.lastname].filter(
+      Boolean
+    )
+    return parts.join(' ')
+  }
+
+  const getEmail = () => {
+    return user?.email || ''
+  }
 
   return (
     <SidebarMenu>
@@ -35,15 +65,23 @@ export default function AppSidebarUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className={'flex size-8 items-center justify-center'}>
                 <Avatar>
-                  <AvatarFallback>
-                    <UserIcon className={'size-4'} />
-                  </AvatarFallback>
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
-                <span className="truncate font-medium">{username}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {email}
+                <span className="h-[12pt] truncate font-medium">
+                  {userExists ? (
+                    getFullName()
+                  ) : (
+                    <Skeleton className={'w-f m-1 h-full'} />
+                  )}
+                </span>
+                <span className="text-muted-foreground h-[10pt] truncate text-xs">
+                  {userExists ? (
+                    getEmail()
+                  ) : (
+                    <Skeleton className={'m-1 h-full w-4/5'} />
+                  )}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -57,15 +95,23 @@ export default function AppSidebarUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <div className={'flex size-8 items-center justify-center'}>
                   <Avatar>
-                    <AvatarFallback>
-                      <UserIcon className={'size-4'} />
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials()}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{username}</span>
+                  <span className="truncate font-medium">
+                    {userExists ? (
+                      getFullName()
+                    ) : (
+                      <Skeleton className={'w-f m-1 h-full'} />
+                    )}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {email}
+                    {userExists ? (
+                      getEmail()
+                    ) : (
+                      <Skeleton className={'m-1 h-full w-4/5'} />
+                    )}
                   </span>
                 </div>
               </div>
@@ -82,7 +128,7 @@ export default function AppSidebarUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { LoginForm } from '@/components/login-form'
+import { RegisterForm } from '@/components/register-form'
 
 export default function Page() {
   return (
@@ -11,7 +11,7 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <LoginForm className="w-full" />
+        <RegisterForm className="w-full" />
       </div>
     </div>
   )

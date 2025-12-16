@@ -202,7 +202,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarSeparator className={'m-0'} />
       <SidebarFooter>
-        <AppSidebarUser username="Luca Wahlen" email="mail@lucawahlen.de" />
+        <AppSidebarUser />
       </SidebarFooter>
     </Sidebar>
   )
