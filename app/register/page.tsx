@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import Image from 'next/image'
 import { RegisterForm } from '@/components/register-form'
 
@@ -12,9 +11,7 @@ export default function Page() {
           height={100}
           alt={'Logo'}
         />
-        <Suspense>
-          <RegisterForm className="w-full" />
-        </Suspense>
+        <RegisterForm className="w-full" />
       </div>
     </div>
   )
