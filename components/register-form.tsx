@@ -66,6 +66,7 @@ export function RegisterForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const form = useForm<z.infer<typeof registrationSchema>>({
     resolver: zodResolver(registrationSchema),
@@ -132,12 +133,16 @@ export function RegisterForm({
   const handleNext = async () => {
     const isValid = await validateCurrentStep()
     if (isValid) {
+      setIsTransitioning(true)
       stepper.next()
+      // Reset transitioning state after a short delay
+      setTimeout(() => setIsTransitioning(false), 100)
     }
   }
 
   const onSubmit = async (data: z.infer<typeof registrationSchema>) => {
-    if (loading) return
+    // Prevent submission if we're transitioning between steps
+    if (loading || isTransitioning) return
 
     setLoading(true)
 
@@ -383,6 +388,7 @@ export function RegisterForm({
                         onOpenChange={setCalendarOpen}>
                         <PopoverTrigger asChild>
                           <Button
+                            type="button"
                             variant="outline"
                             id="date"
                             className="w-48 justify-between font-normal">
@@ -574,11 +580,11 @@ export function RegisterForm({
               Back
             </Button>
             {stepper.isLast ? (
-              <Button type={'submit'} disabled={loading}>
+              <Button type={'submit'} disabled={loading || isTransitioning}>
                 {loading ? 'Creating...' : 'Create Account'}
               </Button>
             ) : (
-              <Button type={'button'} onClick={handleNext}>
+              <Button type={'button'} onClick={handleNext} disabled={isTransitioning}>
                 Next
               </Button>
             )}
