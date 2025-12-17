@@ -48,7 +48,7 @@ export function LoginForm({
     setLoading(true)
 
     try {
-      await apiClient.login(data.email, data.password)
+      await apiClient.login(data)
 
       toast.success('Login successful!')
       setLoading(false)
@@ -101,6 +101,16 @@ export function LoginForm({
                     aria-invalid={fieldState.invalid}
                     placeholder="mail@example.com"
                     autoComplete="off"
+                    onChange={(e) => {
+                      // Always update without validation on change
+                      // Validation will happen on blur or submit
+                      if (fieldState.error) {
+                        form.clearErrors('email')
+                      }
+                      form.setValue('email', e.target.value, {
+                        shouldValidate: false,
+                      })
+                    }}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -125,6 +135,16 @@ export function LoginForm({
                     aria-invalid={fieldState.invalid}
                     type="password"
                     autoComplete="off"
+                    onChange={(e) => {
+                      // Always update without validation on change
+                      // Validation will happen on blur or submit
+                      if (fieldState.error) {
+                        form.clearErrors('password')
+                      }
+                      form.setValue('password', e.target.value, {
+                        shouldValidate: false,
+                      })
+                    }}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

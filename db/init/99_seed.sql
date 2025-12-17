@@ -23,12 +23,12 @@ INSERT INTO gym_manager.users (
 INSERT INTO gym_manager.payment_methods (
     user_id,
     payment_type,
-    card_last_four,
+    card_number,
     card_expiry
 ) VALUES (
              (SELECT id FROM gym_manager.users WHERE user_email = 'admin@admin.com'),
              'credit_card',
-             '1111',
+             '5469238897741608',
              '12/2025'
          );
 

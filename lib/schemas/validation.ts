@@ -49,28 +49,37 @@ export const optionalNameSchema = z
 // Phone validation
 export const phoneSchema = z
   .string()
+  .min(1, 'Phone number is required')
   .max(20, 'Phone number is too long')
-  .regex(/^[+\d\s()-]*$/, 'Invalid phone number format')
+  .regex(/^[+\d\s()-]+$/, 'Invalid phone number format')
   .trim()
-  .optional()
-  .or(z.literal(''))
 
 // Address validation
 export const addressSchema = z
   .string()
+  .min(1, 'Address is required')
   .max(200, 'Address is too long')
   .trim()
-  .optional()
-  .or(z.literal(''))
 
 // Date validation
 export const dateSchema = z
   .string()
+  .min(1, 'Please select a date')
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
   .refine((date) => {
     const d = new Date(date)
     return d instanceof Date && !isNaN(d.getTime())
   }, 'Invalid date')
+
+export const pastDateSchema = dateSchema.refine((date) => {
+  // Parse the date string as YYYY-MM-DD
+  const [year, month, day] = date.split('-').map(Number)
+  const selectedDate = new Date(year, month - 1, day) // month is 0-indexed
+  const today = new Date()
+  // Set time to midnight for comparison
+  today.setHours(0, 0, 0, 0)
+  return selectedDate < today
+}, 'Date must be in the past')
 
 // Payment type validation
 export const paymentTypeSchema = z.enum(['credit_card', 'iban'])
@@ -197,38 +206,6 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
-// Registration schema - Step 1: Account
-export const accountStepSchema = z
-  .object({
-    email: emailSchema,
-    password: passwordSchema,
-    passwordrepeat: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.passwordrepeat, {
-    message: "Passwords don't match",
-    path: ['passwordrepeat'],
-  })
-
-// Registration schema - Step 2: Personal
-export const personalStepSchema = z.object({
-  firstname: nameSchema,
-  middlename: optionalNameSchema,
-  lastname: nameSchema,
-  birthdate: dateSchema,
-})
-
-// Registration schema - Step 3: Contact
-export const contactStepSchema = z.object({
-  phone: phoneSchema,
-  address: addressSchema,
-})
-
-// Registration schema - Step 4: Payment
-export const paymentStepSchema = z.object({
-  paymentType: paymentTypeSchema,
-  paymentInfo: paymentInfoSchema,
-})
-
 // Full registration schema (for final submission)
 export const registrationSchema = z
   .object({
@@ -238,7 +215,7 @@ export const registrationSchema = z
     firstname: nameSchema,
     middlename: optionalNameSchema,
     lastname: nameSchema,
-    birthdate: dateSchema,
+    birthdate: pastDateSchema,
     phone: phoneSchema,
     address: addressSchema,
     paymentType: paymentTypeSchema,
@@ -248,18 +225,6 @@ export const registrationSchema = z
     message: "Passwords don't match",
     path: ['passwordrepeat'],
   })
-
-// UserData validation schema for cached data
-export const userDataSchema = z.object({
-  id: z.string(),
-  email: z.string().email(),
-  firstname: z.string(),
-  lastname: z.string(),
-  middlename: z.string().optional(),
-  birthdate: z.union([z.date(), z.string()]).optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-})
 
 // Type exports
 export type LoginInput = z.infer<typeof loginSchema>

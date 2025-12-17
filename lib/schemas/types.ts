@@ -9,8 +9,8 @@ export interface PaymentMethod {
   id: string
   user_id: string
   payment_type: 'credit_card' | 'iban'
-  // Credit card fields (PCI DSS compliant - only last 4 digits stored)
-  card_last_four?: string
+  // Credit card fields
+  card_number?: string
   card_expiry?: string
   // IBAN field
   iban?: string

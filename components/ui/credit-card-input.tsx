@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useState, useEffect } from 'react'
+import { useId, useState } from 'react'
 import { CreditCardIcon } from 'lucide-react'
 import { usePaymentInputs } from 'react-payment-inputs'
 import images, { type CardImages } from 'react-payment-inputs/images'
@@ -45,25 +45,25 @@ export function CreditCardInput({
   const [cardExpiry, setCardExpiry] = useState(value?.cardExpiry || '')
   const [cardCVC, setCardCVC] = useState(value?.cardCVC || '')
 
-  // Update parent whenever any field changes
-  useEffect(() => {
-    onChange({ cardNumber, cardExpiry, cardCVC })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardNumber, cardExpiry, cardCVC])
-
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     getCardNumberProps().onChange(e)
     setCardNumber(e.target.value)
+    // Trigger onChange immediately to clear errors
+    onChange({ cardNumber: e.target.value, cardExpiry, cardCVC })
   }
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     getExpiryDateProps().onChange(e)
     setCardExpiry(e.target.value)
+    // Trigger onChange immediately to clear errors
+    onChange({ cardNumber, cardExpiry: e.target.value, cardCVC })
   }
 
   const handleCVCChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     getCVCProps().onChange(e)
     setCardCVC(e.target.value)
+    // Trigger onChange immediately to clear errors
+    onChange({ cardNumber, cardExpiry, cardCVC: e.target.value })
   }
 
   // Filter out non-DOM props from wrapperProps to avoid React warnings

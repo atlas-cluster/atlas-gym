@@ -95,7 +95,7 @@ class ApiClient {
           throw new ApiError('Invalid response from server', response.status)
         }
       } else {
-        // Non-JSON response (likely HTML error page)
+        // Non-JSON response (likely HTML error page or server error)
         throw new ApiError(
           response.ok ? 'Invalid response format' : 'Server error occurred',
           response.status
@@ -127,10 +127,13 @@ class ApiClient {
   }
 
   // Auth methods
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(data: {
+    email: string
+    password: string
+  }): Promise<LoginResponse> {
     return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
-      body: { email, password },
+      body: data,
     })
   }
 
@@ -142,8 +145,8 @@ class ApiClient {
     lastname: string
     middlename?: string
     birthdate: string
-    address?: string
-    phone?: string
+    address: string
+    phone: string
     paymentType: 'credit_card' | 'iban'
     paymentInfo:
       | { cardNumber: string; cardExpiry: string; cardCVC: string }
