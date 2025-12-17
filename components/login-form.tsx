@@ -101,6 +101,12 @@ export function LoginForm({
                     aria-invalid={fieldState.invalid}
                     placeholder="mail@example.com"
                     autoComplete="off"
+                    onChange={(e) => {
+                      field.onChange(e)
+                      if (fieldState.error) {
+                        form.clearErrors('email')
+                      }
+                    }}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -125,6 +131,12 @@ export function LoginForm({
                     aria-invalid={fieldState.invalid}
                     type="password"
                     autoComplete="off"
+                    onChange={(e) => {
+                      field.onChange(e)
+                      if (fieldState.error) {
+                        form.clearErrors('password')
+                      }
+                    }}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
