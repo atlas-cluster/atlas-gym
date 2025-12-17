@@ -23,7 +23,7 @@ import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
-export function LoginForm({
+export function AuthForm({
   className,
   redirectTo = '/',
   ...props

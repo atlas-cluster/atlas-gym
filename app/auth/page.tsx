@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
-import { LoginForm } from '@/components/login-form'
+import { AuthForm } from '@/components/auth-form'
 import { RegisterForm } from '@/components/register-form'
 
 export default async function Page({
@@ -28,7 +28,7 @@ export default async function Page({
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-              <LoginForm redirectTo={redirectTo} />
+              <AuthForm redirectTo={redirectTo} />
             </TabsContent>
             <TabsContent value="register">
               <RegisterForm />
