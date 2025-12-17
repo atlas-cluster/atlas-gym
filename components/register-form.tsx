@@ -1,6 +1,5 @@
 'use client'
 import {
-  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -16,8 +15,8 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { ComponentProps, Fragment, useState } from 'react'
-import { Controller, useForm, useWatch } from 'react-hook-form'
+import { ComponentProps, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registrationSchema } from '@/lib/schemas'
 import { z } from 'zod'
@@ -34,6 +33,7 @@ import { ChevronDownIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { CreditCardInput } from '@/components/ui/credit-card-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -87,8 +87,7 @@ export function RegisterForm({
     },
   })
 
-  const { setError, control } = form
-  const paymentType = useWatch({ control, name: 'paymentType' })
+  const { setError } = form
 
   // Validate current step before allowing to proceed
   const validateCurrentStep = async () => {
@@ -312,7 +311,6 @@ export function RegisterForm({
                         {...field}
                         id="firstname"
                         aria-invalid={fieldState.invalid}
-                        placeholder="John"
                         autoComplete="off"
                         onChange={(e) => {
                           field.onChange(e)
@@ -370,7 +368,6 @@ export function RegisterForm({
                         {...field}
                         id="lastname"
                         aria-invalid={fieldState.invalid}
-                        placeholder="Doe"
                         autoComplete="off"
                         onChange={(e) => {
                           field.onChange(e)
@@ -404,7 +401,7 @@ export function RegisterForm({
                             type="button"
                             variant="outline"
                             id="date"
-                            className="w-48 justify-between font-normal">
+                            className={"w-48 justify-between font-normal " + cn(!!fieldState.error && 'border-destructive!')}>
                             {field.value ? field.value : 'Select date'}
                             <ChevronDownIcon />
                           </Button>
@@ -430,7 +427,7 @@ export function RegisterForm({
                                   adjustedDate.toISOString().split('T')[0]
                                 )
                               } else {
-                                field.onChange(undefined)
+                                field.onChange("")
                               }
                               setCalendarOpen(false)
                             }}
