@@ -72,9 +72,13 @@ export const dateSchema = z
   }, 'Invalid date')
 
 export const pastDateSchema = dateSchema.refine((date) => {
-  const d = new Date(date)
+  // Parse the date string as YYYY-MM-DD
+  const [year, month, day] = date.split('-').map(Number)
+  const selectedDate = new Date(year, month - 1, day) // month is 0-indexed
   const today = new Date()
-  return d < today
+  // Set time to midnight for comparison
+  today.setHours(0, 0, 0, 0)
+  return selectedDate < today
 }, 'Date must be in the past')
 
 // Payment type validation
