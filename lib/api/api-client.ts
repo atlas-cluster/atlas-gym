@@ -95,7 +95,13 @@ class ApiClient {
           throw new ApiError('Invalid response from server', response.status)
         }
       } else {
-        // Non-JSON response (likely HTML error page)
+        // Non-JSON response (likely HTML error page or server error)
+        const text = await response.text()
+        console.error('Non-JSON response received:', {
+          status: response.status,
+          contentType: response.headers.get('content-type'),
+          body: text.substring(0, 500), // Log first 500 chars
+        })
         throw new ApiError(
           response.ok ? 'Invalid response format' : 'Server error occurred',
           response.status
