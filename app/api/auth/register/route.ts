@@ -6,11 +6,18 @@ import { getSecureCookieOptions } from '@/lib/config'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    console.log('Registration attempt with data:', {
+      email: body.email,
+      birthdate: body.birthdate,
+      paymentType: body.paymentType,
+    })
 
     // Validate and sanitize input
     const validation = registrationSchema.safeParse(body)
 
     if (!validation.success) {
+      console.error('Validation failed:', validation.error.issues)
       return NextResponse.json(
         { error: validation.error.issues[0].message },
         { status: 400 }
