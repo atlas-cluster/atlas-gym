@@ -176,7 +176,11 @@ export function RegisterForm({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !stepper.isLast) {
+    // Only handle Enter on input elements, not on buttons or selects
+    const target = e.target as HTMLElement
+    const isInput = target.tagName === 'INPUT'
+    
+    if (e.key === 'Enter' && !stepper.isLast && isInput) {
       e.preventDefault()
       handleNext()
     }
