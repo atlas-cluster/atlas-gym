@@ -102,14 +102,12 @@ export function LoginForm({
                     placeholder="mail@example.com"
                     autoComplete="off"
                     onChange={(e) => {
+                      // Always update without validation on change
+                      // Validation will happen on blur or submit
                       if (fieldState.error) {
-                        // Clear error and update value without validation
                         form.clearErrors('email')
-                        form.setValue('email', e.target.value, { shouldValidate: false })
-                      } else {
-                        // Normal onChange when no error
-                        field.onChange(e)
                       }
+                      form.setValue('email', e.target.value, { shouldValidate: false })
                     }}
                   />
                   {fieldState.invalid && (
@@ -136,14 +134,12 @@ export function LoginForm({
                     type="password"
                     autoComplete="off"
                     onChange={(e) => {
+                      // Always update without validation on change
+                      // Validation will happen on blur or submit
                       if (fieldState.error) {
-                        // Clear error and update value without validation
                         form.clearErrors('password')
-                        form.setValue('password', e.target.value, { shouldValidate: false })
-                      } else {
-                        // Normal onChange when no error
-                        field.onChange(e)
                       }
+                      form.setValue('password', e.target.value, { shouldValidate: false })
                     }}
                   />
                   {fieldState.invalid && (
