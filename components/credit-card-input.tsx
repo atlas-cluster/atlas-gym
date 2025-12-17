@@ -60,8 +60,11 @@ export function CreditCardInput({
     setCardCVC(e.target.value)
   }
 
+  // Filter out non-DOM props from wrapperProps to avoid React warnings
+  const { isTouched, ...domWrapperProps } = wrapperProps
+
   return (
-    <div {...wrapperProps} className="w-full space-y-2">
+    <div {...domWrapperProps} className="w-full space-y-2">
       <Label htmlFor={`number-${id}`}>Card details<sup className={'text-destructive'}>*</sup></Label>
       <div>
         <div className="relative focus-within:z-10">
