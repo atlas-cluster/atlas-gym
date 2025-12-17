@@ -89,7 +89,39 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
-// Registration schema
+// Registration schema - Step 1: Account
+export const accountStepSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    passwordrepeat: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.passwordrepeat, {
+    message: "Passwords don't match",
+    path: ['passwordrepeat'],
+  })
+
+// Registration schema - Step 2: Personal
+export const personalStepSchema = z.object({
+  firstname: nameSchema,
+  middlename: optionalNameSchema,
+  lastname: nameSchema,
+  birthdate: dateSchema,
+})
+
+// Registration schema - Step 3: Contact
+export const contactStepSchema = z.object({
+  phone: phoneSchema,
+  address: addressSchema,
+})
+
+// Registration schema - Step 4: Payment
+export const paymentStepSchema = z.object({
+  paymentType: paymentTypeSchema.optional(),
+  paymentInfo: paymentInfoSchema,
+})
+
+// Full registration schema (for final submission)
 export const registrationSchema = z
   .object({
     email: emailSchema,
