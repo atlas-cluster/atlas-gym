@@ -33,7 +33,7 @@ export async function createUser(data: {
   paymentInfo:
     | { cardNumber: string; cardExpiry: string; cardCVC: string }
     | { iban: string }
-}): Promise<User | null> {
+}): Promise<User> {
   const pool = getPool()
   const passwordHash = await hashPassword(data.password)
 
@@ -93,7 +93,8 @@ export async function createUser(data: {
   } catch (error) {
     await client.query('ROLLBACK')
     console.error('Error creating user:', error)
-    return null
+    // Re-throw the error so the caller can handle it appropriately
+    throw error
   } finally {
     client.release()
   }
