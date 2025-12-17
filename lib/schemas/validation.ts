@@ -49,19 +49,17 @@ export const optionalNameSchema = z
 // Phone validation
 export const phoneSchema = z
   .string()
+  .min(1, 'Phone number is required')
   .max(20, 'Phone number is too long')
-  .regex(/^[+\d\s()-]*$/, 'Invalid phone number format')
+  .regex(/^[+\d\s()-]+$/, 'Invalid phone number format')
   .trim()
-  .optional()
-  .or(z.literal(''))
 
 // Address validation
 export const addressSchema = z
   .string()
+  .min(1, 'Address is required')
   .max(200, 'Address is too long')
   .trim()
-  .optional()
-  .or(z.literal(''))
 
 // Date validation
 export const dateSchema = z

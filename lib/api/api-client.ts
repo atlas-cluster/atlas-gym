@@ -127,10 +127,10 @@ class ApiClient {
   }
 
   // Auth methods
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(data: { email: string; password: string }): Promise<LoginResponse> {
     return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
-      body: { email, password },
+      body: data,
     })
   }
 
@@ -142,8 +142,8 @@ class ApiClient {
     lastname: string
     middlename?: string
     birthdate: string
-    address?: string
-    phone?: string
+    address: string
+    phone: string
     paymentType: 'credit_card' | 'iban'
     paymentInfo:
       | { cardNumber: string; cardExpiry: string; cardCVC: string }

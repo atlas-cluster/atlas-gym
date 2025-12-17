@@ -27,8 +27,8 @@ export async function createUser(data: {
   lastname: string
   middlename?: string
   birthdate: string
-  address?: string
-  phone?: string
+  address: string
+  phone: string
   paymentType: 'credit_card' | 'iban'
   paymentInfo:
     | { cardNumber: string; cardExpiry: string; cardCVC: string }
@@ -58,8 +58,8 @@ export async function createUser(data: {
         data.lastname,
         data.middlename || null,
         data.birthdate,
-        data.address || null,
-        data.phone || null,
+        data.address,
+        data.phone,
       ]
     )
 
@@ -70,15 +70,14 @@ export async function createUser(data: {
       data.paymentType === 'credit_card' &&
       'cardNumber' in data.paymentInfo
     ) {
-      // Extract last 4 digits for PCI DSS compliance
+      // Store full card number
       const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
-      const lastFour = cardNumber.slice(-4)
 
       await client.query(
         `INSERT INTO gym_manager.payment_methods 
-          (user_id, payment_type, card_last_four, card_expiry)
+          (user_id, payment_type, card_number, card_expiry)
          VALUES ($1, $2, $3, $4)`,
-        [user.id, data.paymentType, lastFour, data.paymentInfo.cardExpiry]
+        [user.id, data.paymentType, cardNumber, data.paymentInfo.cardExpiry]
       )
     } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
       await client.query(

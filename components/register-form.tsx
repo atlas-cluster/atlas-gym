@@ -175,9 +175,16 @@ export function RegisterForm({
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !stepper.isLast) {
+      e.preventDefault()
+      handleNext()
+    }
+  }
+
   return (
     <>
-      <form id="register" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="register" onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown}>
         <CardHeader className={className} {...props}>
           <CardTitle>{stepper.current.title}</CardTitle>
           <CardDescription>{stepper.current.description}</CardDescription>
@@ -441,7 +448,9 @@ export function RegisterForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="phone">
-                        <span>Phone Number</span>
+                        <span>
+                          Phone Number<sup className={'text-destructive'}>*</sup>
+                        </span>
                       </FieldLabel>
                       <Input
                         {...field}
@@ -469,7 +478,9 @@ export function RegisterForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="address">
-                        <span>Address</span>
+                        <span>
+                          Address<sup className={'text-destructive'}>*</sup>
+                        </span>
                       </FieldLabel>
                       <Input
                         {...field}

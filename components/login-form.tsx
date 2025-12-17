@@ -48,7 +48,7 @@ export function LoginForm({
     setLoading(true)
 
     try {
-      await apiClient.login(data.email, data.password)
+      await apiClient.login(data)
 
       toast.success('Login successful!')
       setLoading(false)
