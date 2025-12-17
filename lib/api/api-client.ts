@@ -127,7 +127,10 @@ class ApiClient {
   }
 
   // Auth methods
-  async login(data: { email: string; password: string }): Promise<LoginResponse> {
+  async login(data: {
+    email: string
+    password: string
+  }): Promise<LoginResponse> {
     return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
       body: data,

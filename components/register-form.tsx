@@ -189,7 +189,10 @@ export function RegisterForm({
 
   return (
     <>
-      <form id="register" onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown}>
+      <form
+        id="register"
+        onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={handleKeyDown}>
         <CardHeader className={className} {...props}>
           <CardTitle>{stepper.current.title}</CardTitle>
           <CardDescription>{stepper.current.description}</CardDescription>
@@ -225,7 +228,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('email')
                           }
-                          form.setValue('email', e.target.value, { shouldValidate: false })
+                          form.setValue('email', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -257,7 +262,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('password')
                           }
-                          form.setValue('password', e.target.value, { shouldValidate: false })
+                          form.setValue('password', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -289,7 +296,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('passwordrepeat')
                           }
-                          form.setValue('passwordrepeat', e.target.value, { shouldValidate: false })
+                          form.setValue('passwordrepeat', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -324,7 +333,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('firstname')
                           }
-                          form.setValue('firstname', e.target.value, { shouldValidate: false })
+                          form.setValue('firstname', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -354,7 +365,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('middlename')
                           }
-                          form.setValue('middlename', e.target.value, { shouldValidate: false })
+                          form.setValue('middlename', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -385,7 +398,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('lastname')
                           }
-                          form.setValue('lastname', e.target.value, { shouldValidate: false })
+                          form.setValue('lastname', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -413,7 +428,10 @@ export function RegisterForm({
                             type="button"
                             variant="outline"
                             id="date"
-                            className={"w-48 justify-between font-normal " + cn(!!fieldState.error && 'border-destructive!')}>
+                            className={
+                              'w-48 justify-between font-normal ' +
+                              cn(!!fieldState.error && 'border-destructive!')
+                            }>
                             {field.value ? field.value : 'Select date'}
                             <ChevronDownIcon />
                           </Button>
@@ -439,7 +457,7 @@ export function RegisterForm({
                                   adjustedDate.toISOString().split('T')[0]
                                 )
                               } else {
-                                field.onChange("")
+                                field.onChange('')
                               }
                               setCalendarOpen(false)
                             }}
@@ -464,7 +482,8 @@ export function RegisterForm({
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="phone">
                         <span>
-                          Phone Number<sup className={'text-destructive'}>*</sup>
+                          Phone Number
+                          <sup className={'text-destructive'}>*</sup>
                         </span>
                       </FieldLabel>
                       <Input
@@ -479,7 +498,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('phone')
                           }
-                          form.setValue('phone', e.target.value, { shouldValidate: false })
+                          form.setValue('phone', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -511,7 +532,9 @@ export function RegisterForm({
                           if (fieldState.error) {
                             form.clearErrors('address')
                           }
-                          form.setValue('address', e.target.value, { shouldValidate: false })
+                          form.setValue('address', e.target.value, {
+                            shouldValidate: false,
+                          })
                         }}
                       />
                       {fieldState.invalid && (
@@ -542,8 +565,7 @@ export function RegisterForm({
                         form.setValue('paymentInfo', { iban: '' })
                       }
                       form.clearErrors('paymentInfo')
-                    }}
-                  >
+                    }}>
                     <TabsList>
                       <TabsTrigger value="credit_card">Credit Card</TabsTrigger>
                       <TabsTrigger value="iban">Iban</TabsTrigger>
@@ -570,7 +592,9 @@ export function RegisterForm({
                                 if (fieldState.error) {
                                   form.clearErrors('paymentInfo')
                                 }
-                                form.setValue('paymentInfo', value, { shouldValidate: false })
+                                form.setValue('paymentInfo', value, {
+                                  shouldValidate: false,
+                                })
                               }}
                             />
                             {fieldState.invalid && (
@@ -587,9 +611,9 @@ export function RegisterForm({
                         render={({ field, fieldState }) => (
                           <Field data-invalid={fieldState.invalid}>
                             <FieldLabel htmlFor="paymentInfo">
-                <span>
-                  IBAN<sup className={'text-destructive'}>*</sup>
-                </span>
+                              <span>
+                                IBAN<sup className={'text-destructive'}>*</sup>
+                              </span>
                             </FieldLabel>
                             <Input
                               id="paymentInfo"
@@ -609,7 +633,9 @@ export function RegisterForm({
                                 if (fieldState.error) {
                                   form.clearErrors('paymentInfo')
                                 }
-                                form.setValue('paymentInfo', newValue, { shouldValidate: false })
+                                form.setValue('paymentInfo', newValue, {
+                                  shouldValidate: false,
+                                })
                               }}
                               onBlur={field.onBlur}
                             />

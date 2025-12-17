@@ -107,7 +107,9 @@ export function LoginForm({
                       if (fieldState.error) {
                         form.clearErrors('email')
                       }
-                      form.setValue('email', e.target.value, { shouldValidate: false })
+                      form.setValue('email', e.target.value, {
+                        shouldValidate: false,
+                      })
                     }}
                   />
                   {fieldState.invalid && (
@@ -139,7 +141,9 @@ export function LoginForm({
                       if (fieldState.error) {
                         form.clearErrors('password')
                       }
-                      form.setValue('password', e.target.value, { shouldValidate: false })
+                      form.setValue('password', e.target.value, {
+                        shouldValidate: false,
+                      })
                     }}
                   />
                   {fieldState.invalid && (

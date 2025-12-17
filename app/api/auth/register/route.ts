@@ -6,7 +6,7 @@ import { getSecureCookieOptions } from '@/lib/config'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     console.log('Registration attempt with data:', {
       email: body.email,
       birthdate: body.birthdate,
@@ -54,8 +54,15 @@ export async function POST(request: NextRequest) {
       })
     } catch (createUserError) {
       // Check if it's a duplicate email error (PostgreSQL unique constraint violation)
-      const pgError = createUserError as { code?: string; constraint?: string; detail?: string }
-      if (pgError.code === '23505' && pgError.constraint === 'users_user_email_key') {
+      const pgError = createUserError as {
+        code?: string
+        constraint?: string
+        detail?: string
+      }
+      if (
+        pgError.code === '23505' &&
+        pgError.constraint === 'users_user_email_key'
+      ) {
         return NextResponse.json(
           { error: 'This email is already registered' },
           { status: 400 }
@@ -69,7 +76,10 @@ export async function POST(request: NextRequest) {
         detail: pgError.detail,
       })
       return NextResponse.json(
-        { error: 'Failed to create user. Please check your information and try again.' },
+        {
+          error:
+            'Failed to create user. Please check your information and try again.',
+        },
         { status: 400 }
       )
     }
