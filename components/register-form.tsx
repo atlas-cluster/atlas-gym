@@ -1,20 +1,8 @@
 'use client'
-import {
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { ComponentProps, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,17 +12,14 @@ import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { defineStepper } from '@stepperize/react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ChevronDownIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { CreditCardInput } from '@/components/ui/credit-card-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { PhoneInput } from '@/components/ui/phone-input'
+import { useHookFormMask } from 'use-mask-input'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -89,6 +74,8 @@ export function RegisterForm({
   })
 
   const { setError } = form
+
+  const registerWithMask = useHookFormMask(form.register)
 
   // Validate current step before allowing to proceed
   const validateCurrentStep = async () => {
@@ -624,21 +611,20 @@ export function RegisterForm({
                               id="paymentInfo"
                               aria-invalid={fieldState.invalid}
                               placeholder="DE89 3704 0044 0532 0130 00"
+                              type="text"
                               autoComplete="off"
-                              value={
-                                typeof field.value === 'object' &&
-                                'iban' in field.value
-                                  ? field.value.iban
-                                  : ''
-                              }
+                              {...registerWithMask('paymentInfo.iban', ["AA99 **** **** **** **** **** **** ***"], {
+                                placeholder: "",
+                                showMaskOnHover: false,
+                                showMaskOnFocus: false,
+                              })}
                               onChange={(e) => {
-                                const newValue = { iban: e.target.value }
-                                // Always update without validation on change
-                                // Validation will happen on blur or submit
+                                const newValue = e.target.value.replace(/\s/g, '').toUpperCase()
+
                                 if (fieldState.error) {
                                   form.clearErrors('paymentInfo')
                                 }
-                                form.setValue('paymentInfo', newValue, {
+                                form.setValue('paymentInfo.iban', newValue, {
                                   shouldValidate: false,
                                 })
                               }}
