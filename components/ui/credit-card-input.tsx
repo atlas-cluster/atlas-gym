@@ -10,20 +10,26 @@ import { FieldError } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 
 interface CreditCardInputProps {
-  onChange: (value: { cardNumber: string; cardExpiry: string; cardCVC: string }) => void
+  onChange: (value: {
+    cardNumber: string
+    cardExpiry: string
+    cardCVC: string
+  }) => void
   onBlur: () => void
-  value: { cardNumber?: string; cardExpiry?: string; cardCVC?: string } | undefined
+  value:
+    | { cardNumber?: string; cardExpiry?: string; cardCVC?: string }
+    | undefined
   name: string
   error?: FieldError
 }
 
 export function CreditCardInput({
-                                  onChange,
-                                  onBlur,
-                                  value = {},
-                                  name,
-                                  error,
-                                }: CreditCardInputProps) {
+  onChange,
+  onBlur,
+  value = {},
+  name,
+  error,
+}: CreditCardInputProps) {
   const id = useId()
   const {
     meta,
@@ -65,7 +71,9 @@ export function CreditCardInput({
 
   return (
     <div {...domWrapperProps} className="w-full space-y-2">
-      <Label htmlFor={`number-${id}`}>Card details<sup className={'text-destructive'}>*</sup></Label>
+      <Label htmlFor={`number-${id}`}>
+        Card details<sup className={'text-destructive'}>*</sup>
+      </Label>
       <div>
         <div className="relative focus-within:z-10">
           <Input
@@ -80,7 +88,7 @@ export function CreditCardInput({
               'border-destructive': !!error,
             })}
           />
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground peer-disabled:opacity-50">
+          <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center pr-3 peer-disabled:opacity-50">
             {meta.cardType ? (
               <svg
                 className="w-6 overflow-hidden"
@@ -103,7 +111,7 @@ export function CreditCardInput({
               })}
               value={cardExpiry}
               id={`expiry-${id}`}
-              className={cn('rounded-r-none rounded-t-none shadow-none', {
+              className={cn('rounded-t-none rounded-r-none shadow-none', {
                 'border-destructive': !!error,
               })}
             />
@@ -116,7 +124,7 @@ export function CreditCardInput({
               })}
               value={cardCVC}
               id={`cvc-${id}`}
-              className={cn('rounded-l-none rounded-t-none shadow-none', {
+              className={cn('rounded-t-none rounded-l-none shadow-none', {
                 'border-destructive': !!error,
               })}
             />

@@ -145,7 +145,7 @@ class ApiClient {
     address?: string
     phone?: string
     paymentType: 'credit_card' | 'iban'
-    paymentInfo: 
+    paymentInfo:
       | { cardNumber: string; cardExpiry: string; cardCVC: string }
       | { iban: string }
   }): Promise<RegisterResponse> {

@@ -30,7 +30,7 @@ export async function createUser(data: {
   address?: string
   phone?: string
   paymentType: 'credit_card' | 'iban'
-  paymentInfo: 
+  paymentInfo:
     | { cardNumber: string; cardExpiry: string; cardCVC: string }
     | { iban: string }
 }): Promise<User | null> {
@@ -39,10 +39,10 @@ export async function createUser(data: {
 
   // Start a transaction
   const client = await pool.connect()
-  
+
   try {
     await client.query('BEGIN')
-    
+
     // Insert user
     const userResult = await client.query(
       `INSERT INTO gym_manager.users 
@@ -66,32 +66,26 @@ export async function createUser(data: {
     const user = userResult.rows[0] as User
 
     // Insert payment method
-    if (data.paymentType === 'credit_card' && 'cardNumber' in data.paymentInfo) {
+    if (
+      data.paymentType === 'credit_card' &&
+      'cardNumber' in data.paymentInfo
+    ) {
       // Extract last 4 digits for PCI DSS compliance
       const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
       const lastFour = cardNumber.slice(-4)
-      
+
       await client.query(
         `INSERT INTO gym_manager.payment_methods 
           (user_id, payment_type, card_last_four, card_expiry)
          VALUES ($1, $2, $3, $4)`,
-        [
-          user.id,
-          data.paymentType,
-          lastFour,
-          data.paymentInfo.cardExpiry,
-        ]
+        [user.id, data.paymentType, lastFour, data.paymentInfo.cardExpiry]
       )
     } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
       await client.query(
         `INSERT INTO gym_manager.payment_methods 
           (user_id, payment_type, iban)
          VALUES ($1, $2, $3)`,
-        [
-          user.id,
-          data.paymentType,
-          data.paymentInfo.iban,
-        ]
+        [user.id, data.paymentType, data.paymentInfo.iban]
       )
     }
 

@@ -85,21 +85,21 @@ export const creditCardNumberSchema = z
     const digits = cardNumber.replace(/\s/g, '')
     let sum = 0
     let isEven = false
-    
+
     for (let i = digits.length - 1; i >= 0; i--) {
       let digit = parseInt(digits[i], 10)
-      
+
       if (isEven) {
         digit *= 2
         if (digit > 9) {
           digit -= 9
         }
       }
-      
+
       sum += digit
       isEven = !isEven
     }
-    
+
     return sum % 10 === 0
   }, 'Invalid card number')
 
@@ -107,20 +107,23 @@ export const creditCardNumberSchema = z
 export const creditCardExpirySchema = z
   .string()
   .min(1, 'Expiry date is required')
-  .regex(/^(0[1-9]|1[0-2])\s?\/\s?(\d{2}|\d{4})$/, 'Invalid expiry format (MM/YY)')
+  .regex(
+    /^(0[1-9]|1[0-2])\s?\/\s?(\d{2}|\d{4})$/,
+    'Invalid expiry format (MM/YY)'
+  )
   .refine((expiry) => {
     // Check if card is not expired
-    const parts = expiry.split('/').map(p => p.trim())
+    const parts = expiry.split('/').map((p) => p.trim())
     const month = parseInt(parts[0], 10)
     const year = parseInt(parts[1], 10)
-    
+
     // Convert 2-digit year to 4-digit
     const fullYear = year < 100 ? 2000 + year : year
-    
+
     // Get the last day of the expiry month (month - 1 because Date months are 0-indexed)
     const expiryDate = new Date(fullYear, month, 0)
     const today = new Date()
-    
+
     return expiryDate >= today
   }, 'Card has expired')
 
@@ -156,7 +159,8 @@ export const paymentInfoSchema = z
       if (!cardNumberResult.success) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: cardNumberResult.error.issues[0]?.message || 'Invalid card number',
+          message:
+            cardNumberResult.error.issues[0]?.message || 'Invalid card number',
         })
       }
 
@@ -164,7 +168,8 @@ export const paymentInfoSchema = z
       if (!cardExpiryResult.success) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: cardExpiryResult.error.issues[0]?.message || 'Invalid expiry date',
+          message:
+            cardExpiryResult.error.issues[0]?.message || 'Invalid expiry date',
         })
       }
 

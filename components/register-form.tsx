@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/popover'
 import { ChevronDownIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import { CreditCardInput } from '@/components/credit-card-input'
+import { CreditCardInput } from '@/components/ui/credit-card-input'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -501,7 +501,10 @@ export function RegisterForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="paymentType">
-                        <span>Payment Type<sup className={'text-destructive'}>*</sup></span>
+                        <span>
+                          Payment Type
+                          <sup className={'text-destructive'}>*</sup>
+                        </span>
                       </FieldLabel>
                       <select
                         {...field}
@@ -512,7 +515,11 @@ export function RegisterForm({
                           field.onChange(e)
                           // Reset payment info when payment type changes
                           if (e.target.value === 'credit_card') {
-                            form.setValue('paymentInfo', { cardNumber: '', cardExpiry: '', cardCVC: '' })
+                            form.setValue('paymentInfo', {
+                              cardNumber: '',
+                              cardExpiry: '',
+                              cardCVC: '',
+                            })
                           } else {
                             form.setValue('paymentInfo', { iban: '' })
                           }
@@ -536,9 +543,14 @@ export function RegisterForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <CreditCardInput 
+                        <CreditCardInput
                           name={field.name}
-                          value={typeof field.value === 'object' && 'cardNumber' in field.value ? field.value : undefined}
+                          value={
+                            typeof field.value === 'object' &&
+                            'cardNumber' in field.value
+                              ? field.value
+                              : undefined
+                          }
                           onBlur={field.onBlur}
                           error={fieldState.error}
                           onChange={(value) => {
@@ -561,14 +573,21 @@ export function RegisterForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="paymentInfo">
-                          <span>IBAN<sup className={'text-destructive'}>*</sup></span>
+                          <span>
+                            IBAN<sup className={'text-destructive'}>*</sup>
+                          </span>
                         </FieldLabel>
                         <Input
                           id="paymentInfo"
                           aria-invalid={fieldState.invalid}
                           placeholder="DE89 3704 0044 0532 0130 00"
                           autoComplete="off"
-                          value={typeof field.value === 'object' && 'iban' in field.value ? field.value.iban : ''}
+                          value={
+                            typeof field.value === 'object' &&
+                            'iban' in field.value
+                              ? field.value.iban
+                              : ''
+                          }
                           onChange={(e) => {
                             field.onChange({ iban: e.target.value })
                             if (fieldState.error) {
@@ -602,7 +621,10 @@ export function RegisterForm({
                 {loading ? 'Creating...' : 'Create Account'}
               </Button>
             ) : (
-              <Button type={'button'} onClick={handleNext} disabled={isTransitioning}>
+              <Button
+                type={'button'}
+                onClick={handleNext}
+                disabled={isTransitioning}>
                 Next
               </Button>
             )}

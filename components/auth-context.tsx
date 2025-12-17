@@ -15,7 +15,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Public routes that don't require authentication
+// Public route that don't require authentication
 const AUTH_ROUTE = '/auth'
 
 export function useAuth() {
@@ -34,8 +34,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Initialize with no user data to ensure server and client render the same
-  // This prevents hydration errors caused by localStorage being unavailable on server
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -83,7 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      // For public routes, just mark as not loading
+      // For public route, just mark as not loading
       if (pathname === AUTH_ROUTE) {
         setLoading(false)
         return
