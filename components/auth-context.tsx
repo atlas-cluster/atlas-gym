@@ -15,8 +15,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Public routes that don't require authentication
-const PUBLIC_ROUTES = ['/login', '/register']
+// Public route that don't require authentication
+const AUTH_ROUTE = '/auth'
 
 export function useAuth() {
   const context = useContext(AuthContext)
@@ -34,8 +34,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Initialize with no user data to ensure server and client render the same
-  // This prevents hydration errors caused by localStorage being unavailable on server
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -66,12 +64,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await apiClient.logout()
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/login')
+      router.push('/auth')
     } catch {
       // Even if logout API fails, clear local state
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/login')
+      router.push('/auth')
     }
   }
 
@@ -83,8 +81,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const checkAuth = async () => {
-      // For public routes, just mark as not loading
-      if (PUBLIC_ROUTES.includes(pathname)) {
+      // For public route, just mark as not loading
+      if (pathname === AUTH_ROUTE) {
         setLoading(false)
         return
       }
@@ -96,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // If session is invalid, redirect to login
       if (!authenticated) {
-        const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`
+        const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
       }
 

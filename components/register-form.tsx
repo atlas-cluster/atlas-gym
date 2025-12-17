@@ -1,34 +1,25 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { defineStepper } from '@/components/ui/stepper'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { ComponentProps, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { registrationSchema } from '@/lib/schemas'
+import { z } from 'zod'
 import { apiClient, ApiError } from '@/lib/api'
-import {
-  emailSchema,
-  passwordSchema,
-  nameSchema,
-  optionalNameSchema,
-  dateSchema,
-  phoneSchema,
-  addressSchema,
-} from '@/lib/schemas'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { defineStepper } from '@stepperize/react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ChevronDownIcon } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import { CreditCardInput } from '@/components/ui/credit-card-input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
+import { PhoneInput } from '@/components/ui/phone-input'
+import { useHookFormMask } from 'use-mask-input'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -55,458 +46,627 @@ const { useStepper, steps, utils } = defineStepper(
 
 export function RegisterForm({
   className,
+  redirectTo = '/',
   ...props
-}: React.ComponentProps<'div'>) {
+}: ComponentProps<'div'> & { redirectTo?: string }) {
   const stepper = useStepper()
   const currentIndex = utils.getIndex(stepper.current.id)
   const router = useRouter()
-  const [formData, setFormData] = useState<Record<string, string>>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setErrors({})
+  const form = useForm<z.infer<typeof registrationSchema>>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      passwordrepeat: '',
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      birthdate: '',
+      phone: '',
+      address: '',
+      paymentType: 'credit_card',
+      paymentInfo: { cardNumber: '', cardExpiry: '', cardCVC: '' },
+    },
+  })
 
-    const formDataObj = new FormData(e.currentTarget)
-    const data = Object.fromEntries(formDataObj.entries()) as Record<
-      string,
-      string
-    >
+  const { setError } = form
 
-    // Merge with previous form data
-    const allData = { ...formData, ...data }
-    setFormData(allData)
+  const registerWithMask = useHookFormMask(form.register)
 
-    // Validate current step
-    const stepErrors: Record<string, string> = {}
+  // Validate current step before allowing to proceed
+  const validateCurrentStep = async () => {
+    let fieldsToValidate: (keyof z.infer<typeof registrationSchema>)[] = []
 
-    if (currentIndex === 0) {
-      // Account step validation
-      const emailValidation = emailSchema.safeParse(data.email)
-      if (!emailValidation.success) {
-        stepErrors.email = emailValidation.error.issues[0].message
-      }
-
-      const passwordValidation = passwordSchema.safeParse(data.password)
-      if (!passwordValidation.success) {
-        stepErrors.password = passwordValidation.error.issues[0].message
-      }
-
-      if (data.password !== data.passwordrepeat) {
-        stepErrors.passwordrepeat = 'Passwords do not match'
-      }
-    } else if (currentIndex === 1) {
-      // Personal step validation
-      const firstnameValidation = nameSchema.safeParse(data.firstname)
-      if (!firstnameValidation.success) {
-        stepErrors.firstname = firstnameValidation.error.issues[0].message
-      }
-
-      const lastnameValidation = nameSchema.safeParse(data.lastname)
-      if (!lastnameValidation.success) {
-        stepErrors.lastname = lastnameValidation.error.issues[0].message
-      }
-
-      if (data.middlename) {
-        const middlenameValidation = optionalNameSchema.safeParse(
-          data.middlename
-        )
-        if (!middlenameValidation.success) {
-          stepErrors.middlename = middlenameValidation.error.issues[0].message
-        }
-      }
-
-      const birthdateValidation = dateSchema.safeParse(data.birthdate)
-      if (!birthdateValidation.success) {
-        stepErrors.birthdate = birthdateValidation.error.issues[0].message
-      }
-    } else if (currentIndex === 2) {
-      // Contact step validation
-      if (data.phone) {
-        const phoneValidation = phoneSchema.safeParse(data.phone)
-        if (!phoneValidation.success) {
-          stepErrors.phone = phoneValidation.error.issues[0].message
-        }
-      }
-
-      if (data.address) {
-        const addressValidation = addressSchema.safeParse(data.address)
-        if (!addressValidation.success) {
-          stepErrors.address = addressValidation.error.issues[0].message
-        }
-      }
+    switch (stepper.current.id) {
+      case 'account':
+        fieldsToValidate = ['email', 'password', 'passwordrepeat']
+        break
+      case 'personal':
+        fieldsToValidate = ['firstname', 'middlename', 'lastname', 'birthdate']
+        break
+      case 'contact':
+        fieldsToValidate = ['phone', 'address']
+        break
+      case 'payment':
+        fieldsToValidate = ['paymentType', 'paymentInfo']
+        break
     }
 
-    if (Object.keys(stepErrors).length > 0) {
-      setErrors(stepErrors)
-      toast.error('Please fix the errors in the form')
-      return
-    }
+    const result = await form.trigger(fieldsToValidate)
 
-    if (!stepper.isLast) {
-      stepper.next()
-    } else {
-      // Submit registration
-      setLoading(true)
+    // For the account step, also check if email exists
+    if (result && stepper.current.id === 'account') {
+      const email = form.getValues('email')
       try {
-        // Type the data properly for the API client
-        const registrationData = {
-          email: allData.email,
-          password: allData.password,
-          passwordrepeat: allData.passwordrepeat,
-          firstname: allData.firstname,
-          lastname: allData.lastname,
-          middlename: allData.middlename || undefined,
-          birthdate: allData.birthdate,
-          address: allData.address || undefined,
-          phone: allData.phone || undefined,
-          paymentType: allData.paymentType || undefined,
-          paymentInfo: allData.paymentInfo || undefined,
+        const { exists } = await apiClient.checkEmail(email)
+        if (exists) {
+          setError('email', {
+            type: 'server',
+            message: 'This email is already registered',
+          })
+          return false
         }
-
-        await apiClient.register(registrationData)
-
-        toast.success('Registration successful! Welcome to Atlas Gym!')
-
-        // Redirect to home page on success
-        router.push('/')
       } catch (err) {
-        if (err instanceof ApiError) {
-          toast.error(err.message)
-          setErrors({ general: err.message })
-        } else {
-          toast.error('An unexpected error occurred')
-          setErrors({ general: 'An unexpected error occurred' })
-        }
+        console.error('Error checking email:', err)
+        // Continue even if check fails to avoid blocking the user
+      }
+    }
 
+    return result
+  }
+
+  const handleNext = async () => {
+    const isValid = await validateCurrentStep()
+    if (isValid) {
+      setIsTransitioning(true)
+      stepper.next()
+      // Reset transitioning state after a short delay
+      setTimeout(() => setIsTransitioning(false), 100)
+    }
+  }
+
+  const onSubmit = async (data: z.infer<typeof registrationSchema>) => {
+    // Prevent submission if we're transitioning between steps
+    if (loading || isTransitioning) return
+
+    setLoading(true)
+
+    try {
+      await apiClient.register(data)
+
+      toast.success('Registration successful!')
+      setLoading(false)
+
+      // Redirect to the original page or home
+      router.push(redirectTo)
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // Map server status codes to specific field errors
+        if (err.status === 400) {
+          // Could be duplicate email or validation error
+          if (err.message.toLowerCase().includes('email')) {
+            setError('email', { type: 'server', message: err.message })
+          } else {
+            toast.error(err.message)
+          }
+        } else {
+          toast.error(err.message)
+        }
+        setLoading(false)
+      } else {
+        toast.error('An unexpected error occurred')
         setLoading(false)
       }
     }
   }
 
-  return (
-    <Card className={className} {...props}>
-      <CardHeader>
-        <CardTitle>{stepper.current.title}</CardTitle>
-        <CardDescription>{stepper.current.description}</CardDescription>
-        <CardAction>
-          <span className={'text-muted-foreground text-xs'}>
-            {currentIndex + 1} / {steps.length}
-          </span>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <FieldGroup>
-            {currentIndex === 0 && (
-              <AccountStep formData={formData} errors={errors} />
-            )}
-            {currentIndex === 1 && (
-              <PersonalStep formData={formData} errors={errors} />
-            )}
-            {currentIndex === 2 && (
-              <ContactStep formData={formData} errors={errors} />
-            )}
-            {currentIndex === 3 && <PaymentStep formData={formData} />}
-            {errors.general && (
-              <Field>
-                <div className="text-sm text-red-600">{errors.general}</div>
-              </Field>
-            )}
-            <Field>
-              <div className={'flex justify-end gap-2'}>
-                <Button
-                  type={'button'}
-                  variant={'secondary'}
-                  disabled={stepper.isFirst || loading}
-                  onClick={stepper.prev}>
-                  Back
-                </Button>
-                {stepper.isLast ? (
-                  <Button type={'submit'} disabled={loading}>
-                    {loading ? 'Creating...' : 'Create Account'}
-                  </Button>
-                ) : (
-                  <Button type={'submit'}>Next</Button>
-                )}
-              </div>
-              {currentIndex === 0 && (
-                <FieldDescription className="text-center">
-                  Already have an account? <a href="/login">Login</a>
-                </FieldDescription>
-              )}
-            </Field>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
-  )
-}
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Only handle Enter on input elements, not on buttons or selects
+    const target = e.target as HTMLElement
 
-function AccountStep({
-  formData,
-  errors,
-}: {
-  formData: Record<string, string>
-  errors: Record<string, string>
-}) {
-  return (
-    <>
-      <Field>
-        <FieldLabel htmlFor="email">Email</FieldLabel>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="mail@example.com"
-          defaultValue={formData.email || ''}
-          required
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-        />
-        {errors.email && (
-          <div id="email-error" className="mt-1 text-sm text-red-600">
-            {errors.email}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="password">Password</FieldLabel>
-        <FieldDescription>
-          Must contain uppercase, lowercase, and a number. At least 8
-          characters.
-        </FieldDescription>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          minLength={8}
-          defaultValue={formData.password || ''}
-          required
-          aria-invalid={!!errors.password}
-          aria-describedby={errors.password ? 'password-error' : undefined}
-        />
-        {errors.password && (
-          <div id="password-error" className="mt-1 text-sm text-red-600">
-            {errors.password}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="passwordrepeat">Repeat Password</FieldLabel>
-        <Input
-          id="passwordrepeat"
-          name="passwordrepeat"
-          type="password"
-          minLength={8}
-          defaultValue={formData.passwordrepeat || ''}
-          required
-          aria-invalid={!!errors.passwordrepeat}
-          aria-describedby={
-            errors.passwordrepeat ? 'passwordrepeat-error' : undefined
-          }
-        />
-        {errors.passwordrepeat && (
-          <div id="passwordrepeat-error" className="mt-1 text-sm text-red-600">
-            {errors.passwordrepeat}
-          </div>
-        )}
-      </Field>
-    </>
-  )
-}
+    // Fix for combobox (e.g., date picker)
+    if (target.role === 'combobox') return
 
-function PersonalStep({
-  formData,
-  errors,
-}: {
-  formData: Record<string, string>
-  errors: Record<string, string>
-}) {
-  return (
-    <>
-      <Field>
-        <FieldLabel htmlFor="firstname">First Name</FieldLabel>
-        <Input
-          id="firstname"
-          name="firstname"
-          type="text"
-          placeholder="John"
-          maxLength={50}
-          defaultValue={formData.firstname || ''}
-          required
-          aria-invalid={!!errors.firstname}
-          aria-describedby={errors.firstname ? 'firstname-error' : undefined}
-        />
-        {errors.firstname && (
-          <div id="firstname-error" className="mt-1 text-sm text-red-600">
-            {errors.firstname}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="middlename">Middle Name</FieldLabel>
-        <Input
-          id="middlename"
-          name="middlename"
-          type="text"
-          placeholder="Pork"
-          maxLength={50}
-          defaultValue={formData.middlename || ''}
-          aria-invalid={!!errors.middlename}
-          aria-describedby={errors.middlename ? 'middlename-error' : undefined}
-        />
-        {errors.middlename && (
-          <div id="middlename-error" className="mt-1 text-sm text-red-600">
-            {errors.middlename}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="lastname">Last Name</FieldLabel>
-        <Input
-          id="lastname"
-          name="lastname"
-          type="text"
-          placeholder="Doe"
-          maxLength={50}
-          defaultValue={formData.lastname || ''}
-          required
-          aria-invalid={!!errors.lastname}
-          aria-describedby={errors.lastname ? 'lastname-error' : undefined}
-        />
-        {errors.lastname && (
-          <div id="lastname-error" className="mt-1 text-sm text-red-600">
-            {errors.lastname}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="birthdate">Date of Birth</FieldLabel>
-        <Input
-          id="birthdate"
-          name="birthdate"
-          type="date"
-          defaultValue={formData.birthdate || ''}
-          required
-          aria-invalid={!!errors.birthdate}
-          aria-describedby={errors.birthdate ? 'birthdate-error' : undefined}
-        />
-        {errors.birthdate && (
-          <div id="birthdate-error" className="mt-1 text-sm text-red-600">
-            {errors.birthdate}
-          </div>
-        )}
-      </Field>
-    </>
-  )
-}
+    const isInput = target.tagName === 'INPUT'
 
-function ContactStep({
-  formData,
-  errors,
-}: {
-  formData: Record<string, string>
-  errors: Record<string, string>
-}) {
-  return (
-    <>
-      <Field>
-        <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          placeholder="+1 234 567 8900"
-          maxLength={20}
-          defaultValue={formData.phone || ''}
-          aria-invalid={!!errors.phone}
-          aria-describedby={errors.phone ? 'phone-error' : undefined}
-        />
-        {errors.phone && (
-          <div id="phone-error" className="mt-1 text-sm text-red-600">
-            {errors.phone}
-          </div>
-        )}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="address">Address</FieldLabel>
-        <Input
-          id="address"
-          name="address"
-          type="text"
-          placeholder="123 Main St, City, Country"
-          defaultValue={formData.address || ''}
-          aria-invalid={!!errors.address}
-          aria-describedby={errors.address ? 'address-error' : undefined}
-        />
-        {errors.address && (
-          <div id="address-error" className="mt-1 text-sm text-red-600">
-            {errors.address}
-          </div>
-        )}
-      </Field>
-    </>
-  )
-}
-
-function PaymentStep({ formData }: { formData: Record<string, string> }) {
-  // Validate and set payment type with fallback
-  const validPaymentTypes = ['credit_card', 'iban'] as const
-  type PaymentType = (typeof validPaymentTypes)[number]
-
-  // Type guard to check if a string is a valid PaymentType
-  const isValidPaymentType = (value: string): value is PaymentType => {
-    return validPaymentTypes.includes(value as PaymentType)
+    if (e.key === 'Enter' && !stepper.isLast && isInput) {
+      e.preventDefault()
+      handleNext()
+    }
   }
 
-  const initialType: PaymentType = isValidPaymentType(formData.paymentType)
-    ? formData.paymentType
-    : 'credit_card'
-
-  const [paymentType, setPaymentType] = useState<PaymentType>(initialType)
-
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="paymentType">Payment Method</FieldLabel>
-        <select
-          id="paymentType"
-          name="paymentType"
-          className="border-input focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-          value={paymentType}
-          onChange={(e) => {
-            const value = e.target.value
-            if (isValidPaymentType(value)) {
-              setPaymentType(value)
-            }
-          }}>
-          <option value="credit_card">Credit Card</option>
-          <option value="iban">IBAN</option>
-        </select>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="paymentInfo">
-          {paymentType === 'credit_card' ? 'Credit Card Number' : 'IBAN'}
-        </FieldLabel>
-        <FieldDescription>
-          {paymentType === 'credit_card'
-            ? 'Enter your credit card number (e.g., 1234 5678 9012 3456)'
-            : 'Enter your IBAN (e.g., DE89 3704 0044 0532 0130 00)'}
-        </FieldDescription>
-        <Input
-          id="paymentInfo"
-          name="paymentInfo"
-          type="text"
-          placeholder={
-            paymentType === 'credit_card'
-              ? '1234 5678 9012 3456'
-              : 'DE89 3704 0044 0532 0130 00'
-          }
-          defaultValue={formData.paymentInfo || ''}
-        />
-      </Field>
+      <form
+        id="register"
+        onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={handleKeyDown}>
+        <CardHeader className={className} {...props}>
+          <CardTitle>{stepper.current.title}</CardTitle>
+          <CardDescription>{stepper.current.description}</CardDescription>
+          <CardAction>
+            <span className={'text-muted-foreground text-xs'}>
+              {currentIndex + 1} / {steps.length}
+            </span>
+          </CardAction>
+        </CardHeader>
+        <CardContent className={'mt-4'}>
+          <FieldGroup>
+            {stepper.current.id === 'account' && (
+              <>
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="email">
+                        <span>
+                          Email<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="email"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="mail@example.com"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('email')
+                          }
+                          form.setValue('email', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="password">
+                        <span>
+                          Password<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="password"
+                        aria-invalid={fieldState.invalid}
+                        type="password"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('password')
+                          }
+                          form.setValue('password', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="passwordrepeat"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="passwordrepeat">
+                        <span>
+                          Repeat Password
+                          <sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="passwordrepeat"
+                        aria-invalid={fieldState.invalid}
+                        type="password"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('passwordrepeat')
+                          }
+                          form.setValue('passwordrepeat', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'personal' && (
+              <>
+                <Controller
+                  name="firstname"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="firstname">
+                        <span>
+                          First Name<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="firstname"
+                        aria-invalid={fieldState.invalid}
+                        placeholder={"John"}
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('firstname')
+                          }
+                          form.setValue('firstname', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="middlename"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="middlename">
+                        <span>Middle Name</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="middlename"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Alan"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('middlename')
+                          }
+                          form.setValue('middlename', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="lastname"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="lastname">
+                        <span>
+                          Last Name<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="lastname"
+                        aria-invalid={fieldState.invalid}
+                        placeholder={"Doe"}
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('lastname')
+                          }
+                          form.setValue('lastname', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="birthdate"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="birthdate">
+                        <span>
+                          Birth Date<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Popover
+                        open={calendarOpen}
+                        onOpenChange={setCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            id="date"
+                            className={
+                              'w-48 justify-between font-normal ' +
+                              cn(!!fieldState.error && 'border-destructive!')
+                            }>
+                            {field.value ? field.value : 'Select date'}
+                            <ChevronDownIcon />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto overflow-hidden p-0"
+                          align="start">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            captionLayout="dropdown"
+                            onSelect={(date) => {
+                              if (date) {
+                                // Adjust for timezone offset to prevent off-by-one error
+                                const timezoneOffset =
+                                  date.getTimezoneOffset() * 60000
+                                const adjustedDate = new Date(
+                                  date.getTime() - timezoneOffset
+                                )
+                                field.onChange(
+                                  adjustedDate.toISOString().split('T')[0]
+                                )
+                              } else {
+                                field.onChange('')
+                              }
+                              setCalendarOpen(false)
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'contact' && (
+              <>
+                <Controller
+                  name="phone"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="phone">
+                        <span>
+                          Phone Number
+                          <sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <PhoneInput
+                        {...field}
+                        id="phone"
+                        aria-invalid={fieldState.invalid}
+                        placeholder={"+49 123 4567890"}
+                        international
+                      onChange={(e) => {
+                        // Always update without validation on change
+                        // Validation will happen on blur or submit
+                        if (fieldState.error) {
+                          form.clearErrors('phone')
+                        }
+                        form.setValue('phone', e.toString(), {
+                          shouldValidate: false,
+                        })
+                      }}/>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="address"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="address">
+                        <span>
+                          Address<sup className={'text-destructive'}>*</sup>
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="address"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="123 Main St, City, State"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('address')
+                          }
+                          form.setValue('address', e.target.value, {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+
+            {stepper.current.id === 'payment' && (
+              <Controller
+                name="paymentType"
+                control={form.control}
+                render={({ field }) => (
+                  <Tabs
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      if (value === 'credit_card') {
+                        form.setValue('paymentInfo', {
+                          cardNumber: '',
+                          cardExpiry: '',
+                          cardCVC: '',
+                        })
+                      } else {
+                        form.setValue('paymentInfo', { iban: '' })
+                      }
+                      form.clearErrors('paymentInfo')
+                    }}>
+                    <TabsList>
+                      <TabsTrigger value="credit_card">Credit Card</TabsTrigger>
+                      <TabsTrigger value="iban">Iban</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="credit_card">
+                      <Controller
+                        name="paymentInfo"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <CreditCardInput
+                              name={field.name}
+                              value={
+                                typeof field.value === 'object' &&
+                                'cardNumber' in field.value
+                                  ? field.value
+                                  : undefined
+                              }
+                              onBlur={field.onBlur}
+                              error={fieldState.error}
+                              onChange={(value) => {
+                                // Always update without validation on change
+                                // Validation will happen on blur or submit
+                                if (fieldState.error) {
+                                  form.clearErrors('paymentInfo')
+                                }
+                                form.setValue('paymentInfo', value, {
+                                  shouldValidate: false,
+                                })
+                              }}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </TabsContent>
+                    <TabsContent value={'iban'}>
+                      <Controller
+                        name="paymentInfo"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="paymentInfo">
+                              <span>
+                                IBAN<sup className={'text-destructive'}>*</sup>
+                              </span>
+                            </FieldLabel>
+                            <Input
+                              id="paymentInfo"
+                              aria-invalid={fieldState.invalid}
+                              placeholder="DE89 3704 0044 0532 0130 00"
+                              type="text"
+                              autoComplete="off"
+                              {...registerWithMask('paymentInfo.iban', ["AA99 **** **** **** **** **** **** ***"], {
+                                placeholder: "",
+                                showMaskOnHover: false,
+                                showMaskOnFocus: false,
+                              })}
+                              onChange={(e) => {
+                                const newValue = e.target.value.replace(/\s/g, '').toUpperCase()
+
+                                if (fieldState.error) {
+                                  form.clearErrors('paymentInfo')
+                                }
+                                form.setValue('paymentInfo.iban', newValue, {
+                                  shouldValidate: false,
+                                })
+                              }}
+                              onBlur={field.onBlur}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                )}
+              />
+            )}
+          </FieldGroup>
+        </CardContent>
+        <CardFooter className={'mt-6 w-full'}>
+          <div className={'flex w-full justify-end gap-2'}>
+            <Button
+              type={'button'}
+              variant={'secondary'}
+              disabled={stepper.isFirst || loading}
+              onClick={stepper.prev}>
+              Back
+            </Button>
+            {stepper.isLast ? (
+              <Button type={'submit'} disabled={loading || isTransitioning}>
+                {loading ? 'Creating...' : 'Create Account'}
+              </Button>
+            ) : (
+              <Button
+                type={'button'}
+                onClick={handleNext}
+                disabled={isTransitioning}>
+                Next
+              </Button>
+            )}
+          </div>
+        </CardFooter>
+      </form>
     </>
   )
 }

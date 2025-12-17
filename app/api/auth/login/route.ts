@@ -20,16 +20,27 @@ export async function POST(request: NextRequest) {
     const { email, password } = validation.data
 
     // Authenticate user
-    const user = await authenticateUser(email, password)
+    const authResult = await authenticateUser(email, password)
 
-    if (!user) {
+    if (authResult.user === null) {
+      if (authResult.error === 'NOT_FOUND') {
+        return NextResponse.json(
+          { error: 'Email does not exist' },
+          { status: 404 }
+        )
+      }
+      if (authResult.error === 'INVALID_PASSWORD') {
+        return NextResponse.json(
+          { error: 'Incorrect password' },
+          { status: 401 }
+        )
+      }
       return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
+        { error: 'Authentication error' },
+        { status: 500 }
       )
     }
-
-    // Create session
+    const user = authResult.user
     const session = await createSession(user.id)
 
     if (!session) {
@@ -39,7 +50,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create response with session cookie
     const response = NextResponse.json(
       {
         success: true,
@@ -53,7 +63,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
 
-    // Set secure session cookie
     response.cookies.set('session', session.id, getSecureCookieOptions())
 
     return response

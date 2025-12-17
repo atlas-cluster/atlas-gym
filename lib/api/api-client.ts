@@ -35,6 +35,10 @@ interface PingResponse {
   details?: unknown
 }
 
+interface CheckEmailResponse {
+  exists: boolean
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -91,7 +95,7 @@ class ApiClient {
           throw new ApiError('Invalid response from server', response.status)
         }
       } else {
-        // Non-JSON response (likely HTML error page)
+        // Non-JSON response (likely HTML error page or server error)
         throw new ApiError(
           response.ok ? 'Invalid response format' : 'Server error occurred',
           response.status
@@ -123,10 +127,13 @@ class ApiClient {
   }
 
   // Auth methods
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(data: {
+    email: string
+    password: string
+  }): Promise<LoginResponse> {
     return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
-      body: { email, password },
+      body: data,
     })
   }
 
@@ -138,10 +145,12 @@ class ApiClient {
     lastname: string
     middlename?: string
     birthdate: string
-    address?: string
-    phone?: string
-    paymentType?: string
-    paymentInfo?: string
+    address: string
+    phone: string
+    paymentType: 'credit_card' | 'iban'
+    paymentInfo:
+      | { cardNumber: string; cardExpiry: string; cardCVC: string }
+      | { iban: string }
   }): Promise<RegisterResponse> {
     return this.request<RegisterResponse>(API_ENDPOINTS.auth.register, {
       method: 'POST',
@@ -157,6 +166,13 @@ class ApiClient {
 
   async getSession(): Promise<SessionResponse> {
     return this.request<SessionResponse>(API_ENDPOINTS.auth.session)
+  }
+
+  async checkEmail(email: string): Promise<CheckEmailResponse> {
+    return this.request<CheckEmailResponse>(API_ENDPOINTS.auth.checkEmail, {
+      method: 'POST',
+      body: { email },
+    })
   }
 
   // Utility methods

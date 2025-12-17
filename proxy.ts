@@ -9,8 +9,7 @@ import type { NextRequest } from 'next/server'
  * Invalid cookies are handled by the AuthProvider on the client side.
  */
 
-// Public routes that don't require authentication
-const PUBLIC_ROUTES = ['/login', '/register']
+const AUTH_ROUTE = '/auth'
 
 export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
@@ -18,13 +17,13 @@ export function proxy(request: NextRequest) {
 
   // If user has a session cookie and tries to access login/register, redirect to home
   // The AuthProvider will validate the session and redirect back to login if invalid
-  if (sessionCookie && PUBLIC_ROUTES.includes(pathname)) {
+  if (sessionCookie && pathname === AUTH_ROUTE) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
   // If user doesn't have a session cookie and tries to access protected route, redirect to login
-  if (!sessionCookie && !PUBLIC_ROUTES.includes(pathname)) {
-    const loginUrl = new URL('/login', request.url)
+  if (!sessionCookie && pathname !== AUTH_ROUTE) {
+    const loginUrl = new URL('/auth', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }

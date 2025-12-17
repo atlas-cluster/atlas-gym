@@ -16,6 +16,10 @@ export async function verifyPassword(
   return await bcrypt.compare(password, hash)
 }
 
+export type AuthResult =
+  | { user: User; error?: undefined }
+  | { user: null; error: 'NOT_FOUND' | 'INVALID_PASSWORD' | 'DB_ERROR' }
+
 export async function createUser(data: {
   email: string
   password: string
@@ -23,22 +27,30 @@ export async function createUser(data: {
   lastname: string
   middlename?: string
   birthdate: string
-  address?: string
-  phone?: string
-  paymentType?: string
-  paymentInfo?: string
-}): Promise<User | null> {
+  address: string
+  phone: string
+  paymentType: 'credit_card' | 'iban'
+  paymentInfo:
+    | { cardNumber: string; cardExpiry: string; cardCVC: string }
+    | { iban: string }
+}): Promise<User> {
   const pool = getPool()
   const passwordHash = await hashPassword(data.password)
 
+  // Start a transaction
+  const client = await pool.connect()
+
   try {
-    const result = await pool.query(
+    await client.query('BEGIN')
+
+    // Insert user
+    const userResult = await client.query(
       `INSERT INTO gym_manager.users 
         (user_email, password_hash, user_firstname, user_lastname, user_middlename, 
-         user_birthdate, user_address, user_phone, payment_type, payment_info)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         user_birthdate, user_address, user_phone)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
-                 user_email, user_address, user_birthdate, user_phone, payment_type, payment_info`,
+                 user_email, user_address, user_birthdate, user_phone`,
       [
         data.email,
         passwordHash,
@@ -46,77 +58,82 @@ export async function createUser(data: {
         data.lastname,
         data.middlename || null,
         data.birthdate,
-        data.address || null,
-        data.phone || null,
-        data.paymentType || null,
-        data.paymentInfo || null,
+        data.address,
+        data.phone,
       ]
     )
 
-    return result.rows[0] as User
-  } catch (error) {
-    console.error('Error creating user:', error)
-    return null
-  }
-}
+    const user = userResult.rows[0] as User
 
-export async function getUserByEmail(email: string): Promise<User | null> {
-  const pool = getPool()
+    // Insert payment method
+    if (
+      data.paymentType === 'credit_card' &&
+      'cardNumber' in data.paymentInfo
+    ) {
+      // Store full card number
+      const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
 
-  try {
-    const result = await pool.query(
-      `SELECT id, created_at, user_firstname, user_lastname, user_middlename, 
-              user_email, user_address, user_birthdate, user_phone, payment_type, payment_info
-       FROM gym_manager.users 
-       WHERE user_email = $1`,
-      [email]
-    )
-
-    if (result.rows.length === 0) {
-      return null
+      await client.query(
+        `INSERT INTO gym_manager.payment_methods 
+          (user_id, payment_type, card_number, card_expiry)
+         VALUES ($1, $2, $3, $4)`,
+        [user.id, data.paymentType, cardNumber, data.paymentInfo.cardExpiry]
+      )
+    } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
+      await client.query(
+        `INSERT INTO gym_manager.payment_methods 
+          (user_id, payment_type, iban)
+         VALUES ($1, $2, $3)`,
+        [user.id, data.paymentType, data.paymentInfo.iban]
+      )
     }
 
-    return result.rows[0] as User
+    await client.query('COMMIT')
+    return user
   } catch (error) {
-    console.error('Error getting user by email:', error)
-    return null
+    await client.query('ROLLBACK')
+    console.error('Error creating user:', error)
+    // Re-throw the error so the caller can handle it appropriately
+    throw error
+  } finally {
+    client.release()
   }
 }
 
 export async function authenticateUser(
   email: string,
   password: string
-): Promise<User | null> {
+): Promise<AuthResult> {
   const pool = getPool()
 
   try {
     const result = await pool.query(
-      `SELECT id, created_at, user_firstname, user_lastname, user_middlename, 
-              user_email, user_address, user_birthdate, user_phone, payment_type, payment_info,
+      `SELECT id, created_at, user_firstname, user_lastname, user_middlename,
+              user_email, user_address, user_birthdate, user_phone,
               password_hash
-       FROM gym_manager.users 
+       FROM gym_manager.users
        WHERE user_email = $1`,
       [email]
     )
 
     if (result.rows.length === 0) {
-      return null
+      return { user: null, error: 'NOT_FOUND' }
     }
 
     const user = result.rows[0]
     const isValid = await verifyPassword(password, user.password_hash)
 
     if (!isValid) {
-      return null
+      return { user: null, error: 'INVALID_PASSWORD' }
     }
 
     // Remove password_hash from returned user object
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = user
-    return userWithoutPassword as User
+    return { user: userWithoutPassword as User }
   } catch (error) {
     console.error('Error authenticating user:', error)
-    return null
+    return { user: null, error: 'DB_ERROR' }
   }
 }
 
@@ -183,7 +200,7 @@ export async function getUserBySessionId(
   try {
     const result = await pool.query(
       `SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone, u.payment_type, u.payment_info
+              u.user_email, u.user_address, u.user_birthdate, u.user_phone
        FROM gym_manager.users u
        JOIN gym_manager.sessions s ON u.id = s.user_id
        WHERE s.id = $1 AND s.expires_at > NOW()`,

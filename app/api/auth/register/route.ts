@@ -31,22 +31,43 @@ export async function POST(request: NextRequest) {
     } = validation.data
 
     // Create user
-    const user = await createUser({
-      email,
-      password,
-      firstname,
-      lastname,
-      middlename,
-      birthdate,
-      address,
-      phone,
-      paymentType,
-      paymentInfo,
-    })
-
-    if (!user) {
+    let user
+    try {
+      user = await createUser({
+        email,
+        password,
+        firstname,
+        lastname,
+        middlename,
+        birthdate,
+        address,
+        phone,
+        paymentType,
+        paymentInfo,
+      })
+    } catch (createUserError) {
+      // Check if it's a duplicate email error (PostgreSQL unique constraint violation)
+      const pgError = createUserError as {
+        code?: string
+        constraint?: string
+        detail?: string
+      }
+      if (
+        pgError.code === '23505' &&
+        pgError.constraint === 'users_user_email_key'
+      ) {
+        return NextResponse.json(
+          { error: 'This email is already registered' },
+          { status: 400 }
+        )
+      }
+      // For other errors, log and return a generic message
+      console.error('Error creating user:', createUserError)
       return NextResponse.json(
-        { error: 'Failed to create user. Email might already be in use.' },
+        {
+          error:
+            'Failed to create user. Please check your information and try again.',
+        },
         { status: 400 }
       )
     }
