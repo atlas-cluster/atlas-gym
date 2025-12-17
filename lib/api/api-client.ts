@@ -144,8 +144,10 @@ class ApiClient {
     birthdate: string
     address?: string
     phone?: string
-    paymentType?: string
-    paymentInfo?: string
+    paymentType: 'credit_card' | 'iban'
+    paymentInfo: 
+      | { cardNumber: string; cardExpiry: string; cardCVC: string }
+      | { iban: string }
   }): Promise<RegisterResponse> {
     return this.request<RegisterResponse>(API_ENDPOINTS.auth.register, {
       method: 'POST',
