@@ -1,5 +1,6 @@
 'use client'
 import {
+  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -32,6 +33,7 @@ import {
 import { ChevronDownIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { CreditCardInput } from '@/components/ui/credit-card-input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -179,7 +181,7 @@ export function RegisterForm({
     // Only handle Enter on input elements, not on buttons or selects
     const target = e.target as HTMLElement
     const isInput = target.tagName === 'INPUT'
-    
+
     if (e.key === 'Enter' && !stepper.isLast && isInput) {
       e.preventDefault()
       handleNext()
@@ -509,116 +511,100 @@ export function RegisterForm({
             )}
 
             {stepper.current.id === 'payment' && (
-              <>
-                <Controller
-                  name="paymentType"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="paymentType">
-                        <span>
-                          Payment Type
-                          <sup className={'text-destructive'}>*</sup>
-                        </span>
-                      </FieldLabel>
-                      <select
-                        {...field}
-                        id="paymentType"
-                        className="border-input file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                        aria-invalid={fieldState.invalid}
-                        onChange={(e) => {
-                          field.onChange(e)
-                          // Reset payment info when payment type changes
-                          if (e.target.value === 'credit_card') {
-                            form.setValue('paymentInfo', {
-                              cardNumber: '',
-                              cardExpiry: '',
-                              cardCVC: '',
-                            })
-                          } else {
-                            form.setValue('paymentInfo', { iban: '' })
-                          }
-                          if (fieldState.error) {
-                            form.clearErrors('paymentType')
-                          }
-                        }}>
-                        <option value="credit_card">Credit Card</option>
-                        <option value="iban">IBAN</option>
-                      </select>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                {paymentType === 'credit_card' ? (
-                  <Controller
-                    name="paymentInfo"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <CreditCardInput
-                          name={field.name}
-                          value={
-                            typeof field.value === 'object' &&
-                            'cardNumber' in field.value
-                              ? field.value
-                              : undefined
-                          }
-                          onBlur={field.onBlur}
-                          error={fieldState.error}
-                          onChange={(value) => {
-                            field.onChange(value)
-                            if (fieldState.error) {
-                              form.clearErrors('paymentInfo')
-                            }
-                          }}
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+              <Controller
+                name="paymentType"
+                control={form.control}
+                render={({ field }) => (
+                  <Tabs
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      if (value === 'credit_card') {
+                        form.setValue('paymentInfo', {
+                          cardNumber: '',
+                          cardExpiry: '',
+                          cardCVC: '',
+                        })
+                      } else {
+                        form.setValue('paymentInfo', { iban: '' })
+                      }
+                      form.clearErrors('paymentInfo')
+                    }}
+                  >
+                    <TabsList>
+                      <TabsTrigger value="credit_card">Credit Card</TabsTrigger>
+                      <TabsTrigger value="iban">Iban</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="credit_card">
+                      <Controller
+                        name="paymentInfo"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <CreditCardInput
+                              name={field.name}
+                              value={
+                                typeof field.value === 'object' &&
+                                'cardNumber' in field.value
+                                  ? field.value
+                                  : undefined
+                              }
+                              onBlur={field.onBlur}
+                              error={fieldState.error}
+                              onChange={(value) => {
+                                field.onChange(value)
+                                if (fieldState.error) {
+                                  form.clearErrors('paymentInfo')
+                                }
+                              }}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
                         )}
-                      </Field>
-                    )}
-                  />
-                ) : (
-                  <Controller
-                    name="paymentInfo"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="paymentInfo">
-                          <span>
-                            IBAN<sup className={'text-destructive'}>*</sup>
-                          </span>
-                        </FieldLabel>
-                        <Input
-                          id="paymentInfo"
-                          aria-invalid={fieldState.invalid}
-                          placeholder="DE89 3704 0044 0532 0130 00"
-                          autoComplete="off"
-                          value={
-                            typeof field.value === 'object' &&
-                            'iban' in field.value
-                              ? field.value.iban
-                              : ''
-                          }
-                          onChange={(e) => {
-                            field.onChange({ iban: e.target.value })
-                            if (fieldState.error) {
-                              form.clearErrors('paymentInfo')
-                            }
-                          }}
-                          onBlur={field.onBlur}
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                      />
+                    </TabsContent>
+                    <TabsContent value={'iban'}>
+                      <Controller
+                        name="paymentInfo"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="paymentInfo">
+                <span>
+                  IBAN<sup className={'text-destructive'}>*</sup>
+                </span>
+                            </FieldLabel>
+                            <Input
+                              id="paymentInfo"
+                              aria-invalid={fieldState.invalid}
+                              placeholder="DE89 3704 0044 0532 0130 00"
+                              autoComplete="off"
+                              value={
+                                typeof field.value === 'object' &&
+                                'iban' in field.value
+                                  ? field.value.iban
+                                  : ''
+                              }
+                              onChange={(e) => {
+                                field.onChange({ iban: e.target.value })
+                                if (fieldState.error) {
+                                  form.clearErrors('paymentInfo')
+                                }
+                              }}
+                              onBlur={field.onBlur}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
                         )}
-                      </Field>
-                    )}
-                  />
+                      />
+                    </TabsContent>
+                  </Tabs>
                 )}
-              </>
+              />
             )}
           </FieldGroup>
         </CardContent>
