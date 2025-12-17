@@ -7,17 +7,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    console.log('Registration attempt with data:', {
-      email: body.email,
-      birthdate: body.birthdate,
-      paymentType: body.paymentType,
-    })
-
     // Validate and sanitize input
     const validation = registrationSchema.safeParse(body)
 
     if (!validation.success) {
-      console.error('Validation failed:', validation.error.issues)
       return NextResponse.json(
         { error: validation.error.issues[0].message },
         { status: 400 }
@@ -68,13 +61,8 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      // Log detailed error information for debugging
+      // For other errors, log and return a generic message
       console.error('Error creating user:', createUserError)
-      console.error('Error details:', {
-        code: pgError.code,
-        constraint: pgError.constraint,
-        detail: pgError.detail,
-      })
       return NextResponse.json(
         {
           error:
