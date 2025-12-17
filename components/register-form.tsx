@@ -220,9 +220,13 @@ export function RegisterForm({
                         placeholder="mail@example.com"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('email')
+                            form.setValue('email', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -250,9 +254,13 @@ export function RegisterForm({
                         type="password"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('password')
+                            form.setValue('password', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -280,9 +288,13 @@ export function RegisterForm({
                         type="password"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('passwordrepeat')
+                            form.setValue('passwordrepeat', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -313,9 +325,13 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('firstname')
+                            form.setValue('firstname', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -341,9 +357,13 @@ export function RegisterForm({
                         placeholder="Michael"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('middlename')
+                            form.setValue('middlename', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -370,9 +390,13 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('lastname')
+                            form.setValue('lastname', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -462,9 +486,13 @@ export function RegisterForm({
                         placeholder="+1 (555) 123-4567"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('phone')
+                            form.setValue('phone', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -492,9 +520,13 @@ export function RegisterForm({
                         placeholder="123 Main St, City, State"
                         autoComplete="off"
                         onChange={(e) => {
-                          field.onChange(e)
                           if (fieldState.error) {
+                            // Clear error and update value without validation
                             form.clearErrors('address')
+                            form.setValue('address', e.target.value, { shouldValidate: false })
+                          } else {
+                            // Normal onChange when no error
+                            field.onChange(e)
                           }
                         }}
                       />
@@ -549,9 +581,13 @@ export function RegisterForm({
                               onBlur={field.onBlur}
                               error={fieldState.error}
                               onChange={(value) => {
-                                field.onChange(value)
                                 if (fieldState.error) {
+                                  // Clear error and update value without validation
                                   form.clearErrors('paymentInfo')
+                                  form.setValue('paymentInfo', value, { shouldValidate: false })
+                                } else {
+                                  // Normal onChange when no error
+                                  field.onChange(value)
                                 }
                               }}
                             />
@@ -585,9 +621,14 @@ export function RegisterForm({
                                   : ''
                               }
                               onChange={(e) => {
-                                field.onChange({ iban: e.target.value })
+                                const newValue = { iban: e.target.value }
                                 if (fieldState.error) {
+                                  // Clear error and update value without validation
                                   form.clearErrors('paymentInfo')
+                                  form.setValue('paymentInfo', newValue, { shouldValidate: false })
+                                } else {
+                                  // Normal onChange when no error
+                                  field.onChange(newValue)
                                 }
                               }}
                               onBlur={field.onBlur}

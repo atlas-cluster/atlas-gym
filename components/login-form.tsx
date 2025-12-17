@@ -102,9 +102,13 @@ export function LoginForm({
                     placeholder="mail@example.com"
                     autoComplete="off"
                     onChange={(e) => {
-                      field.onChange(e)
                       if (fieldState.error) {
+                        // Clear error and update value without validation
                         form.clearErrors('email')
+                        form.setValue('email', e.target.value, { shouldValidate: false })
+                      } else {
+                        // Normal onChange when no error
+                        field.onChange(e)
                       }
                     }}
                   />
@@ -132,9 +136,13 @@ export function LoginForm({
                     type="password"
                     autoComplete="off"
                     onChange={(e) => {
-                      field.onChange(e)
                       if (fieldState.error) {
+                        // Clear error and update value without validation
                         form.clearErrors('password')
+                        form.setValue('password', e.target.value, { shouldValidate: false })
+                      } else {
+                        // Normal onChange when no error
+                        field.onChange(e)
                       }
                     }}
                   />
