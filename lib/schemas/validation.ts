@@ -145,10 +145,49 @@ export const creditCardDataSchema = z.object({
 })
 
 // Payment info validation - can be credit card data object or IBAN string
-export const paymentInfoSchema = z.union([
-  creditCardDataSchema,
-  z.object({ iban: ibanSchema }),
-])
+export const paymentInfoSchema = z
+  .union([creditCardDataSchema, z.object({ iban: ibanSchema })])
+  .superRefine((data, ctx) => {
+    // Provide more specific error messages
+    if ('cardNumber' in data) {
+      // Validate each credit card field individually for better error messages
+      const cardNumberResult = creditCardNumberSchema.safeParse(data.cardNumber)
+      if (!cardNumberResult.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: cardNumberResult.error.issues[0]?.message || 'Invalid card number',
+          path: ['cardNumber'],
+        })
+      }
+
+      const cardExpiryResult = creditCardExpirySchema.safeParse(data.cardExpiry)
+      if (!cardExpiryResult.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: cardExpiryResult.error.issues[0]?.message || 'Invalid expiry date',
+          path: ['cardExpiry'],
+        })
+      }
+
+      const cardCVCResult = creditCardCVCSchema.safeParse(data.cardCVC)
+      if (!cardCVCResult.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: cardCVCResult.error.issues[0]?.message || 'Invalid CVC',
+          path: ['cardCVC'],
+        })
+      }
+    } else if ('iban' in data) {
+      const ibanResult = ibanSchema.safeParse(data.iban)
+      if (!ibanResult.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: ibanResult.error.issues[0]?.message || 'Invalid IBAN',
+          path: ['iban'],
+        })
+      }
+    }
+  })
 
 // Login schema
 export const loginSchema = z.object({
