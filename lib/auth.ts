@@ -67,16 +67,19 @@ export async function createUser(data: {
 
     // Insert payment method
     if (data.paymentType === 'credit_card' && 'cardNumber' in data.paymentInfo) {
+      // Extract last 4 digits for PCI DSS compliance
+      const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
+      const lastFour = cardNumber.slice(-4)
+      
       await client.query(
         `INSERT INTO gym_manager.payment_methods 
-          (user_id, payment_type, card_number, card_expiry, card_cvc)
-         VALUES ($1, $2, $3, $4, $5)`,
+          (user_id, payment_type, card_last_four, card_expiry)
+         VALUES ($1, $2, $3, $4)`,
         [
           user.id,
           data.paymentType,
-          data.paymentInfo.cardNumber,
+          lastFour,
           data.paymentInfo.cardExpiry,
-          data.paymentInfo.cardCVC,
         ]
       )
     } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {

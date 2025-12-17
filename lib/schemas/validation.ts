@@ -117,7 +117,8 @@ export const creditCardExpirySchema = z
     // Convert 2-digit year to 4-digit
     const fullYear = year < 100 ? 2000 + year : year
     
-    const expiryDate = new Date(fullYear, month, 0) // Last day of the month
+    // Get the last day of the expiry month (month - 1 because Date months are 0-indexed)
+    const expiryDate = new Date(fullYear, month, 0)
     const today = new Date()
     
     return expiryDate >= today

@@ -31,9 +31,8 @@ CREATE TABLE payment_methods (
     payment_type        VARCHAR(20) NOT NULL,  -- 'credit_card' or 'iban'
     
     -- Credit card fields (only populated when payment_type = 'credit_card')
-    card_number         VARCHAR(19),  -- Last 4 digits or masked number
+    card_last_four      VARCHAR(4),   -- Last 4 digits only for security
     card_expiry         VARCHAR(7),   -- Format: MM/YYYY
-    card_cvc            VARCHAR(4),   -- Should be encrypted/hashed in production
     
     -- IBAN fields (only populated when payment_type = 'iban')
     iban                VARCHAR(34),
@@ -43,7 +42,7 @@ CREATE TABLE payment_methods (
     
     CONSTRAINT valid_payment_type CHECK (payment_type IN ('credit_card', 'iban')),
     CONSTRAINT check_credit_card_fields CHECK (
-        (payment_type = 'credit_card' AND card_number IS NOT NULL AND card_expiry IS NOT NULL AND card_cvc IS NOT NULL)
+        (payment_type = 'credit_card' AND card_last_four IS NOT NULL AND card_expiry IS NOT NULL)
         OR payment_type != 'credit_card'
     ),
     CONSTRAINT check_iban_fields CHECK (
