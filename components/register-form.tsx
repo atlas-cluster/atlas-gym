@@ -530,7 +530,16 @@ export function RegisterForm({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <CreditCardInput {...field} error={fieldState.error} />
+                        <CreditCardInput 
+                          {...field} 
+                          error={fieldState.error}
+                          onChange={(value) => {
+                            field.onChange(value)
+                            if (fieldState.error) {
+                              form.clearErrors('paymentInfo')
+                            }
+                          }}
+                        />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
                         )}

@@ -76,7 +76,7 @@ export function CreditCardInput({
               {...getExpiryDateProps()}
               id={`expiry-${id}`}
               className={cn('rounded-r-none rounded-t-none shadow-none', {
-                'border-destructive': meta.erroredInputs.expiryDate,
+                'border-destructive': !!error,
               })}
             />
           </div>
@@ -85,15 +85,12 @@ export function CreditCardInput({
               {...getCVCProps()}
               id={`cvc-${id}`}
               className={cn('rounded-l-none rounded-t-none shadow-none', {
-                'border-destructive': meta.erroredInputs.cvc,
+                'border-destructive': !!error,
               })}
             />
           </div>
         </div>
       </div>
-      {meta.error && (
-        <p className="text-sm font-medium text-destructive">{meta.error}</p>
-      )}
     </div>
   )
 }
