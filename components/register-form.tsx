@@ -34,6 +34,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { CreditCardInput } from '@/components/ui/credit-card-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { PhoneInput } from '@/components/ui/phone-input'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -179,6 +180,10 @@ export function RegisterForm({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Only handle Enter on input elements, not on buttons or selects
     const target = e.target as HTMLElement
+
+    // Fix for combobox (e.g., date picker)
+    if (target.role === 'combobox') return
+
     const isInput = target.tagName === 'INPUT'
 
     if (e.key === 'Enter' && !stepper.isLast && isInput) {
@@ -239,7 +244,6 @@ export function RegisterForm({
                     </Field>
                   )}
                 />
-
                 <Controller
                   name="password"
                   control={form.control}
@@ -326,6 +330,7 @@ export function RegisterForm({
                         {...field}
                         id="firstname"
                         aria-invalid={fieldState.invalid}
+                        placeholder={"John"}
                         autoComplete="off"
                         onChange={(e) => {
                           // Always update without validation on change
@@ -357,7 +362,7 @@ export function RegisterForm({
                         {...field}
                         id="middlename"
                         aria-invalid={fieldState.invalid}
-                        placeholder="Michael"
+                        placeholder="Alan"
                         autoComplete="off"
                         onChange={(e) => {
                           // Always update without validation on change
@@ -391,6 +396,7 @@ export function RegisterForm({
                         {...field}
                         id="lastname"
                         aria-invalid={fieldState.invalid}
+                        placeholder={"Doe"}
                         autoComplete="off"
                         onChange={(e) => {
                           // Always update without validation on change
@@ -486,23 +492,22 @@ export function RegisterForm({
                           <sup className={'text-destructive'}>*</sup>
                         </span>
                       </FieldLabel>
-                      <Input
+                      <PhoneInput
                         {...field}
                         id="phone"
                         aria-invalid={fieldState.invalid}
-                        placeholder="+1 (555) 123-4567"
-                        autoComplete="off"
-                        onChange={(e) => {
-                          // Always update without validation on change
-                          // Validation will happen on blur or submit
-                          if (fieldState.error) {
-                            form.clearErrors('phone')
-                          }
-                          form.setValue('phone', e.target.value, {
-                            shouldValidate: false,
-                          })
-                        }}
-                      />
+                        placeholder={"+49 123 4567890"}
+                        international
+                      onChange={(e) => {
+                        // Always update without validation on change
+                        // Validation will happen on blur or submit
+                        if (fieldState.error) {
+                          form.clearErrors('phone')
+                        }
+                        form.setValue('phone', e.toString(), {
+                          shouldValidate: false,
+                        })
+                      }}/>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
