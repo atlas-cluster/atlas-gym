@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { useId, useState, useEffect } from 'react'
 import { CreditCardIcon } from 'lucide-react'
 import { usePaymentInputs } from 'react-payment-inputs'
 import images, { type CardImages } from 'react-payment-inputs/images'
@@ -10,9 +10,9 @@ import { FieldError } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 
 interface CreditCardInputProps {
-  onChange: (value: string) => void
+  onChange: (value: { cardNumber: string; cardExpiry: string; cardCVC: string }) => void
   onBlur: () => void
-  value: string | undefined
+  value: { cardNumber?: string; cardExpiry?: string; cardCVC?: string } | undefined
   name: string
   error?: FieldError
 }
@@ -20,7 +20,7 @@ interface CreditCardInputProps {
 export function CreditCardInput({
                                   onChange,
                                   onBlur,
-                                  value,
+                                  value = {},
                                   name,
                                   error,
                                 }: CreditCardInputProps) {
@@ -34,22 +34,46 @@ export function CreditCardInput({
     wrapperProps,
   } = usePaymentInputs()
 
+  // Local state to manage individual field values
+  const [cardNumber, setCardNumber] = useState(value?.cardNumber || '')
+  const [cardExpiry, setCardExpiry] = useState(value?.cardExpiry || '')
+  const [cardCVC, setCardCVC] = useState(value?.cardCVC || '')
+
+  // Update parent whenever any field changes
+  useEffect(() => {
+    onChange({ cardNumber, cardExpiry, cardCVC })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardNumber, cardExpiry, cardCVC])
+
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     getCardNumberProps().onChange(e)
-    onChange(e.target.value)
+    setCardNumber(e.target.value)
   }
 
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    getExpiryDateProps().onChange(e)
+    setCardExpiry(e.target.value)
+  }
+
+  const handleCVCChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    getCVCProps().onChange(e)
+    setCardCVC(e.target.value)
+  }
+
+  // Filter out non-DOM props from wrapperProps to avoid React warnings
+  const { isTouched, ...domWrapperProps } = wrapperProps
+
   return (
-    <div {...wrapperProps} className="w-full space-y-2">
-      <Label htmlFor={`number-${id}`}>Card details</Label>
+    <div {...domWrapperProps} className="w-full space-y-2">
+      <Label htmlFor={`number-${id}`}>Card details<sup className={'text-destructive'}>*</sup></Label>
       <div>
         <div className="relative focus-within:z-10">
           <Input
             {...getCardNumberProps({
               onChange: handleCardNumberChange,
               onBlur: onBlur,
-              value: value,
             })}
+            value={cardNumber}
             id={`number-${id}`}
             name={name}
             className={cn('peer rounded-b-none pr-9 shadow-none', {
@@ -73,7 +97,11 @@ export function CreditCardInput({
         <div className="-mt-px flex">
           <div className="min-w-0 flex-1 focus-within:z-10">
             <Input
-              {...getExpiryDateProps()}
+              {...getExpiryDateProps({
+                onChange: handleExpiryChange,
+                onBlur: onBlur,
+              })}
+              value={cardExpiry}
               id={`expiry-${id}`}
               className={cn('rounded-r-none rounded-t-none shadow-none', {
                 'border-destructive': !!error,
@@ -82,7 +110,11 @@ export function CreditCardInput({
           </div>
           <div className="-ms-px min-w-0 flex-1 focus-within:z-10">
             <Input
-              {...getCVCProps()}
+              {...getCVCProps({
+                onChange: handleCVCChange,
+                onBlur: onBlur,
+              })}
+              value={cardCVC}
               id={`cvc-${id}`}
               className={cn('rounded-l-none rounded-t-none shadow-none', {
                 'border-destructive': !!error,

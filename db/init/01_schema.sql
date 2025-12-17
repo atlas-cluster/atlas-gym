@@ -7,7 +7,8 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 DROP TABLE IF EXISTS
     users,
-    sessions
+    sessions,
+    payment_methods
 CASCADE;
 
 CREATE TABLE users (
@@ -21,9 +22,33 @@ CREATE TABLE users (
     user_address    TEXT,
     user_birthdate  DATE         NOT NULL,
     user_phone      VARCHAR(20),
-    payment_type    VARCHAR(20),  -- 'credit_card' or 'iban'
-    payment_info    TEXT,         -- Stored payment information
     CONSTRAINT valid_email CHECK (user_email <> '')
+);
+
+CREATE TABLE payment_methods (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    payment_type        VARCHAR(20) NOT NULL,  -- 'credit_card' or 'iban'
+    
+    -- Credit card fields (only populated when payment_type = 'credit_card')
+    card_last_four      VARCHAR(4),   -- Last 4 digits only for security
+    card_expiry         VARCHAR(7),   -- Format: MM/YYYY
+    
+    -- IBAN fields (only populated when payment_type = 'iban')
+    iban                VARCHAR(34),
+    
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    
+    CONSTRAINT valid_payment_type CHECK (payment_type IN ('credit_card', 'iban')),
+    CONSTRAINT check_credit_card_fields CHECK (
+        (payment_type = 'credit_card' AND card_last_four IS NOT NULL AND card_expiry IS NOT NULL)
+        OR payment_type != 'credit_card'
+    ),
+    CONSTRAINT check_iban_fields CHECK (
+        (payment_type = 'iban' AND iban IS NOT NULL)
+        OR payment_type != 'iban'
+    )
 );
 
 CREATE TABLE sessions (

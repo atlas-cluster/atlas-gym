@@ -3,6 +3,22 @@
  */
 
 /**
+ * Payment method data structure
+ */
+export interface PaymentMethod {
+  id: string
+  user_id: string
+  payment_type: 'credit_card' | 'iban'
+  // Credit card fields (PCI DSS compliant - only last 4 digits stored)
+  card_last_four?: string
+  card_expiry?: string
+  // IBAN field
+  iban?: string
+  created_at: Date
+  updated_at: Date
+}
+
+/**
  * Database User type - matches the database schema
  */
 export interface User {
@@ -15,8 +31,6 @@ export interface User {
   user_address?: string
   user_birthdate: Date
   user_phone?: string
-  payment_type?: string
-  payment_info?: string
 }
 
 /**

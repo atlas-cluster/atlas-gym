@@ -29,20 +29,28 @@ export async function createUser(data: {
   birthdate: string
   address?: string
   phone?: string
-  paymentType?: string
-  paymentInfo?: string
+  paymentType: 'credit_card' | 'iban'
+  paymentInfo: 
+    | { cardNumber: string; cardExpiry: string; cardCVC: string }
+    | { iban: string }
 }): Promise<User | null> {
   const pool = getPool()
   const passwordHash = await hashPassword(data.password)
 
+  // Start a transaction
+  const client = await pool.connect()
+  
   try {
-    const result = await pool.query(
+    await client.query('BEGIN')
+    
+    // Insert user
+    const userResult = await client.query(
       `INSERT INTO gym_manager.users 
         (user_email, password_hash, user_firstname, user_lastname, user_middlename, 
-         user_birthdate, user_address, user_phone, payment_type, payment_info)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         user_birthdate, user_address, user_phone)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
-                 user_email, user_address, user_birthdate, user_phone, payment_type, payment_info`,
+                 user_email, user_address, user_birthdate, user_phone`,
       [
         data.email,
         passwordHash,
@@ -52,15 +60,49 @@ export async function createUser(data: {
         data.birthdate,
         data.address || null,
         data.phone || null,
-        data.paymentType || null,
-        data.paymentInfo || null,
       ]
     )
 
-    return result.rows[0] as User
+    const user = userResult.rows[0] as User
+
+    // Insert payment method
+    if (data.paymentType === 'credit_card' && 'cardNumber' in data.paymentInfo) {
+      // Extract last 4 digits for PCI DSS compliance
+      const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
+      const lastFour = cardNumber.slice(-4)
+      
+      await client.query(
+        `INSERT INTO gym_manager.payment_methods 
+          (user_id, payment_type, card_last_four, card_expiry)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          user.id,
+          data.paymentType,
+          lastFour,
+          data.paymentInfo.cardExpiry,
+        ]
+      )
+    } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
+      await client.query(
+        `INSERT INTO gym_manager.payment_methods 
+          (user_id, payment_type, iban)
+         VALUES ($1, $2, $3)`,
+        [
+          user.id,
+          data.paymentType,
+          data.paymentInfo.iban,
+        ]
+      )
+    }
+
+    await client.query('COMMIT')
+    return user
   } catch (error) {
+    await client.query('ROLLBACK')
     console.error('Error creating user:', error)
     return null
+  } finally {
+    client.release()
   }
 }
 
@@ -73,7 +115,7 @@ export async function authenticateUser(
   try {
     const result = await pool.query(
       `SELECT id, created_at, user_firstname, user_lastname, user_middlename,
-              user_email, user_address, user_birthdate, user_phone, payment_type, payment_info,
+              user_email, user_address, user_birthdate, user_phone,
               password_hash
        FROM gym_manager.users
        WHERE user_email = $1`,
@@ -164,7 +206,7 @@ export async function getUserBySessionId(
   try {
     const result = await pool.query(
       `SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone, u.payment_type, u.payment_info
+              u.user_email, u.user_address, u.user_birthdate, u.user_phone
        FROM gym_manager.users u
        JOIN gym_manager.sessions s ON u.id = s.user_id
        WHERE s.id = $1 AND s.expires_at > NOW()`,

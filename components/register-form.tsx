@@ -81,7 +81,7 @@ export function RegisterForm({
       phone: '',
       address: '',
       paymentType: 'credit_card',
-      paymentInfo: '',
+      paymentInfo: { cardNumber: '', cardExpiry: '', cardCVC: '' },
     },
   })
 
@@ -501,7 +501,7 @@ export function RegisterForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="paymentType">
-                        <span>Payment Type</span>
+                        <span>Payment Type<sup className={'text-destructive'}>*</sup></span>
                       </FieldLabel>
                       <select
                         {...field}
@@ -510,6 +510,12 @@ export function RegisterForm({
                         aria-invalid={fieldState.invalid}
                         onChange={(e) => {
                           field.onChange(e)
+                          // Reset payment info when payment type changes
+                          if (e.target.value === 'credit_card') {
+                            form.setValue('paymentInfo', { cardNumber: '', cardExpiry: '', cardCVC: '' })
+                          } else {
+                            form.setValue('paymentInfo', { iban: '' })
+                          }
                           if (fieldState.error) {
                             form.clearErrors('paymentType')
                           }
@@ -531,7 +537,9 @@ export function RegisterForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <CreditCardInput 
-                          {...field} 
+                          name={field.name}
+                          value={typeof field.value === 'object' && 'cardNumber' in field.value ? field.value : undefined}
+                          onBlur={field.onBlur}
                           error={fieldState.error}
                           onChange={(value) => {
                             field.onChange(value)
@@ -553,20 +561,21 @@ export function RegisterForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="paymentInfo">
-                          <span>IBAN</span>
+                          <span>IBAN<sup className={'text-destructive'}>*</sup></span>
                         </FieldLabel>
                         <Input
-                          {...field}
                           id="paymentInfo"
                           aria-invalid={fieldState.invalid}
                           placeholder="DE89 3704 0044 0532 0130 00"
                           autoComplete="off"
+                          value={typeof field.value === 'object' && 'iban' in field.value ? field.value.iban : ''}
                           onChange={(e) => {
-                            field.onChange(e)
+                            field.onChange({ iban: e.target.value })
                             if (fieldState.error) {
                               form.clearErrors('paymentInfo')
                             }
                           }}
+                          onBlur={field.onBlur}
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
