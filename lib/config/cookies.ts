@@ -8,7 +8,7 @@ export const COOKIE_CONFIG = {
     options: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const, // More secure than 'lax'
+      sameSite: 'lax' as const, // Compatible with Safari/iOS while maintaining CSRF protection
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
       path: '/',
     },
@@ -22,7 +22,7 @@ export function getSecureCookieOptions() {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict' as const,
+    sameSite: 'lax' as const,
     maxAge: 7 * 24 * 60 * 60, // 7 days
     path: '/',
   }
