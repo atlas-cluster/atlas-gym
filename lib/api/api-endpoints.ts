@@ -10,5 +10,5 @@ export const API_ENDPOINTS = {
     session: '/api/auth/session',
     checkEmail: '/api/auth/check-email',
   },
-  ping: '/api/ping',
+  ping: '/api/health',
 } as const

@@ -24,7 +24,8 @@ export async function testConnection(): Promise<{
 }> {
   try {
     const sql = getPool()
-    const result = await sql`SELECT NOW() as now, version() as version`
+    const result =
+      await sql`SELECT NOW() as now, version() as version, pg_postmaster_start_time() as uptime`
 
     return {
       success: true,
@@ -32,6 +33,7 @@ export async function testConnection(): Promise<{
       details: {
         timestamp: result[0].now,
         version: result[0].version,
+        uptime: result[0].uptime,
       },
     }
   } catch (error) {
