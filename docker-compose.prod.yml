@@ -8,7 +8,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data_prod:/var/lib/postgresql
-      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
@@ -17,6 +16,23 @@ services:
     networks:
       - atlas-network
     restart: unless-stopped
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: atlas-gym-flyway-prod
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./db/migrations:/flyway/sql:ro
+      - ./db/flyway.conf:/flyway/conf/flyway.conf:ro
+    command: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - atlas-network
 
   app:
     build:
@@ -35,6 +51,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
     networks:
       - atlas-network
     restart: unless-stopped
