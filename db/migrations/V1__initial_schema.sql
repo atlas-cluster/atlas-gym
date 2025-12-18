@@ -1,4 +1,5 @@
 -- Create schema and enable extensions
+-- Flyway migration will have already created the schema, but we include it here for completeness
 CREATE SCHEMA IF NOT EXISTS gym_manager;
 SET search_path TO gym_manager;
 
@@ -25,17 +26,17 @@ CREATE TABLE payment_methods (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     payment_type        VARCHAR(20) NOT NULL,  -- 'credit_card' or 'iban'
-    
+
     -- Credit card fields (only populated when payment_type = 'credit_card')
     card_number         VARCHAR(19),  -- Full card number
     card_expiry         VARCHAR(7),   -- Format: MM/YYYY
-    
+
     -- IBAN fields (only populated when payment_type = 'iban')
     iban                VARCHAR(34),
-    
+
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
-    
+
     CONSTRAINT valid_payment_type CHECK (payment_type IN ('credit_card', 'iban')),
     CONSTRAINT check_credit_card_fields CHECK (
         (payment_type = 'credit_card' AND card_number IS NOT NULL AND card_expiry IS NOT NULL)

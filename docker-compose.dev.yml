@@ -19,7 +19,7 @@ services:
       - atlas-network
 
   flyway:
-    image: flyway/flyway:10
+    image: flyway/flyway:11
     container_name: atlas-gym-flyway-dev
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
