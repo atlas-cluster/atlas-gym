@@ -34,69 +34,54 @@ export async function createUser(data: {
     | { cardNumber: string; cardExpiry: string; cardCVC: string }
     | { iban: string }
 }): Promise<User> {
-  const pool = getPool()
+  const sql = getPool()
   const passwordHash = await hashPassword(data.password)
 
-  // Start a transaction
-  const client = await pool.connect()
-
   try {
-    await client.query('BEGIN')
+    // Use transaction with postgres
+    const user = await sql.begin(async (sql) => {
+      // Insert user
+      const userResult = await sql`
+        INSERT INTO gym_manager.users 
+          (user_email, password_hash, user_firstname, user_lastname, user_middlename, 
+           user_birthdate, user_address, user_phone)
+         VALUES (${data.email}, ${passwordHash}, ${data.firstname}, ${data.lastname}, 
+                 ${data.middlename || null}, ${data.birthdate}, ${data.address}, ${data.phone})
+         RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
+                   user_email, user_address, user_birthdate, user_phone
+      `
 
-    // Insert user
-    const userResult = await client.query(
-      `INSERT INTO gym_manager.users 
-        (user_email, password_hash, user_firstname, user_lastname, user_middlename, 
-         user_birthdate, user_address, user_phone)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
-                 user_email, user_address, user_birthdate, user_phone`,
-      [
-        data.email,
-        passwordHash,
-        data.firstname,
-        data.lastname,
-        data.middlename || null,
-        data.birthdate,
-        data.address,
-        data.phone,
-      ]
-    )
+      const insertedUser = userResult[0] as User
 
-    const user = userResult.rows[0] as User
+      // Insert payment method
+      if (
+        data.paymentType === 'credit_card' &&
+        'cardNumber' in data.paymentInfo
+      ) {
+        // Store full card number
+        const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
 
-    // Insert payment method
-    if (
-      data.paymentType === 'credit_card' &&
-      'cardNumber' in data.paymentInfo
-    ) {
-      // Store full card number
-      const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
+        await sql`
+          INSERT INTO gym_manager.payment_methods 
+            (user_id, payment_type, card_number, card_expiry)
+           VALUES (${insertedUser.id}, ${data.paymentType}, ${cardNumber}, ${data.paymentInfo.cardExpiry})
+        `
+      } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
+        await sql`
+          INSERT INTO gym_manager.payment_methods 
+            (user_id, payment_type, iban)
+           VALUES (${insertedUser.id}, ${data.paymentType}, ${data.paymentInfo.iban})
+        `
+      }
 
-      await client.query(
-        `INSERT INTO gym_manager.payment_methods 
-          (user_id, payment_type, card_number, card_expiry)
-         VALUES ($1, $2, $3, $4)`,
-        [user.id, data.paymentType, cardNumber, data.paymentInfo.cardExpiry]
-      )
-    } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
-      await client.query(
-        `INSERT INTO gym_manager.payment_methods 
-          (user_id, payment_type, iban)
-         VALUES ($1, $2, $3)`,
-        [user.id, data.paymentType, data.paymentInfo.iban]
-      )
-    }
+      return insertedUser
+    })
 
-    await client.query('COMMIT')
     return user
   } catch (error) {
-    await client.query('ROLLBACK')
     console.error('Error creating user:', error)
     // Re-throw the error so the caller can handle it appropriately
     throw error
-  } finally {
-    client.release()
   }
 }
 
@@ -104,23 +89,22 @@ export async function authenticateUser(
   email: string,
   password: string
 ): Promise<AuthResult> {
-  const pool = getPool()
+  const sql = getPool()
 
   try {
-    const result = await pool.query(
-      `SELECT id, created_at, user_firstname, user_lastname, user_middlename,
+    const result = await sql`
+      SELECT id, created_at, user_firstname, user_lastname, user_middlename,
               user_email, user_address, user_birthdate, user_phone,
               password_hash
        FROM gym_manager.users
-       WHERE user_email = $1`,
-      [email]
-    )
+       WHERE user_email = ${email}
+    `
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return { user: null, error: 'NOT_FOUND' }
     }
 
-    const user = result.rows[0]
+    const user = result[0]
     const isValid = await verifyPassword(password, user.password_hash)
 
     if (!isValid) {
@@ -138,18 +122,17 @@ export async function authenticateUser(
 }
 
 export async function createSession(userId: string): Promise<Session | null> {
-  const pool = getPool()
+  const sql = getPool()
   const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
   try {
-    const result = await pool.query(
-      `INSERT INTO gym_manager.sessions (user_id, expires_at)
-       VALUES ($1, $2)
-       RETURNING id, user_id, expires_at, created_at`,
-      [userId, expiresAt]
-    )
+    const result = await sql`
+      INSERT INTO gym_manager.sessions (user_id, expires_at)
+       VALUES (${userId}, ${expiresAt})
+       RETURNING id, user_id, expires_at, created_at
+    `
 
-    return result.rows[0] as Session
+    return result[0] as Session
   } catch (error) {
     console.error('Error creating session:', error)
     return null
@@ -157,21 +140,20 @@ export async function createSession(userId: string): Promise<Session | null> {
 }
 
 export async function getSession(sessionId: string): Promise<Session | null> {
-  const pool = getPool()
+  const sql = getPool()
 
   try {
-    const result = await pool.query(
-      `SELECT id, user_id, expires_at, created_at
+    const result = await sql`
+      SELECT id, user_id, expires_at, created_at
        FROM gym_manager.sessions 
-       WHERE id = $1 AND expires_at > NOW()`,
-      [sessionId]
-    )
+       WHERE id = ${sessionId} AND expires_at > NOW()
+    `
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return null
     }
 
-    return result.rows[0] as Session
+    return result[0] as Session
   } catch (error) {
     console.error('Error getting session:', error)
     return null
@@ -179,12 +161,10 @@ export async function getSession(sessionId: string): Promise<Session | null> {
 }
 
 export async function deleteSession(sessionId: string): Promise<boolean> {
-  const pool = getPool()
+  const sql = getPool()
 
   try {
-    await pool.query(`DELETE FROM gym_manager.sessions WHERE id = $1`, [
-      sessionId,
-    ])
+    await sql`DELETE FROM gym_manager.sessions WHERE id = ${sessionId}`
     return true
   } catch (error) {
     console.error('Error deleting session:', error)
@@ -195,23 +175,22 @@ export async function deleteSession(sessionId: string): Promise<boolean> {
 export async function getUserBySessionId(
   sessionId: string
 ): Promise<User | null> {
-  const pool = getPool()
+  const sql = getPool()
 
   try {
-    const result = await pool.query(
-      `SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
+    const result = await sql`
+      SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
               u.user_email, u.user_address, u.user_birthdate, u.user_phone
        FROM gym_manager.users u
        JOIN gym_manager.sessions s ON u.id = s.user_id
-       WHERE s.id = $1 AND s.expires_at > NOW()`,
-      [sessionId]
-    )
+       WHERE s.id = ${sessionId} AND s.expires_at > NOW()
+    `
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return null
     }
 
-    return result.rows[0] as User
+    return result[0] as User
   } catch (error) {
     console.error('Error getting user by session:', error)
     return null
