@@ -41,7 +41,7 @@ services:
       args:
         - BUILDKIT_INLINE_CACHE=1
     image: atlas-gym-app:${IMAGE_TAG:-latest}
-    container_name: atlas-gym-app-prod
+    container_name: atlas-gym-app-${DEPLOYMENT_SLOT:-blue}
     environment:
       - NODE_ENV=production
       - POSTGRES_USER=${POSTGRES_USER}
@@ -49,8 +49,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-    ports:
-      - '3000:3000'
+    expose:
+      - '3000'
+    labels:
+      - "com.atlas-gym.deployment.slot=${DEPLOYMENT_SLOT:-blue}"
+      - "com.atlas-gym.deployment.version=${IMAGE_TAG:-latest}"
     healthcheck:
       test: ["CMD", "bun", "run", "/app/healthcheck.js"]
       interval: 10s
@@ -62,6 +65,20 @@ services:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully
+    networks:
+      - atlas-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: atlas-gym-nginx-prod
+    ports:
+      - '3000:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
     networks:
       - atlas-network
     restart: unless-stopped

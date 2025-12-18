@@ -23,18 +23,8 @@ jobs:
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          IMAGE_TAG=${{ github.sha }}
           EOF
-
-      - name: Clean deployment directory
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          script: |
-            rm -rf /var/www/atlas-gym/*
-            rm -rf /var/www/atlas-gym/.[!.]*
 
       - name: Copy files to server
         uses: easingthemes/ssh-deploy@v5.1.0
@@ -45,8 +35,8 @@ jobs:
           REMOTE_PORT: ${{ secrets.DEPLOY_PORT || 22 }}
           SOURCE: .
           TARGET: /var/www/atlas-gym/
-          EXCLUDE: node_modules/, .next/, .git/, *.log, .gitignore
-          ARGS: -avzr --delete
+          EXCLUDE: node_modules/, .next/, .git/, *.log
+          ARGS: -avzr
 
 
       - name: Deploy application
@@ -58,14 +48,76 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           script: |
             cd /var/www/atlas-gym
-
-            docker compose -f docker-compose.prod.yml down -v
             
-            docker volume prune -f
-
-            docker compose -f docker-compose.prod.yml build --no-cache
-            docker compose -f docker-compose.prod.yml up -d
-
-            docker system prune -f
-
-            echo "Deployment completed successfully!"
+            # Export image tag
+            export IMAGE_TAG=${{ github.sha }}
+            
+            # Build new image with caching enabled
+            echo "Building new image..."
+            docker compose -f docker-compose.prod.yml build app
+            
+            # Create a backup of current container (for rollback)
+            BACKUP_IMAGE="atlas-gym-app:backup-$(date +%Y%m%d-%H%M%S)"
+            if docker ps -q -f name=atlas-gym-app-prod; then
+              echo "Creating backup of current deployment..."
+              docker commit atlas-gym-app-prod $BACKUP_IMAGE
+            fi
+            
+            # Pull/update other services without stopping them
+            docker compose -f docker-compose.prod.yml up -d postgres
+            
+            # Run database migrations
+            echo "Running database migrations..."
+            docker compose -f docker-compose.prod.yml run --rm flyway migrate
+            
+            # Deploy new app version with rolling update
+            echo "Deploying new app version..."
+            docker compose -f docker-compose.prod.yml up -d app
+            
+            # Wait for health check to pass
+            echo "Waiting for application to be healthy..."
+            MAX_WAIT=120
+            COUNTER=0
+            HEALTH_CHECK_PASSED=false
+            
+            while [ $COUNTER -lt $MAX_WAIT ]; do
+              if docker exec atlas-gym-app-prod bun run /app/healthcheck.js 2>/dev/null; then
+                echo "✓ Application is healthy!"
+                HEALTH_CHECK_PASSED=true
+                break
+              fi
+              echo "Waiting for health check... ($COUNTER/$MAX_WAIT seconds)"
+              sleep 2
+              COUNTER=$((COUNTER + 2))
+            done
+            
+            if [ "$HEALTH_CHECK_PASSED" = false ]; then
+              echo "✗ Deployment failed: Health check timeout"
+              echo "Rolling back to previous version..."
+              
+              # Rollback if we have a backup
+              if docker images -q $BACKUP_IMAGE 2>/dev/null; then
+                docker stop atlas-gym-app-prod
+                docker rm atlas-gym-app-prod
+                docker run -d \
+                  --name atlas-gym-app-prod \
+                  --network atlas-network \
+                  -p 3000:3000 \
+                  $BACKUP_IMAGE
+                echo "Rolled back to previous version"
+              fi
+              
+              docker compose -f docker-compose.prod.yml logs app
+              exit 1
+            fi
+            
+            # Cleanup old backup images (keep last 2)
+            echo "Cleaning up old backups..."
+            docker images atlas-gym-app --format "{{.Repository}}:{{.Tag}}" | grep backup | tail -n +3 | xargs -r docker rmi 2>/dev/null || true
+            
+            # Cleanup dangling images
+            docker image prune -f
+            
+            echo "✓ Deployment completed successfully!"
+            echo "Active version: $IMAGE_TAG"
+            docker ps --filter "name=atlas-gym"
