@@ -35,7 +35,9 @@ services:
       - atlas-network
 
   app:
-    image: ghcr.io/atlas-cluster/atlas-gym:${IMAGE_TAG}
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     container_name: atlas-gym-app-prod
     environment:
       - NODE_ENV=production
