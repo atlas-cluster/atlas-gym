@@ -10,13 +10,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const pool = getPool()
-    const result = await pool.query(
-      'SELECT id FROM gym_manager.users WHERE user_email = $1',
-      [email]
-    )
+    const sql = getPool()
+    const result = await sql`
+      SELECT id FROM gym_manager.users WHERE user_email = ${email}
+    `
 
-    const exists = result.rows.length > 0
+    const exists = result.length > 0
 
     return NextResponse.json({ exists }, { status: 200 })
   } catch (err) {
