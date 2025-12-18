@@ -240,16 +240,6 @@ If builds are slow:
 | File Sync | Destructive `rm -rf` | Incremental sync |
 | Database | Destroyed & recreated | Persistent across deployments |
 
-## Advanced Options
-
-### Blue-Green Deployment
-
-For even more advanced zero-downtime deployments, see:
-- `docker-compose.prod.v2.yml` - Blue-green capable compose file
-- `.github/workflows/deploy.v2.yml` - Blue-green deployment workflow
-
-This setup allows running two versions simultaneously and switching traffic between them.
-
 ## Security Considerations
 
 1. **Health endpoint**: Consider adding authentication for production
@@ -261,8 +251,8 @@ This setup allows running two versions simultaneously and switching traffic betw
 
 Potential improvements for consideration:
 
-1. **Load balancer integration**: Use nginx for traffic routing
+1. **Monitoring integration**: Prometheus/Grafana for metrics
 2. **Database backup automation**: Automated backups before deployment
-3. **Monitoring integration**: Prometheus/Grafana for metrics
-4. **Canary deployments**: Gradual traffic shifting
-5. **Multi-region deployment**: Geographic redundancy
+3. **Canary deployments**: Gradual traffic shifting to new versions
+4. **Multi-region deployment**: Geographic redundancy
+5. **Blue-green deployment**: For even more advanced zero-downtime scenarios
