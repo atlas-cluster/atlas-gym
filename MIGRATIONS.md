@@ -75,6 +75,28 @@ node scripts/migrate.js status
 
 ### Creating a New Migration
 
+#### Automatic (Recommended)
+
+Use the migration creation script:
+```bash
+npm run migrate:create description_of_migration
+# or
+node scripts/create-migration.js description_of_migration
+```
+
+This will:
+- Automatically find the next migration number
+- Create a properly named migration file
+- Include a template with the correct format
+
+Example:
+```bash
+npm run migrate:create add_trainers_table
+# Creates: db/migrations/003_add_trainers_table.sql
+```
+
+#### Manual
+
 1. Find the highest numbered migration file in `db/migrations/`
 2. Create a new file with the next number
 3. Add your SQL code

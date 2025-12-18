@@ -11,7 +11,8 @@
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build",
     "migrate": "node scripts/migrate.js up",
-    "migrate:status": "node scripts/migrate.js status"
+    "migrate:status": "node scripts/migrate.js status",
+    "migrate:create": "node scripts/create-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
