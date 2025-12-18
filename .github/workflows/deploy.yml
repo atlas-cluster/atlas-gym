@@ -58,14 +58,6 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           script: |
             cd /var/www/atlas-gym
-
-            docker compose -f docker-compose.prod.yml down -v
-            
-            docker volume prune -f
-
-            docker compose -f docker-compose.prod.yml build --no-cache
-            docker compose -f docker-compose.prod.yml up -d
-
-            docker system prune -f
-
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
             echo "Deployment completed successfully!"
