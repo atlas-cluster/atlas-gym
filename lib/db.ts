@@ -1,20 +1,20 @@
-import { Pool } from 'pg'
+import postgres from 'postgres'
 
-let pool: Pool | null = null
+let sql: ReturnType<typeof postgres> | null = null
 
-export function getPool(): Pool {
-  if (!pool) {
-    pool = new Pool({
+export function getPool() {
+  if (!sql) {
+    sql = postgres({
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       host: process.env.POSTGRES_HOST,
       port: 5432,
       database: process.env.POSTGRES_DB,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      idle_timeout: 30, // seconds (was 30000ms in pg)
+      connect_timeout: 2, // seconds (was 2000ms in pg)
     })
   }
-  return pool
+  return sql
 }
 
 export async function testConnection(): Promise<{
@@ -23,17 +23,15 @@ export async function testConnection(): Promise<{
   details?: unknown
 }> {
   try {
-    const pool = getPool()
-    const client = await pool.connect()
-    const result = await client.query('SELECT NOW(), version()')
-    client.release()
+    const sql = getPool()
+    const result = await sql`SELECT NOW() as now, version() as version`
 
     return {
       success: true,
       message: 'Database connection successful',
       details: {
-        timestamp: result.rows[0].now,
-        version: result.rows[0].version,
+        timestamp: result[0].now,
+        version: result[0].version,
       },
     }
   } catch (error) {

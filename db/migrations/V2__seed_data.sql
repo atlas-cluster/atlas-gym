@@ -1,3 +1,5 @@
+-- Seed data for testing
+
 -- Insert test user
 INSERT INTO gym_manager.users (
     user_email,
@@ -28,7 +30,6 @@ INSERT INTO gym_manager.payment_methods (
 ) VALUES (
              (SELECT id FROM gym_manager.users WHERE user_email = 'admin@admin.com'),
              'credit_card',
-             '5469238897741608',
+             '4000000000000000',
              '12/2025'
          );
-
