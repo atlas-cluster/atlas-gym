@@ -60,7 +60,6 @@ services:
         condition: service_completed_successfully
     networks:
       - atlas-network
-    command: sh -c "bun install && bun run dev"
 
 volumes:
   postgres_data_dev:
