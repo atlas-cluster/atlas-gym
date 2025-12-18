@@ -1,121 +1,102 @@
 # Database Migrations Guide
 
-This project uses [node-pg-migrate](https://github.com/salsita/node-pg-migrate) for database migrations. This guide explains how to use the migration system.
+This project uses a simple SQL-based migration system. Migrations are numbered sequentially (001, 002, 003, etc.) and run in order.
 
 ## Overview
 
 The migration system provides:
-- Version-controlled database schema changes
-- Repeatable and reliable database setup
-- Support for both up (apply) and down (rollback) migrations
-- TypeScript support for type-safe migrations
+- Simple SQL migration files with integer versioning
+- Automatic tracking of which migrations have been applied
+- Support for both development and production environments
 - Automatic migration running in Docker environments
 
 ## Directory Structure
 
 ```
 atlas-gym/
-├── migrations/           # Migration files (timestamped)
-│   ├── 1734519000000_initial-schema.ts
-│   └── 1734519100000_seed-initial-data.ts
+├── db/
+│   ├── migrations/           # Migration files (numbered)
+│   │   ├── 001_initial_schema.sql
+│   │   └── 002_seed_data.sql
+│   └── init/                 # Legacy SQL files (kept for reference)
 ├── scripts/
-│   ├── migrate.js       # Migration runner script
-│   └── docker-migrate.sh # Docker migration entrypoint
-├── .pgmigrate.json      # Migration configuration
-└── db/
-    └── init/            # Legacy SQL files (kept for reference)
+│   ├── migrate.js            # Migration runner script
+│   └── docker-migrate.sh     # Docker migration entrypoint
 ```
 
-## Configuration
+## Migration Naming Convention
 
-The migration system is configured via `.pgmigrate.json`:
-
-```json
-{
-  "databaseUrl": {
-    "env": "DATABASE_URL"
-  },
-  "migrationsTable": "pgmigrations",
-  "dir": "migrations",
-  "schema": "gym_manager",
-  "direction": "up",
-  "count": 999,
-  "createSchema": true,
-  "createMigrationsSchema": false,
-  "checkOrder": true
-}
+Migration files must follow this naming pattern:
 ```
+NNN_description.sql
+```
+
+Where:
+- `NNN` is a 3-digit number (001, 002, 003, etc.)
+- `description` is a brief description using underscores for spaces
+- File extension is `.sql`
+
+Examples:
+- `001_initial_schema.sql`
+- `002_seed_data.sql`
+- `003_add_trainers_table.sql`
 
 ## Environment Variables
 
-The migration system needs database connection information. You can provide this in two ways:
+The migration system needs database connection information:
 
-### Option 1: Individual variables (recommended for Docker)
 ```bash
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=db
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-```
-
-### Option 2: Database URL
-```bash
-DATABASE_URL=postgres://user:password@localhost:5432/db
+POSTGRES_HOST=localhost    # Optional, defaults to localhost
+POSTGRES_PORT=5432         # Optional, defaults to 5432
 ```
 
 ## Usage
 
-### Creating a New Migration
-
-To create a new migration file:
-
-```bash
-npm run migrate:create my-migration-name
-```
-
-This creates a new timestamped TypeScript file in the `migrations/` directory.
-
-Example migration file structure:
-
-```typescript
-import { MigrationBuilder } from 'node-pg-migrate'
-
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  // Your schema changes here
-  pgm.createTable('my_table', {
-    id: { type: 'uuid', primaryKey: true },
-    name: { type: 'varchar(100)', notNull: true }
-  })
-}
-
-export async function down(pgm: MigrationBuilder): Promise<void> {
-  // Rollback changes here
-  pgm.dropTable('my_table')
-}
-```
-
 ### Running Migrations
 
-#### Apply all pending migrations:
+Apply all pending migrations:
 ```bash
-npm run migrate:up
+npm run migrate
 # or
 node scripts/migrate.js up
 ```
 
-#### Rollback the last migration:
+### Check Migration Status
+
+See which migrations have been applied:
 ```bash
-npm run migrate:down
+npm run migrate:status
 # or
-node scripts/migrate.js down
+node scripts/migrate.js status
 ```
 
-#### Check migration status:
+### Creating a New Migration
+
+1. Find the highest numbered migration file in `db/migrations/`
+2. Create a new file with the next number
+3. Add your SQL code
+
+Example:
 ```bash
-npm run migrate
-# or
-node scripts/migrate.js
+# If the last migration is 002_seed_data.sql
+# Create: db/migrations/003_add_feature.sql
+```
+
+Migration file template:
+```sql
+-- Migration: 003
+-- Description: Add new feature
+
+SET search_path TO gym_manager;
+
+-- Your SQL statements here
+CREATE TABLE IF NOT EXISTS my_new_table (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL
+);
 ```
 
 ### Docker Usage
@@ -125,98 +106,144 @@ Migrations run automatically when you start the Docker containers:
 #### Development:
 ```bash
 npm run docker:dev
-# or
-docker compose -f docker-compose.dev.yml up
 ```
 
 #### Production:
 ```bash
 npm run docker:prod
-# or
-docker compose -f docker-compose.prod.yml up --build
 ```
 
 The migrations run before the application starts, ensuring the database is always up to date.
 
+## How It Works
+
+1. The migration system maintains a `schema_migrations` table that tracks which migrations have been applied
+2. When you run migrations, the system:
+   - Checks which migration files exist in `db/migrations/`
+   - Compares them to the `schema_migrations` table
+   - Runs any pending migrations in order
+   - Records each successful migration
+
+3. Each migration runs in a transaction:
+   - If the migration succeeds, it's recorded in `schema_migrations`
+   - If it fails, the transaction is rolled back
+
 ## Migration Best Practices
 
-### 1. Always Test Both Up and Down
-- Test your `up` migration to ensure it applies cleanly
-- Test your `down` migration to ensure it rolls back properly
-- Never deploy a migration without testing both directions
+### 1. Always Use Idempotent Statements
 
-### 2. Make Migrations Idempotent When Possible
-Use conditional statements to make migrations safe to run multiple times:
+Use `IF NOT EXISTS` and `IF EXISTS` to make migrations safe to run multiple times:
 
-```typescript
-pgm.createTable('users', { /* ... */ }, { ifNotExists: true })
+```sql
+CREATE TABLE IF NOT EXISTS users (...);
+DROP TABLE IF EXISTS old_table;
+```
+
+### 2. Set the Schema Path
+
+Always include at the top of your migration:
+```sql
+SET search_path TO gym_manager;
 ```
 
 ### 3. Never Modify Existing Migrations
-Once a migration has been applied in production, never modify it. Instead, create a new migration to make additional changes.
+
+Once a migration has been applied in any environment, never modify it. Instead:
+- Create a new migration to make changes
+- Keep a linear history of database changes
 
 ### 4. Keep Migrations Small and Focused
-Each migration should do one thing. This makes it easier to:
-- Understand what changed
-- Roll back specific changes
-- Debug issues
 
-### 5. Use Transactions
-Migrations run in transactions by default. If any part fails, the entire migration is rolled back.
+Each migration should do one thing:
+- ✓ Good: `003_add_users_email_index.sql`
+- ✗ Bad: `003_add_indexes_and_update_data_and_add_tables.sql`
 
-### 6. Add Data Migrations Separately
-Keep schema migrations separate from data migrations:
-- Schema: Tables, columns, indexes, constraints
-- Data: Seed data, data transformations, updates
+### 5. Use Descriptive Names
+
+The migration name should clearly indicate what it does:
+- ✓ Good: `004_add_trainers_table.sql`
+- ✗ Bad: `004_update.sql`
+
+### 6. Test Locally First
+
+Always test new migrations locally before deploying:
+```bash
+npm run migrate:status  # Check status
+npm run migrate         # Run migrations
+```
 
 ## Common Migration Tasks
 
+### Adding a Table
+```sql
+-- Migration: 003
+-- Description: Add trainers table
+
+SET search_path TO gym_manager;
+
+CREATE TABLE IF NOT EXISTS trainers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    specialty VARCHAR(100),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
 ### Adding a Column
-```typescript
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.addColumn('users', {
-    phone_verified: { type: 'boolean', default: false }
-  })
-}
+```sql
+-- Migration: 004
+-- Description: Add phone_verified to users
+
+SET search_path TO gym_manager;
+
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT false;
 ```
 
 ### Creating an Index
-```typescript
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.createIndex('users', 'email')
-}
+```sql
+-- Migration: 005
+-- Description: Add index on users email
+
+SET search_path TO gym_manager;
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(user_email);
 ```
 
-### Adding a Foreign Key
-```typescript
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.addConstraint('orders', 'fk_user', {
-    foreignKeys: {
-      columns: 'user_id',
-      references: 'users(id)',
-      onDelete: 'CASCADE'
-    }
-  })
-}
-```
+### Inserting Data
+```sql
+-- Migration: 006
+-- Description: Add membership types
 
-### Renaming a Table
-```typescript
-export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.renameTable('old_name', 'new_name')
-}
+SET search_path TO gym_manager;
+
+INSERT INTO membership_types (name, price_monthly, description)
+VALUES 
+    ('Basic', 29.99, 'Access to gym facilities'),
+    ('Premium', 59.99, 'Access to gym and classes'),
+    ('VIP', 99.99, 'Full access with personal trainer')
+ON CONFLICT DO NOTHING;
 ```
 
 ## Troubleshooting
 
 ### Migration Failed
+
 If a migration fails:
-1. Check the error message for details
-2. Fix the issue in the migration file
-3. If the migration partially applied, you may need to manually clean up
-4. Re-run the migration
+1. Check the error message in the console
+2. The failed migration will NOT be recorded in `schema_migrations`
+3. Fix the SQL in the migration file
+4. Run migrations again
+
+### Check What's Been Applied
+
+Query the migrations table directly:
+```sql
+SELECT * FROM schema_migrations ORDER BY version;
+```
 
 ### Reset Database (Development Only)
+
 To start fresh in development:
 
 ```bash
@@ -230,19 +257,20 @@ docker volume rm atlas-gym_postgres_data_dev
 docker compose -f docker-compose.dev.yml up
 ```
 
-### Check Which Migrations Have Run
-The `pgmigrations` table in your database tracks which migrations have been applied:
+### Skip a Migration (Not Recommended)
 
+If you absolutely need to mark a migration as applied without running it:
 ```sql
-SELECT * FROM gym_manager.pgmigrations ORDER BY run_on DESC;
+INSERT INTO schema_migrations (version, name) 
+VALUES (3, 'description_of_migration');
 ```
 
 ## Migration History
 
-- `1734519000000_initial-schema.ts` - Initial database schema with users, sessions, and payment_methods tables
-- `1734519100000_seed-initial-data.ts` - Seed data with demo user and payment method
+- `001_initial_schema.sql` - Initial database schema with users, sessions, and payment_methods tables
+- `002_seed_data.sql` - Seed data with demo user (admin@admin.com / admin)
 
-## Additional Resources
+## Database Schema
 
-- [node-pg-migrate Documentation](https://github.com/salsita/node-pg-migrate)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+The database uses a dedicated schema called `gym_manager` to organize tables and avoid naming conflicts with PostgreSQL system tables.
+

@@ -10,10 +10,8 @@
     "format": "prettier . --write",
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build",
-    "migrate": "node-pg-migrate",
-    "migrate:up": "node-pg-migrate up",
-    "migrate:down": "node-pg-migrate down",
-    "migrate:create": "node-pg-migrate create"
+    "migrate": "node scripts/migrate.js up",
+    "migrate:status": "node scripts/migrate.js status"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -61,7 +59,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "eslint-config-prettier": "^10.1.8",
-    "node-pg-migrate": "^8.0.4",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
