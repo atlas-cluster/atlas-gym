@@ -10,8 +10,8 @@ export function getPool() {
       host: process.env.POSTGRES_HOST,
       port: 5432,
       database: process.env.POSTGRES_DB,
-      idle_timeout: 30,
-      connect_timeout: 2,
+      idle_timeout: 30, // seconds (was 30000ms in pg)
+      connect_timeout: 2, // seconds (was 2000ms in pg)
     })
   }
   return sql
