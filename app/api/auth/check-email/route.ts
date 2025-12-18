@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPool } from '@/lib/db'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,10 +12,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    const sql = getPool()
-    const result = await sql`
-      SELECT id FROM gym_manager.users WHERE user_email = ${email}
-    `
+    const result = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.userEmail, email))
 
     const exists = result.length > 0
 

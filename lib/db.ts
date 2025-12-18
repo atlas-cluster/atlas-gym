@@ -1,21 +1,19 @@
+import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
+import * as schema from './db/schema'
 
-let sql: ReturnType<typeof postgres> | null = null
+// Disable prefetch as it's not supported for "Transaction" pool mode
+const queryClient = postgres({
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  host: process.env.POSTGRES_HOST,
+  port: 5432,
+  database: process.env.POSTGRES_DB,
+  idle_timeout: 30,
+  connect_timeout: 2,
+})
 
-export function getPool() {
-  if (!sql) {
-    sql = postgres({
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      host: process.env.POSTGRES_HOST,
-      port: 5432,
-      database: process.env.POSTGRES_DB,
-      idle_timeout: 30, // seconds (was 30000ms in pg)
-      connect_timeout: 2, // seconds (was 2000ms in pg)
-    })
-  }
-  return sql
-}
+export const db = drizzle(queryClient, { schema })
 
 export async function testConnection(): Promise<{
   success: boolean
@@ -23,8 +21,7 @@ export async function testConnection(): Promise<{
   details?: unknown
 }> {
   try {
-    const sql = getPool()
-    const result = await sql`SELECT NOW() as now, version() as version`
+    const result = await queryClient`SELECT NOW() as now, version() as version`
 
     return {
       success: true,

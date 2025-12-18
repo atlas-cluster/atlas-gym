@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs'
-import { getPool } from './db'
-import { User, Session } from './schemas'
+import { db } from './db'
+import { users, paymentMethods, sessions } from './db/schema'
+import { eq, and, gt } from 'drizzle-orm'
+import type { User, Session } from './schemas'
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
@@ -34,24 +36,35 @@ export async function createUser(data: {
     | { cardNumber: string; cardExpiry: string; cardCVC: string }
     | { iban: string }
 }): Promise<User> {
-  const sql = getPool()
   const passwordHash = await hashPassword(data.password)
 
   try {
-    // Use transaction with postgres
-    const user = await sql.begin(async (sql) => {
+    // Use transaction with Drizzle
+    const user = await db.transaction(async (tx) => {
       // Insert user
-      const userResult = await sql`
-        INSERT INTO gym_manager.users 
-          (user_email, password_hash, user_firstname, user_lastname, user_middlename, 
-           user_birthdate, user_address, user_phone)
-         VALUES (${data.email}, ${passwordHash}, ${data.firstname}, ${data.lastname}, 
-                 ${data.middlename || null}, ${data.birthdate}, ${data.address}, ${data.phone})
-         RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
-                   user_email, user_address, user_birthdate, user_phone
-      `
-
-      const insertedUser = userResult[0] as User
+      const [insertedUser] = await tx
+        .insert(users)
+        .values({
+          userEmail: data.email,
+          passwordHash: passwordHash,
+          userFirstname: data.firstname,
+          userLastname: data.lastname,
+          userMiddlename: data.middlename || null,
+          userBirthdate: data.birthdate,
+          userAddress: data.address,
+          userPhone: data.phone,
+        })
+        .returning({
+          id: users.id,
+          created_at: users.createdAt,
+          user_firstname: users.userFirstname,
+          user_lastname: users.userLastname,
+          user_middlename: users.userMiddlename,
+          user_email: users.userEmail,
+          user_address: users.userAddress,
+          user_birthdate: users.userBirthdate,
+          user_phone: users.userPhone,
+        })
 
       // Insert payment method
       if (
@@ -61,20 +74,25 @@ export async function createUser(data: {
         // Store full card number
         const cardNumber = data.paymentInfo.cardNumber.replace(/\s/g, '')
 
-        await sql`
-          INSERT INTO gym_manager.payment_methods 
-            (user_id, payment_type, card_number, card_expiry)
-           VALUES (${insertedUser.id}, ${data.paymentType}, ${cardNumber}, ${data.paymentInfo.cardExpiry})
-        `
+        await tx.insert(paymentMethods).values({
+          userId: insertedUser.id,
+          paymentType: data.paymentType,
+          cardNumber: cardNumber,
+          cardExpiry: data.paymentInfo.cardExpiry,
+        })
       } else if (data.paymentType === 'iban' && 'iban' in data.paymentInfo) {
-        await sql`
-          INSERT INTO gym_manager.payment_methods 
-            (user_id, payment_type, iban)
-           VALUES (${insertedUser.id}, ${data.paymentType}, ${data.paymentInfo.iban})
-        `
+        await tx.insert(paymentMethods).values({
+          userId: insertedUser.id,
+          paymentType: data.paymentType,
+          iban: data.paymentInfo.iban,
+        })
       }
 
-      return insertedUser
+      // Convert to User type (Drizzle date returns string, need to convert to Date)
+      return {
+        ...insertedUser,
+        user_birthdate: new Date(insertedUser.user_birthdate),
+      } as User
     })
 
     return user
@@ -89,16 +107,22 @@ export async function authenticateUser(
   email: string,
   password: string
 ): Promise<AuthResult> {
-  const sql = getPool()
-
   try {
-    const result = await sql`
-      SELECT id, created_at, user_firstname, user_lastname, user_middlename,
-              user_email, user_address, user_birthdate, user_phone,
-              password_hash
-       FROM gym_manager.users
-       WHERE user_email = ${email}
-    `
+    const result = await db
+      .select({
+        id: users.id,
+        created_at: users.createdAt,
+        user_firstname: users.userFirstname,
+        user_lastname: users.userLastname,
+        user_middlename: users.userMiddlename,
+        user_email: users.userEmail,
+        user_address: users.userAddress,
+        user_birthdate: users.userBirthdate,
+        user_phone: users.userPhone,
+        password_hash: users.passwordHash,
+      })
+      .from(users)
+      .where(eq(users.userEmail, email))
 
     if (result.length === 0) {
       return { user: null, error: 'NOT_FOUND' }
@@ -114,7 +138,12 @@ export async function authenticateUser(
     // Remove password_hash from returned user object
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = user
-    return { user: userWithoutPassword as User }
+    return {
+      user: {
+        ...userWithoutPassword,
+        user_birthdate: new Date(userWithoutPassword.user_birthdate),
+      } as User,
+    }
   } catch (error) {
     console.error('Error authenticating user:', error)
     return { user: null, error: 'DB_ERROR' }
@@ -122,17 +151,23 @@ export async function authenticateUser(
 }
 
 export async function createSession(userId: string): Promise<Session | null> {
-  const sql = getPool()
   const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
   try {
-    const result = await sql`
-      INSERT INTO gym_manager.sessions (user_id, expires_at)
-       VALUES (${userId}, ${expiresAt})
-       RETURNING id, user_id, expires_at, created_at
-    `
+    const [session] = await db
+      .insert(sessions)
+      .values({
+        userId: userId,
+        expiresAt: expiresAt,
+      })
+      .returning({
+        id: sessions.id,
+        user_id: sessions.userId,
+        expires_at: sessions.expiresAt,
+        created_at: sessions.createdAt,
+      })
 
-    return result[0] as Session
+    return session as Session
   } catch (error) {
     console.error('Error creating session:', error)
     return null
@@ -140,14 +175,21 @@ export async function createSession(userId: string): Promise<Session | null> {
 }
 
 export async function getSession(sessionId: string): Promise<Session | null> {
-  const sql = getPool()
-
   try {
-    const result = await sql`
-      SELECT id, user_id, expires_at, created_at
-       FROM gym_manager.sessions 
-       WHERE id = ${sessionId} AND expires_at > NOW()
-    `
+    const result = await db
+      .select({
+        id: sessions.id,
+        user_id: sessions.userId,
+        expires_at: sessions.expiresAt,
+        created_at: sessions.createdAt,
+      })
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          gt(sessions.expiresAt, new Date())
+        )
+      )
 
     if (result.length === 0) {
       return null
@@ -161,10 +203,8 @@ export async function getSession(sessionId: string): Promise<Session | null> {
 }
 
 export async function deleteSession(sessionId: string): Promise<boolean> {
-  const sql = getPool()
-
   try {
-    await sql`DELETE FROM gym_manager.sessions WHERE id = ${sessionId}`
+    await db.delete(sessions).where(eq(sessions.id, sessionId))
     return true
   } catch (error) {
     console.error('Error deleting session:', error)
@@ -175,22 +215,36 @@ export async function deleteSession(sessionId: string): Promise<boolean> {
 export async function getUserBySessionId(
   sessionId: string
 ): Promise<User | null> {
-  const sql = getPool()
-
   try {
-    const result = await sql`
-      SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone
-       FROM gym_manager.users u
-       JOIN gym_manager.sessions s ON u.id = s.user_id
-       WHERE s.id = ${sessionId} AND s.expires_at > NOW()
-    `
+    const result = await db
+      .select({
+        id: users.id,
+        created_at: users.createdAt,
+        user_firstname: users.userFirstname,
+        user_lastname: users.userLastname,
+        user_middlename: users.userMiddlename,
+        user_email: users.userEmail,
+        user_address: users.userAddress,
+        user_birthdate: users.userBirthdate,
+        user_phone: users.userPhone,
+      })
+      .from(users)
+      .innerJoin(sessions, eq(users.id, sessions.userId))
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          gt(sessions.expiresAt, new Date())
+        )
+      )
 
     if (result.length === 0) {
       return null
     }
 
-    return result[0] as User
+    return {
+      ...result[0],
+      user_birthdate: new Date(result[0].user_birthdate),
+    } as User
   } catch (error) {
     console.error('Error getting user by session:', error)
     return null
