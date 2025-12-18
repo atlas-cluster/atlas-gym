@@ -37,7 +37,7 @@ console.log(`Database: ${process.env.DATABASE_URL.replace(/:[^:]*@/, ':****@')}`
 console.log('')
 
 try {
-  const npxCommand = `node-pg-migrate ${command}`
+  const npxCommand = `npx node-pg-migrate ${command}`
   execSync(npxCommand, { stdio: 'inherit' })
   console.log('\n✅ Migration completed successfully')
 } catch (error) {

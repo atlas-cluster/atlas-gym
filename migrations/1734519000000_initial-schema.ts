@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+// @ts-nocheck - node-pg-migrate has built-in types
 import { MigrationBuilder, ColumnDefinitions } from 'node-pg-migrate'
 
 export const shorthands: ColumnDefinitions | undefined = undefined
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   // Create schema
-  pgm.createSchema('gym_manager', { ifNotExists: true })
+  pgm.sql('CREATE SCHEMA IF NOT EXISTS gym_manager')
 
   // Enable CITEXT extension for case-insensitive text
   pgm.sql('CREATE EXTENSION IF NOT EXISTS citext')
@@ -64,9 +65,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.addConstraint(
     { schema: 'gym_manager', name: 'users' },
     'valid_email',
-    {
-      check: "user_email <> ''",
-    }
+    "CHECK (user_email <> '')"
   )
 
   // Create payment_methods table
@@ -81,7 +80,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       user_id: {
         type: 'uuid',
         notNull: true,
-        references: { schema: 'gym_manager', name: 'users' },
+        references: '"gym_manager"."users"',
         onDelete: 'CASCADE',
       },
       payment_type: {
@@ -114,26 +113,19 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.addConstraint(
     { schema: 'gym_manager', name: 'payment_methods' },
     'valid_payment_type',
-    {
-      check: "payment_type IN ('credit_card', 'iban')",
-    }
+    "CHECK (payment_type IN ('credit_card', 'iban'))"
   )
 
   pgm.addConstraint(
     { schema: 'gym_manager', name: 'payment_methods' },
     'check_credit_card_fields',
-    {
-      check:
-        "(payment_type = 'credit_card' AND card_number IS NOT NULL AND card_expiry IS NOT NULL) OR payment_type != 'credit_card'",
-    }
+    "CHECK ((payment_type = 'credit_card' AND card_number IS NOT NULL AND card_expiry IS NOT NULL) OR payment_type != 'credit_card')"
   )
 
   pgm.addConstraint(
     { schema: 'gym_manager', name: 'payment_methods' },
     'check_iban_fields',
-    {
-      check: "(payment_type = 'iban' AND iban IS NOT NULL) OR payment_type != 'iban'",
-    }
+    "CHECK ((payment_type = 'iban' AND iban IS NOT NULL) OR payment_type != 'iban')"
   )
 
   // Create sessions table
@@ -147,7 +139,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       },
       user_id: {
         type: 'uuid',
-        references: { schema: 'gym_manager', name: 'users' },
+        references: '"gym_manager"."users"',
         onDelete: 'CASCADE',
       },
       expires_at: {
@@ -169,5 +161,6 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTable({ schema: 'gym_manager', name: 'users' }, { ifExists: true, cascade: true })
   
   // Drop schema
-  pgm.dropSchema('gym_manager', { ifExists: true, cascade: true })
+  pgm.sql('DROP SCHEMA IF EXISTS gym_manager CASCADE')
 }
+
