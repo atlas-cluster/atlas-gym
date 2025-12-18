@@ -10,7 +10,6 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data_dev:/var/lib/postgresql
-      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
@@ -42,7 +41,7 @@ services:
         condition: service_healthy
     networks:
       - atlas-network
-    command: sh -c "bun install && bun run dev"
+    command: sh -c "bun install && node scripts/migrate.js up && bun run dev"
 
 volumes:
   postgres_data_dev:

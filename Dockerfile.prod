@@ -2,7 +2,7 @@ FROM oven/bun:1.3-debian AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lock* ./
+COPY package.json bun.lock* package-lock.json* ./
 RUN bun install --frozen-lockfile
 
 COPY . .
@@ -15,12 +15,21 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install postgresql-client for pg_isready in migration scripts
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd -g 1001 nodejs \
  && useradd -u 1001 -g nodejs -s /bin/bash -m nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy migration files and scripts
+COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/.pgmigrate.json ./.pgmigrate.json
+COPY --from=builder /app/node_modules ./node_modules
 
 RUN chown -R nextjs:nodejs /app
 
@@ -31,4 +40,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["bun", "run", "server.js"]
+# Run migrations then start the server
+CMD sh -c "node scripts/migrate.js up && bun run server.js"
