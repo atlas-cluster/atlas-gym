@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Simple Database Migration Script for Docker
 # This script waits for PostgreSQL and runs migrations
