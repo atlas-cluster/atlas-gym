@@ -48,7 +48,6 @@ jobs:
           EXCLUDE: node_modules/, .next/, .git/, *.log, .gitignore
           ARGS: -avzr --delete
 
-
       - name: Deploy application
         uses: appleboy/ssh-action@v1.1.0
         with:

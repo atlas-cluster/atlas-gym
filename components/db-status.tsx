@@ -1,4 +1,3 @@
-
 'use client'
 import { useEffect, useState } from 'react'
 import {
@@ -106,9 +105,7 @@ export function DbStatus() {
           </span>
         ) : dbConnected ? (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">
-              Connection successful
-            </h4>
+            <h4 className="text-sm font-semibold">Connection successful</h4>
             <div className="text-xs">
               <span className="font-semibold">Version:</span>{' '}
               <span>{pgVersion}</span>
@@ -122,9 +119,7 @@ export function DbStatus() {
           </div>
         ) : (
           <>
-            <span className="text-destructive font-semibold">
-              Error
-            </span>
+            <span className="text-destructive font-semibold">Error</span>
             <div className="text-muted-foreground mt-1 text-xs">
               {result?.message}
             </div>

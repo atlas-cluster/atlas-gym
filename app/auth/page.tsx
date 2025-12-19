@@ -5,15 +5,15 @@ import { LoginForm } from '@/components/login-form'
 import { RegisterForm } from '@/components/register-form'
 
 export default async function Page({
-                                     searchParams,
-                                   }: {
+  searchParams,
+}: {
   searchParams: Promise<{ redirect?: string }>
 }) {
   const params = await searchParams
   const redirectTo = params.redirect || '/'
 
   return (
-    <div className="flex min-h-screen w-full justify-center p-2 items-center">
+    <div className="flex min-h-screen w-full items-center justify-center p-2">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
         <Image
           src={'/atlas_logo_rounded_m.png'}
@@ -21,7 +21,7 @@ export default async function Page({
           height={100}
           alt={'Logo'}
         />
-        <div className={"min-h-[500px] w-full"}>
+        <div className={'min-h-[500px] w-full'}>
           <Card className={'w-full pt-0'}>
             <Tabs defaultValue="login">
               <TabsList className={'mb-8 flex w-full'}>

@@ -1,8 +1,20 @@
 'use client'
-import { CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { ComponentProps, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,7 +24,11 @@ import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { defineStepper } from '@stepperize/react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { ChevronDownIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { CreditCardInput } from '@/components/ui/credit-card-input'
@@ -317,7 +333,7 @@ export function RegisterForm({
                         {...field}
                         id="firstname"
                         aria-invalid={fieldState.invalid}
-                        placeholder={"John"}
+                        placeholder={'John'}
                         autoComplete="off"
                         onChange={(e) => {
                           // Always update without validation on change
@@ -383,7 +399,7 @@ export function RegisterForm({
                         {...field}
                         id="lastname"
                         aria-invalid={fieldState.invalid}
-                        placeholder={"Doe"}
+                        placeholder={'Doe'}
                         autoComplete="off"
                         onChange={(e) => {
                           // Always update without validation on change
@@ -483,18 +499,19 @@ export function RegisterForm({
                         {...field}
                         id="phone"
                         aria-invalid={fieldState.invalid}
-                        placeholder={"+49 123 4567890"}
+                        placeholder={'+49 123 4567890'}
                         international
-                      onChange={(e) => {
-                        // Always update without validation on change
-                        // Validation will happen on blur or submit
-                        if (fieldState.error) {
-                          form.clearErrors('phone')
-                        }
-                        form.setValue('phone', e.toString(), {
-                          shouldValidate: false,
-                        })
-                      }}/>
+                        onChange={(e) => {
+                          // Always update without validation on change
+                          // Validation will happen on blur or submit
+                          if (fieldState.error) {
+                            form.clearErrors('phone')
+                          }
+                          form.setValue('phone', e.toString(), {
+                            shouldValidate: false,
+                          })
+                        }}
+                      />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
@@ -613,13 +630,19 @@ export function RegisterForm({
                               placeholder="DE89 3704 0044 0532 0130 00"
                               type="text"
                               autoComplete="off"
-                              {...registerWithMask('paymentInfo.iban', ["AA99 **** **** **** **** **** **** ***"], {
-                                placeholder: "",
-                                showMaskOnHover: false,
-                                showMaskOnFocus: false,
-                              })}
+                              {...registerWithMask(
+                                'paymentInfo.iban',
+                                ['AA99 **** **** **** **** **** **** ***'],
+                                {
+                                  placeholder: '',
+                                  showMaskOnHover: false,
+                                  showMaskOnFocus: false,
+                                }
+                              )}
                               onChange={(e) => {
-                                const newValue = e.target.value.replace(/\s/g, '').toUpperCase()
+                                const newValue = e.target.value
+                                  .replace(/\s/g, '')
+                                  .toUpperCase()
 
                                 if (fieldState.error) {
                                   form.clearErrors('paymentInfo')

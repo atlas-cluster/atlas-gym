@@ -17,12 +17,9 @@ export default function RoomsPage() {
             <CircleAlertIcon />
           </EmptyMedia>
           <EmptyTitle>Rooms</EmptyTitle>
-          <EmptyDescription>
-            This page is under construction.
-          </EmptyDescription>
+          <EmptyDescription>This page is under construction.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     </Card>
   )
 }
-

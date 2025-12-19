@@ -93,11 +93,13 @@ export async function authenticateUser(
 
   try {
     const result = await sql`
-      SELECT id, created_at, user_firstname, user_lastname, user_middlename,
-              user_email, user_address, user_birthdate, user_phone,
-              password_hash
-       FROM gym_manager.users
-       WHERE user_email = ${email}
+      SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
+              u.user_email, u.user_address, u.user_birthdate, u.user_phone,
+              u.password_hash,
+              CASE WHEN t.id IS NOT NULL THEN true ELSE false END as "isTrainer"
+       FROM gym_manager.users u
+       LEFT JOIN gym_manager.trainers t ON u.id = t.user_id
+       WHERE u.user_email = ${email}
     `
 
     if (result.length === 0) {

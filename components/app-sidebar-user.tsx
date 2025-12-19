@@ -19,10 +19,41 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/components/auth-context'
 import { toast } from 'sonner'
+import { useIsMounted } from '@/hooks/use-is-mounted'
+
+const UserButtonContent = ({
+  userExists,
+  getInitials,
+  getFullName,
+  getEmail,
+}: {
+  userExists: boolean
+  getInitials: () => string
+  getFullName: () => string
+  getEmail: () => string
+}) => (
+  <>
+    <div className={'flex size-8 items-center justify-center'}>
+      <Avatar>
+        <AvatarFallback>{userExists ? getInitials() : ''}</AvatarFallback>
+      </Avatar>
+    </div>
+    <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
+      <span className="h-[12pt] truncate font-medium">
+        {userExists ? getFullName() : <Skeleton className={'w-f m-1 h-full'} />}
+      </span>
+      <span className="text-muted-foreground h-[10pt] truncate text-xs">
+        {userExists ? getEmail() : <Skeleton className={'m-1 h-full w-4/5'} />}
+      </span>
+    </div>
+  </>
+)
 
 export default function AppSidebarUser() {
   const { isMobile } = useSidebar()
   const { user, loading, logout } = useAuth()
+  const isMounted = useIsMounted()
+
   const userExists = Boolean(user && !loading)
 
   const handleLogout = async () => {
@@ -55,6 +86,25 @@ export default function AppSidebarUser() {
     return user?.email || ''
   }
 
+  if (!isMounted) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            size="lg"
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+            <UserButtonContent
+              userExists={userExists}
+              getInitials={getInitials}
+              getFullName={getFullName}
+              getEmail={getEmail}
+            />
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -63,27 +113,12 @@ export default function AppSidebarUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <div className={'flex size-8 items-center justify-center'}>
-                <Avatar>
-                  <AvatarFallback>{getInitials()}</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
-                <span className="h-[12pt] truncate font-medium">
-                  {userExists ? (
-                    getFullName()
-                  ) : (
-                    <Skeleton className={'w-f m-1 h-full'} />
-                  )}
-                </span>
-                <span className="text-muted-foreground h-[10pt] truncate text-xs">
-                  {userExists ? (
-                    getEmail()
-                  ) : (
-                    <Skeleton className={'m-1 h-full w-4/5'} />
-                  )}
-                </span>
-              </div>
+              <UserButtonContent
+                userExists={userExists}
+                getInitials={getInitials}
+                getFullName={getFullName}
+                getEmail={getEmail}
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -93,27 +128,12 @@ export default function AppSidebarUser() {
             sideOffset={4}>
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div className={'flex size-8 items-center justify-center'}>
-                  <Avatar>
-                    <AvatarFallback>{getInitials()}</AvatarFallback>
-                  </Avatar>
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {userExists ? (
-                      getFullName()
-                    ) : (
-                      <Skeleton className={'w-f m-1 h-full'} />
-                    )}
-                  </span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {userExists ? (
-                      getEmail()
-                    ) : (
-                      <Skeleton className={'m-1 h-full w-4/5'} />
-                    )}
-                  </span>
-                </div>
+                <UserButtonContent
+                  userExists={userExists}
+                  getInitials={getInitials}
+                  getFullName={getFullName}
+                  getEmail={getEmail}
+                />
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

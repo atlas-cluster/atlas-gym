@@ -17,12 +17,9 @@ export default function ReservationsPage() {
             <CircleAlertIcon />
           </EmptyMedia>
           <EmptyTitle>Reservations</EmptyTitle>
-          <EmptyDescription>
-            This page is under construction.
-          </EmptyDescription>
+          <EmptyDescription>This page is under construction.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     </Card>
   )
 }
-

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/empty'
 import { CircleAlertIcon } from 'lucide-react'
 
-export default function ContractsPage() {
+export default function TrainersPage() {
   return (
     <Card className={'mb-2 h-full'}>
       <Empty>
@@ -16,13 +16,10 @@ export default function ContractsPage() {
           <EmptyMedia variant="icon">
             <CircleAlertIcon />
           </EmptyMedia>
-          <EmptyTitle>Contracts</EmptyTitle>
-          <EmptyDescription>
-            This page is under construction.
-          </EmptyDescription>
+          <EmptyTitle>Trainers</EmptyTitle>
+          <EmptyDescription>This page is under construction.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     </Card>
   )
 }
-

@@ -17,12 +17,9 @@ export default function EquipmentPage() {
             <CircleAlertIcon />
           </EmptyMedia>
           <EmptyTitle>Equipment</EmptyTitle>
-          <EmptyDescription>
-            This page is under construction.
-          </EmptyDescription>
+          <EmptyDescription>This page is under construction.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     </Card>
   )
 }
-

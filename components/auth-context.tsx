@@ -18,9 +18,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 // Public route that don't require authentication
 const AUTH_ROUTE = '/auth'
 
-// Trainer only routes
-const TRAINER_ROUTES = ['/members', '/contracts', '/trainers']
-
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -99,16 +96,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!currentUser) {
         const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
-        setLoading(false)
-        return
-      }
-
-      // Check for trainer routes
-      if (
-        TRAINER_ROUTES.some((route) => pathname.startsWith(route)) &&
-        !currentUser.isTrainer
-      ) {
-        router.push('/dashboard')
         setLoading(false)
         return
       }
