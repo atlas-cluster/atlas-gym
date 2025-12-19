@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { getPool } from './db'
 import { User, Session } from './schemas'
+import { unstable_cache } from 'next/cache'
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
@@ -200,3 +201,14 @@ export async function getUserBySessionId(
     return null
   }
 }
+
+const getCachedUserBySessionId = unstable_cache(
+  async (sessionId: string) => getUserBySessionId(sessionId),
+  ['user-session'],
+  {
+    tags: ['user-session'],
+    revalidate: 60,
+  },
+)
+
+export { getCachedUserBySessionId }

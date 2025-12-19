@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getUserBySessionId } from '@/lib/auth'
+import { getCachedUserBySessionId } from '@/lib/auth'
 
 export default async function TrainerLayout({
   children,
@@ -14,7 +14,7 @@ export default async function TrainerLayout({
     redirect('/auth')
   }
 
-  const user = await getUserBySessionId(sessionId)
+  const user = await getCachedUserBySessionId(sessionId)
 
   if (!user || !user.isTrainer) {
     redirect('/dashboard')

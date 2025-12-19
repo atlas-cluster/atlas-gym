@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserBySessionId } from '@/lib/auth'
+import { getCachedUserBySessionId } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const user = await getUserBySessionId(sessionId)
+    const user = await getCachedUserBySessionId(sessionId)
 
     if (!user) {
       // Invalid/expired session - clear the cookie
