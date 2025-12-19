@@ -26,6 +26,7 @@ import Image from 'next/image'
 import { DbStatus } from '@/components/db-status'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/components/auth-context'
 
 const mainNavItems = [
   { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },
@@ -43,6 +44,8 @@ const trainerNavItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useAuth()
+
   return (
     <Sidebar collapsible={'icon'} variant={'floating'}>
       <SidebarHeader>
@@ -86,25 +89,27 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Trainer</SidebarGroupLabel>
-          <SidebarMenu>
-            {trainerNavItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  tooltip={item.title}
-                >
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {user?.isTrainer && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Trainer</SidebarGroupLabel>
+            <SidebarMenu>
+              {trainerNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarSeparator className={'m-0'} />
       <SidebarFooter>

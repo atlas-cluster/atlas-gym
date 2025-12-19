@@ -13,6 +13,13 @@ export const emailSchema = z
   .toLowerCase()
   .trim()
 
+// Login identifier validation (email or username)
+export const loginIdentifierSchema = z
+  .string()
+  .min(1, 'Email or username is required')
+  .max(255, 'Input is too long')
+  .trim()
+
 // Password validation
 export const passwordSchema = z
   .string()
@@ -202,7 +209,7 @@ export const paymentInfoSchema = z
 
 // Login schema
 export const loginSchema = z.object({
-  email: emailSchema,
+  email: loginIdentifierSchema,
   password: z.string().min(1, 'Password is required'),
 })
 

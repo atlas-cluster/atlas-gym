@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
           birthdate: user.user_birthdate,
           address: user.user_address,
           phone: user.user_phone,
+          isTrainer: user.isTrainer || false,
         },
       },
       { status: 200 }

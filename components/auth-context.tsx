@@ -18,6 +18,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 // Public route that don't require authentication
 const AUTH_ROUTE = '/auth'
 
+// Trainer only routes
+const TRAINER_ROUTES = ['/members', '/contracts', '/trainers']
+
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -45,17 +48,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (data.authenticated && data.user) {
         setUser(data.user)
         setIsAuthenticated(true)
-        return true
+        return data.user
       } else {
         setUser(null)
         setIsAuthenticated(false)
-        return false
+        return null
       }
     } catch {
       // Silently handle auth errors - user will be redirected to login
       setUser(null)
       setIsAuthenticated(false)
-      return false
+      return null
     }
   }
 
@@ -88,14 +91,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // For protected routes, validate session with server
-      const authenticated = await fetchUser()
+      const currentUser = await fetchUser()
 
       if (!isMounted) return
 
       // If session is invalid, redirect to login
-      if (!authenticated) {
+      if (!currentUser) {
         const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
+        setLoading(false)
+        return
+      }
+
+      // Check for trainer routes
+      if (
+        TRAINER_ROUTES.some((route) => pathname.startsWith(route)) &&
+        !currentUser.isTrainer
+      ) {
+        router.push('/dashboard')
+        setLoading(false)
+        return
       }
 
       setLoading(false)

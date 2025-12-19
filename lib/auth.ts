@@ -180,9 +180,11 @@ export async function getUserBySessionId(
   try {
     const result = await sql`
       SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone
+              u.user_email, u.user_address, u.user_birthdate, u.user_phone,
+              CASE WHEN t.id IS NOT NULL THEN true ELSE false END as "isTrainer"
        FROM gym_manager.users u
        JOIN gym_manager.sessions s ON u.id = s.user_id
+       LEFT JOIN gym_manager.trainers t ON u.id = t.user_id
        WHERE s.id = ${sessionId} AND s.expires_at > NOW()
     `
 

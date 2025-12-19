@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (authResult.user === null) {
       if (authResult.error === 'NOT_FOUND') {
         return NextResponse.json(
-          { error: 'Email does not exist' },
+          { error: 'User does not exist' },
           { status: 404 }
         )
       }

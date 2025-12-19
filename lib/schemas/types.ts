@@ -31,6 +31,7 @@ export interface User {
   user_address?: string
   user_birthdate: Date
   user_phone?: string
+  isTrainer?: boolean
 }
 
 /**
@@ -53,7 +54,8 @@ export interface UserData {
   firstname: string
   lastname: string
   middlename?: string
-  birthdate?: Date | string // Can be Date from DB or string from API
+  birthdate: string
   address?: string
   phone?: string
+  isTrainer: boolean
 }
