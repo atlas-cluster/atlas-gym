@@ -24,8 +24,25 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { DbStatus } from '@/components/db-status'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+const mainNavItems = [
+  { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },
+  { title: 'Courses', url: '/courses', icon: CalendarIcon },
+  { title: 'Reservations', url: '/reservations', icon: BookCheckIcon },
+  { title: 'Equipment', url: '/equipment', icon: DumbbellIcon },
+  { title: 'Rooms', url: '/rooms', icon: MapPinIcon },
+]
+
+const trainerNavItems = [
+  { title: 'Members', url: '/members', icon: UsersIcon },
+  { title: 'Contracts', url: '/contracts', icon: ReceiptTextIcon },
+  { title: 'Trainers', url: '/trainers', icon: UserStarIcon },
+]
 
 export function AppSidebar() {
+  const pathname = usePathname()
   return (
     <Sidebar collapsible={'icon'} variant={'floating'}>
       <SidebarHeader>
@@ -53,59 +70,39 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <HomeIcon />
-                Dashboard
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <CalendarIcon />
-                Courses
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <BookCheckIcon />
-                Reservations
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <DumbbellIcon />
-                Equipment
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <MapPinIcon />
-                Rooms
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {mainNavItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  tooltip={item.title}
+                >
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Trainer</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <UsersIcon />
-                Members
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <ReceiptTextIcon />
-                Contracts
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <UserStarIcon />
-                Trainers
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {trainerNavItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  tooltip={item.title}
+                >
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
