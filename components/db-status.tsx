@@ -89,7 +89,7 @@ export function DbStatus() {
                   : 'bg-destructive'
             }`}
           />
-          <span className="text-muted-foreground cursor-pointer truncate text-xs">
+          <span className="text-muted-foreground cursor-pointer text-xs">
             {dbConnected === null
               ? 'Connecting...'
               : dbConnected

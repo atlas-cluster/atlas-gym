@@ -47,24 +47,19 @@ export function AppSidebar() {
   const { user } = useAuth()
 
   return (
-    <Sidebar collapsible={'icon'} variant={'floating'}>
-      <SidebarHeader>
-        <div className={'flex items-center gap-2 overflow-hidden'}>
-          <div className="flex-shrink-0">
-            <Image
-              src="/atlas_logo_rounded_m.png"
-              width={48}
-              height={48}
-              className={'size-8'}
-              alt={'Logo'}
-            />
-          </div>
+    <Sidebar collapsible={'icon'}>
+      <SidebarHeader className={'px-2 py-1'}>
+        <div className={'flex items-center overflow-hidden'}>
+          <Image
+            src="/atlas_logo_rounded_m.png"
+            width={48}
+            height={48}
+            className={'size-8'}
+            alt={'Logo'}
+          />
 
-          <div
-            className={
-              'grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0'
-            }>
-            <span className="truncate font-medium">Atlas Gym</span>
+          <div className={'ml-2 grid'}>
+            <span className="text-md font-medium">Atlas Gym</span>
             <DbStatus />
           </div>
         </div>

@@ -208,7 +208,7 @@ const getCachedUserBySessionId = unstable_cache(
   {
     tags: ['user-session'],
     revalidate: 60,
-  },
+  }
 )
 
 export { getCachedUserBySessionId }

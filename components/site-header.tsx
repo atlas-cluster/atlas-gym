@@ -18,23 +18,24 @@ export function SiteHeader() {
   }
 
   return (
-    <Card className={'my-2 mr-2 h-13 w-full px-2 py-0'}>
-      <div className="flex h-full w-full items-center justify-between">
-        <div className={'flex items-center gap-2'}>
-          <SidebarTrigger />
-          <Separator
-            orientation={'vertical'}
-            className={'data-[orientation=vertical]:h-12'}
-          />
-          <h1 className="ml-2 text-base font-medium">{getTitle(pathname)}</h1>
-        </div>
-        <div className={'flex items-center gap-2'}>
-          <Button variant="ghost" size="icon-sm" aria-label="Open SQL Editor">
-            <SquareTerminalIcon />
-          </Button>
-          <ThemeToggle />
-        </div>
+    <div
+      className={
+        'border-sidebar-border flex h-[49px]! w-full items-center border-b px-2'
+      }>
+      <div className={'mr-auto flex items-center gap-2'}>
+        <SidebarTrigger />
+        <Separator
+          orientation={'vertical'}
+          className={'data-[orientation=vertical]:h-6'}
+        />
+        <h1 className="ml-1 text-base font-semibold">{getTitle(pathname)}</h1>
       </div>
-    </Card>
+      <div className={'ml-auto flex items-center gap-2'}>
+        <Button variant="ghost" size="icon-sm" aria-label="Open SQL Editor">
+          <SquareTerminalIcon />
+        </Button>
+        <ThemeToggle />
+      </div>
+    </div>
   )
 }
