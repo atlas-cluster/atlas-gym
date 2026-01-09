@@ -1,6 +1,6 @@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/app-sidebar'
-import { SiteHeader } from '@/components/site-header'
+import { AppHeader } from '@/components/app-header'
 import { ReactNode } from 'react'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -8,7 +8,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <SiteHeader />
+        <AppHeader />
         <div className={'flex-1 p-3'}>{children}</div>
       </SidebarInset>
     </SidebarProvider>

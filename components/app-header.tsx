@@ -1,5 +1,4 @@
 'use client'
-import { Card } from '@/components/ui/card'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
@@ -7,7 +6,7 @@ import { SquareTerminalIcon } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { usePathname } from 'next/navigation'
 
-export function SiteHeader() {
+export function AppHeader() {
   const pathname = usePathname()
 
   // Helper to get title from pathname
