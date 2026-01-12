@@ -42,8 +42,8 @@ export async function createUser(data: {
            user_birthdate, user_address, user_phone)
          VALUES (${data.email}, ${passwordHash}, ${data.firstname}, ${data.lastname}, 
                  ${data.middlename || null}, ${data.birthdate}, ${data.address}, ${data.phone})
-         RETURNING id, created_at, user_firstname, user_lastname, user_middlename, 
-                   user_email, user_address, user_birthdate, user_phone
+         RETURNING id, created_at as "createdAt", user_firstname as "firstname", user_lastname as "lastname", user_middlename as "middlename", 
+                   user_email as "email", user_address as "address", user_birthdate as "birthdate", user_phone as "phone"
       `
 
       const insertedUser = userResult[0] as User
@@ -97,8 +97,8 @@ export async function authenticateUser(
 
   try {
     const result = await sql`
-      SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone,
+      SELECT u.id, u.created_at as "createdAt", u.user_firstname as "firstname", u.user_lastname as "lastname", u.user_middlename as "middlename",
+              u.user_email as "email", u.user_address as "address", u.user_birthdate as "birthdate", u.user_phone as "phone",
               u.password_hash,
               CASE WHEN t.id IS NOT NULL THEN true ELSE false END as "isTrainer"
        FROM gym_manager.users u
@@ -312,8 +312,8 @@ export async function getUserBySessionId(
 
   try {
     const result = await sql`
-      SELECT u.id, u.created_at, u.user_firstname, u.user_lastname, u.user_middlename,
-              u.user_email, u.user_address, u.user_birthdate, u.user_phone,
+      SELECT u.id, u.created_at as "createdAt", u.user_firstname as "firstname", u.user_lastname as "lastname", u.user_middlename as "middlename",
+              u.user_email as "email", u.user_address as "address", u.user_birthdate as "birthdate", u.user_phone as "phone",
               CASE WHEN t.id IS NOT NULL THEN true ELSE false END as "isTrainer"
        FROM gym_manager.users u
        JOIN gym_manager.sessions s ON u.id = s.user_id
