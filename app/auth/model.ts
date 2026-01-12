@@ -17,15 +17,3 @@ export type Session = {
   expires_at: Date
   created_at: Date
 }
-
-export interface UserData {
-  id: string
-  email: string
-  firstname: string
-  lastname: string
-  middlename?: string
-  birthdate: string
-  address?: string
-  phone?: string
-  isTrainer: boolean
-}

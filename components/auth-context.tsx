@@ -8,11 +8,11 @@ import React, {
   useCallback,
 } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { UserData } from '@/app/auth/model'
+import { User } from '@/app/auth/model'
 import { getCurrentUser, logoutUser } from '@/app/auth/actions'
 
 interface AuthContextType {
-  user: UserData | null
+  user: User | null
   loading: boolean
   isAuthenticated: boolean
   logout: () => Promise<void>
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const [user, setUser] = useState<UserData | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
