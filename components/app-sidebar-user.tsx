@@ -17,7 +17,7 @@ import {
 import { BookUserIcon, LogOut, SettingsIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuth } from '@/components/auth-context'
+import { useAuth } from '@/app/auth'
 import { toast } from 'sonner'
 import { useIsMounted } from '@/hooks/use-is-mounted'
 

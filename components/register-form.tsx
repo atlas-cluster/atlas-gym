@@ -36,7 +36,7 @@ import { cn } from '@/lib/utils'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { useHookFormMask } from 'use-mask-input'
 import { checkEmailExists, register } from '@/app/auth/actions'
-import { useAuth } from '@/components/auth-context'
+import { useAuth } from '@/app/auth'
 
 const { useStepper, steps, utils } = defineStepper(
   {

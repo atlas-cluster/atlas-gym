@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { DbStatus } from '@/components/db-status'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/components/auth-context'
+import { useAuth } from '@/app/auth'
 
 const mainNavItems = [
   { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },

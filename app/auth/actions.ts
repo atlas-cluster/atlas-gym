@@ -1,6 +1,6 @@
 'use server'
 
-import { Session, User, UserData } from '@/app/auth/model'
+import { Session, User } from '@/app/auth'
 import { getPool } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
@@ -127,7 +127,7 @@ export async function authenticateUser(
   }
 }
 
-export async function getCurrentUser(): Promise<UserData | null> {
+export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies()
   const sessionId = cookieStore.get('session')?.value
 
@@ -146,13 +146,14 @@ export async function getCurrentUser(): Promise<UserData | null> {
   // Return only serializable data
   return {
     id: user.id,
-    email: user.user_email,
-    firstname: user.user_firstname,
-    lastname: user.user_lastname,
-    middlename: user.user_middlename,
-    birthdate: user.user_birthdate.toISOString(),
-    address: user.user_address,
-    phone: user.user_phone,
+    createdAt: user.createdAt,
+    email: user.email,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    middlename: user.middlename,
+    birthdate: user.birthdate,
+    address: user.address,
+    phone: user.phone,
     isTrainer: user.isTrainer,
   }
 }

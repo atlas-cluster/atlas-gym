@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { User } from '@/app/auth/model'
+import { User } from '@/app/auth'
 import { getCurrentUser, logoutUser } from '@/app/auth/actions'
 
 interface AuthContextType {
