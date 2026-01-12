@@ -213,7 +213,7 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
-// Full registration schema (for final submission)
+// Full registration schema
 export const registrationSchema = z
   .object({
     email: emailSchema,

@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
-import { LoginForm } from '@/components/login-form'
-import { RegisterForm } from '@/components/register-form'
+import { LoginForm } from '@/app/auth/components/login-form'
+import { RegisterForm } from '@/app/auth/components/register-form'
 
 export default async function Page({
   searchParams,
