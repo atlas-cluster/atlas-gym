@@ -19,9 +19,9 @@ import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema } from '@/lib/schemas'
 import { z } from 'zod'
-import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { login } from '@/app/auth/actions'
 
 export function LoginForm({
   className,
@@ -48,29 +48,28 @@ export function LoginForm({
     setLoading(true)
 
     try {
-      await apiClient.login(data)
+      const result = await login(data)
 
-      toast.success('Login successful!')
-      setLoading(false)
-
-      // Redirect to the original page or home
-      router.push(redirectTo)
-    } catch (err) {
-      if (err instanceof ApiError) {
-        // Map server status codes to specific field errors
-        if (err.status === 404) {
-          setError('email', { type: 'server', message: err.message })
-        } else if (err.status === 401) {
-          setError('password', { type: 'server', message: err.message })
+      if (result.success) {
+        toast.success('Login successful!')
+        // Redirect logic
+        router.push(redirectTo)
+      } else {
+        if (result.field === 'email') {
+          setError('email', { type: 'server', message: result.error })
+        } else if (result.field === 'password') {
+          setError('password', { type: 'server', message: result.error })
         } else {
-          // Fallback: attach to password (or choose a global banner)
-          setError('password', { type: 'server', message: err.message })
+          setError('password', {
+            type: 'server',
+            message: result.error || 'Login failed',
+          })
         }
         setLoading(false)
-      } else {
-        toast.error('An unexpected error occurred')
-        setLoading(false)
       }
+    } catch {
+      toast.error('An unexpected error occurred')
+      setLoading(false)
     }
   }
 

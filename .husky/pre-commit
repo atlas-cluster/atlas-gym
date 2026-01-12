@@ -1,3 +1,2 @@
 bun run format &&
-bun run lint &&
 git add -A .

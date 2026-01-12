@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getCachedUserBySessionId } from '@/lib/auth'
+import { getUserBySessionId } from '@/app/auth/actions'
 
 export default async function TrainerLayout({
   children,
@@ -15,7 +15,7 @@ export default async function TrainerLayout({
     redirect('/auth')
   }
 
-  const user = await getCachedUserBySessionId(sessionId)
+  const user = await getUserBySessionId(sessionId)
 
   if (!user || !user.isTrainer) {
     redirect('/dashboard')

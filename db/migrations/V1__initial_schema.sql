@@ -1,12 +1,10 @@
--- Create schema and enable extensions
 -- Flyway migration will have already created the schema, but we include it here for completeness
 CREATE SCHEMA IF NOT EXISTS gym_manager;
 SET search_path TO gym_manager;
 
--- Enable CITEXT extension for case-insensitive text
+
 CREATE EXTENSION IF NOT EXISTS citext;
 
--- Users table
 CREATE TABLE users (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -15,9 +13,9 @@ CREATE TABLE users (
     user_middlename VARCHAR(50),
     user_email      CITEXT       NOT NULL UNIQUE,
     password_hash   TEXT         NOT NULL,
-    user_address    TEXT,
+    user_address    TEXT         NOT NULL,
     user_birthdate  DATE         NOT NULL,
-    user_phone      VARCHAR(20),
+    user_phone      VARCHAR(20)  NOT NULL,
     CONSTRAINT valid_email CHECK (user_email <> '')
 );
 

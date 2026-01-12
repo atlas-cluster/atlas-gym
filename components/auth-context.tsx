@@ -1,9 +1,15 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { UserData } from '@/lib/schemas'
-import { apiClient } from '@/lib/api'
+import { UserData } from '@/app/auth/model'
+import { getCurrentUser, logoutUser } from '@/app/auth/actions'
 
 interface AuthContextType {
   user: UserData | null
@@ -38,14 +44,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const data = await apiClient.getSession()
+      const userData = await getCurrentUser()
 
-      if (data.authenticated && data.user) {
-        setUser(data.user)
+      if (userData) {
+        setUser(userData)
         setIsAuthenticated(true)
-        return data.user
+        return userData
       } else {
         setUser(null)
         setIsAuthenticated(false)
@@ -57,19 +63,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsAuthenticated(false)
       return null
     }
-  }
+  }, [])
 
   const logout = async () => {
     try {
-      await apiClient.logout()
+      await logoutUser()
+
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/auth')
+      router.push('/auth?logout=true')
     } catch {
       // Even if logout API fails, clear local state
       setUser(null)
       setIsAuthenticated(false)
-      router.push('/auth')
+      router.push('/auth?logout=true')
     }
   }
 
@@ -94,7 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // If session is invalid, redirect to login
       if (!currentUser) {
-        const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
+        const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}&logout=true`
         router.push(loginUrl)
         setLoading(false)
         return
@@ -108,7 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted = false
     }
-  }, [pathname, router])
+  }, [pathname, router, fetchUser])
 
   // Always render children - no loading screen
   // Components will use skeleton states while loading is true

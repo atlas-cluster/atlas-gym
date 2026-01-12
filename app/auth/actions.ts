@@ -1,21 +1,15 @@
+'use server'
+
+import { Session, User, UserData } from '@/app/auth/model'
+import { getPool } from '@/lib/db'
 import bcrypt from 'bcryptjs'
-import { getPool } from './db'
-import { User, Session } from './schemas'
-import { unstable_cache } from 'next/cache'
+import { cookies } from 'next/headers'
+import { getSecureCookieOptions } from '@/lib/config'
+import { loginSchema, registrationSchema } from '@/lib/schemas'
+import { z } from 'zod'
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
-
-export async function hashPassword(password: string): Promise<string> {
-  return await bcrypt.hash(password, SALT_ROUNDS)
-}
-
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
-  return await bcrypt.compare(password, hash)
-}
 
 export type AuthResult =
   | { user: User; error?: undefined }
@@ -86,6 +80,15 @@ export async function createUser(data: {
   }
 }
 
+export async function checkEmailExists(email: string): Promise<boolean> {
+  const sql = getPool()
+  const result = await sql`
+      SELECT id FROM gym_manager.users WHERE user_email = ${email}
+    `
+
+  return result.length > 0
+}
+
 export async function authenticateUser(
   email: string,
   password: string
@@ -122,6 +125,132 @@ export async function authenticateUser(
     console.error('Error authenticating user:', error)
     return { user: null, error: 'DB_ERROR' }
   }
+}
+
+export async function getCurrentUser(): Promise<UserData | null> {
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get('session')?.value
+
+  if (!sessionId) {
+    return null
+  }
+
+  const user = await getUserBySessionId(sessionId)
+
+  if (!user) {
+    // Session is invalid or expired, clear the cookie
+    cookieStore.delete('session')
+    return null
+  }
+
+  // Return only serializable data
+  return {
+    id: user.id,
+    email: user.user_email,
+    firstname: user.user_firstname,
+    lastname: user.user_lastname,
+    middlename: user.user_middlename,
+    birthdate: user.user_birthdate.toISOString(),
+    address: user.user_address,
+    phone: user.user_phone,
+    isTrainer: user.isTrainer,
+  }
+}
+
+export async function logoutUser(): Promise<void> {
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get('session')?.value
+
+  if (sessionId) {
+    await deleteSession(sessionId)
+  }
+
+  cookieStore.delete('session')
+}
+
+export async function login(data: z.infer<typeof loginSchema>) {
+  const result = loginSchema.safeParse(data)
+
+  if (!result.success) {
+    return { success: false, error: result.error.issues[0].message }
+  }
+
+  const { email, password } = result.data
+  const authResponse = await authenticateUser(email, password)
+
+  if (!authResponse.user) {
+    if (authResponse.error === 'NOT_FOUND') {
+      return { success: false, error: 'User does not exist', field: 'email' }
+    }
+    if (authResponse.error === 'INVALID_PASSWORD') {
+      return { success: false, error: 'Incorrect password', field: 'password' }
+    }
+    return { success: false, error: 'Authentication error' }
+  }
+
+  const session = await createSession(authResponse.user.id)
+  if (!session) {
+    return { success: false, error: 'Failed to create session' }
+  }
+
+  const cookieStore = await cookies()
+  cookieStore.set('session', session.id, getSecureCookieOptions())
+
+  return { success: true }
+}
+
+export async function register(data: z.infer<typeof registrationSchema>) {
+  const result = registrationSchema.safeParse(data)
+
+  if (!result.success) {
+    return { success: false, error: result.error.issues[0].message }
+  }
+
+  try {
+    const user = await createUser(result.data)
+    const session = await createSession(user.id)
+
+    if (!session) {
+      return { success: false, error: 'Failed to create session' }
+    }
+
+    const cookieStore = await cookies()
+    cookieStore.set('session', session.id, getSecureCookieOptions())
+
+    return { success: true }
+  } catch (error: unknown) {
+    // Type assertion for Postgres error
+    const pgError = error as { code?: string; constraint?: string }
+
+    // Postgres unique violation
+    if (
+      pgError.code === '23505' &&
+      pgError.constraint === 'users_user_email_key'
+    ) {
+      return {
+        success: false,
+        error: 'This email is already registered',
+        field: 'email',
+      }
+    }
+
+    console.error('Registration error:', error)
+    return {
+      success: false,
+      error: 'Failed to create user. Please check your information.',
+    }
+  }
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return await bcrypt.hash(password, SALT_ROUNDS)
+}
+
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
+  return await bcrypt.compare(password, hash)
 }
 
 export async function createSession(userId: string): Promise<Session | null> {
@@ -201,14 +330,3 @@ export async function getUserBySessionId(
     return null
   }
 }
-
-const getCachedUserBySessionId = unstable_cache(
-  async (sessionId: string) => getUserBySessionId(sessionId),
-  ['user-session'],
-  {
-    tags: ['user-session'],
-    revalidate: 60,
-  }
-)
-
-export { getCachedUserBySessionId }

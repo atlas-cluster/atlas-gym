@@ -14,10 +14,11 @@ const AUTH_ROUTE = '/auth'
 export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
   const pathname = request.nextUrl.pathname
+  const isLogout = request.nextUrl.searchParams.get('logout')
 
   // If user has a session cookie and tries to access login/register, redirect to home
   // The AuthProvider will validate the session and redirect back to login if invalid
-  if (sessionCookie && pathname === AUTH_ROUTE) {
+  if (sessionCookie && pathname === AUTH_ROUTE && !isLogout) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

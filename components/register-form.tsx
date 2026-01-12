@@ -20,7 +20,6 @@ import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registrationSchema } from '@/lib/schemas'
 import { z } from 'zod'
-import { apiClient, ApiError } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { defineStepper } from '@stepperize/react'
@@ -36,6 +35,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { useHookFormMask } from 'use-mask-input'
+import { checkEmailExists, register } from '@/app/auth/actions'
+import { useAuth } from '@/components/auth-context'
 
 const { useStepper, steps, utils } = defineStepper(
   {
@@ -68,6 +69,8 @@ export function RegisterForm({
   const stepper = useStepper()
   const currentIndex = utils.getIndex(stepper.current.id)
   const router = useRouter()
+  // Get access to refreshUser
+  const { refreshUser } = useAuth()
   const [loading, setLoading] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -118,7 +121,7 @@ export function RegisterForm({
     if (result && stepper.current.id === 'account') {
       const email = form.getValues('email')
       try {
-        const { exists } = await apiClient.checkEmail(email)
+        const exists = await checkEmailExists(email)
         if (exists) {
           setError('email', {
             type: 'server',
@@ -152,31 +155,23 @@ export function RegisterForm({
     setLoading(true)
 
     try {
-      await apiClient.register(data)
+      const result = await register(data)
 
-      toast.success('Registration successful!')
-      setLoading(false)
-
-      // Redirect to the original page or home
-      router.push(redirectTo)
-    } catch (err) {
-      if (err instanceof ApiError) {
-        // Map server status codes to specific field errors
-        if (err.status === 400) {
-          // Could be duplicate email or validation error
-          if (err.message.toLowerCase().includes('email')) {
-            setError('email', { type: 'server', message: err.message })
-          } else {
-            toast.error(err.message)
-          }
+      if (result.success) {
+        toast.success('Registration successful!')
+        // Redirect to the original page or home
+        router.push(redirectTo)
+      } else {
+        if (result.field === 'email') {
+          setError('email', { type: 'server', message: result.error })
         } else {
-          toast.error(err.message)
+          toast.error(result.error || 'Registration failed')
         }
         setLoading(false)
-      } else {
-        toast.error('An unexpected error occurred')
-        setLoading(false)
       }
+    } catch (err) {
+      toast.error('An unexpected error occurred')
+      setLoading(false)
     }
   }
 
