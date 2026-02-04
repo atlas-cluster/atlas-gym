@@ -6,10 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --fix",
+    "test": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
-    "docker:dev": "docker compose -f docker-compose.dev.yml up",
-    "docker:prod": "docker compose -f docker-compose.prod.yml up --build"
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -53,6 +54,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-payment-inputs": "^1.1.4",
+    "@vitejs/plugin-react": "^5.1.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "eslint-config-prettier": "^10.1.8",
@@ -61,6 +63,8 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.0.5",
+    "vitest": "^4.0.18"
   }
 }

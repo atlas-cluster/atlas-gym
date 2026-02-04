@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
+import React from 'react'
 import { Toaster } from 'sonner'
 
 import '@/features/shared/styles/globals.css'
-import React from 'react'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

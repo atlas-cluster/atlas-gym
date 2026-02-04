@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from '@/features/shared/components/ui/empty'
 
-export default function RoomsPage() {
+export default function CoursesPage() {
   return (
     <Empty className={'h-full'}>
       <EmptyHeader>

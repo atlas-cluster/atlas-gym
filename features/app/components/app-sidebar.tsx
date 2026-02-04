@@ -1,5 +1,20 @@
 'use client'
 import {
+  BookCheckIcon,
+  CalendarIcon,
+  DumbbellIcon,
+  HomeIcon,
+  MapPinIcon,
+  ReceiptTextIcon,
+  UserStarIcon,
+  UsersIcon,
+} from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+import { AppStatus } from '@/features/app/components/app-status'
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -10,20 +25,6 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/features/shared/components/ui/sidebar'
-import {
-  DumbbellIcon,
-  HomeIcon,
-  CalendarIcon,
-  UsersIcon,
-  ReceiptTextIcon,
-  BookCheckIcon,
-  MapPinIcon,
-  UserStarIcon,
-} from 'lucide-react'
-import Image from 'next/image'
-import { AppStatus } from '@/features/app/components/app-status'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 const mainNavItems = [
   { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },
