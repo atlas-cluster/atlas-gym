@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
+import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
-import { AuthProvider } from '@/app/auth'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from 'sonner'
+
+import '@/features/shared/styles/globals.css'
+import React from 'react'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,7 +27,6 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    // Suppressing hydration warning as theme is handled on client side
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -35,10 +35,8 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange>
-          <AuthProvider>
-            <Toaster />
-            {children}
-          </AuthProvider>
+          <Toaster />
+          {children}
         </ThemeProvider>
       </body>
     </html>

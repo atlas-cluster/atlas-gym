@@ -1,7 +1,10 @@
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/app-sidebar'
-import { AppHeader } from '@/components/app-header'
 import { ReactNode } from 'react'
+
+import { AppHeader, AppSidebar } from '@/features/app'
+import {
+  SidebarInset,
+  SidebarProvider,
+} from '@/features/shared/components/ui/sidebar'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,7 +12,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
-        <div className={'flex-1 p-3'}>{children}</div>
+        <div className={'p-3'}>{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )
