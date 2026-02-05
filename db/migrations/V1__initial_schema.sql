@@ -47,8 +47,10 @@ CREATE TABLE payment_methods (
 CREATE TABLE credit_cards (
     payment_method_id UUID PRIMARY KEY REFERENCES payment_methods(id) ON DELETE CASCADE,
     card_number       VARCHAR(19) NOT NULL,
-    card_expiry       VARCHAR(7) NOT NULL,
-    card_holder       VARCHAR(100)
+    card_holder       VARCHAR(100) NOT NULL,
+    card_exp_month    SMALLINT NOT NULL CHECK (card_exp_month BETWEEN 1 AND 12),
+    card_exp_year     SMALLINT NOT NULL,
+    card_cvc          VARCHAR(4) NOT NULL
 );
 
 CREATE TABLE bank_accounts (
