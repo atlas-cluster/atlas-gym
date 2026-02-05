@@ -18,13 +18,22 @@ export interface Session {
   created_at: Date
 }
 
+export type LoginError =
+  | 'INVALID_CREDENTIALS'
+  | 'USER_NOT_FOUND'
+  | 'INVALID_INPUT'
+  | 'UNKNOWN_ERROR'
+export type CheckEmailError =
+  | 'EMAIL_ALREADY_EXISTS'
+  | 'INVALID_EMAIL'
+  | 'UNKNOWN_ERROR'
+
 export type PaymentMethod = CreditCardDetails | BankAccountDetails
 
 export interface CreditCardDetails {
   card_number: string
   cardholder_name: string
-  expiration_month: number
-  expiration_year: number
+  card_expiry: string
   card_cvc: string
 }
 

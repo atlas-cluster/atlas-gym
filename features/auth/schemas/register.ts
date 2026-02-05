@@ -1,4 +1,4 @@
-import { paymentMethodSchema } from './payment'
+import { creditCardSchema, ibanSchema } from './payment'
 import { z } from 'zod'
 
 import { addressSchema } from '@/features/shared/schemas/address'
@@ -21,9 +21,60 @@ export const registerSchema = z
     address: addressSchema,
     birthdate: pastDateSchema('Birthdate'),
     phone: phoneSchema,
-    paymentMethod: paymentMethodSchema,
+    paymentType: z.enum(['credit_card', 'iban']),
+    cardHolder: z.string().optional(),
+    cardNumber: z.string().optional(),
+    cardExpiry: z.string().optional(),
+    cardCvc: z.string().optional(),
+    iban: z.string().optional(),
   })
-  .refine((data) => data.password === data.repeatPassword, {
-    message: "Passwords don't match",
-    path: ['repeatPassword'],
+  .superRefine((data, ctx) => {
+    if (data.password !== data.repeatPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: "Passwords don't match",
+        path: ['repeatPassword'],
+      })
+    }
+
+    if (data.paymentType === 'credit_card') {
+      const result = creditCardSchema.safeParse({
+        type: 'credit_card',
+        cardNumber: data.cardNumber,
+        cardHolder: data.cardHolder,
+        cardExpiry: data.cardExpiry,
+        cardCvc: data.cardCvc,
+      })
+
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          if (issue.path[0] !== 'type') {
+            const issueData = {
+              ...issue,
+              path: [issue.path[0]],
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ctx.addIssue(issueData as any)
+          }
+        })
+      }
+    } else if (data.paymentType === 'iban') {
+      const result = ibanSchema.safeParse({
+        type: 'iban',
+        iban: data.iban,
+      })
+
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          if (issue.path[0] !== 'type') {
+            const issueData = {
+              ...issue,
+              path: [issue.path[0]],
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ctx.addIssue(issueData as any)
+          }
+        })
+      }
+    }
   })

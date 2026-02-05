@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/features/shared/lib/utils'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 
 function Tabs({

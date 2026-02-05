@@ -2,7 +2,6 @@
 
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { registerSchema } from '@/features/auth/schemas/register'
@@ -24,7 +23,12 @@ export async function register(data: z.infer<typeof registerSchema>) {
     address,
     birthdate,
     phone,
-    paymentMethod,
+    paymentType,
+    cardNumber,
+    cardExpiry,
+    cardCvc,
+    cardHolder,
+    iban,
   } = validation.data
 
   const client = await pool.connect()
@@ -78,37 +82,36 @@ export async function register(data: z.infer<typeof registerSchema>) {
       `INSERT INTO gym_manager.payment_methods (user_id, type)
          VALUES ($1, $2)
          RETURNING id`,
-      [userId, paymentMethod.type]
+      [userId, paymentType]
     )
 
     const paymentMethodId = paymentMethodResult.rows[0].id
 
-    if (paymentMethod.type === 'credit_card') {
+    if (paymentType === 'credit_card') {
+      // Normalize expiry to MM/YY format to fit VARCHAR(5)
+      const cleanExpiry = (cardExpiry || '').replace(/\D/g, '')
+      const formattedExpiry =
+        cleanExpiry.length >= 4
+          ? `${cleanExpiry.slice(0, 2)}/${cleanExpiry.slice(-2)}`
+          : cardExpiry
+
       await client.query(
         `INSERT INTO gym_manager.credit_cards (
              payment_method_id,
              card_number,
-             card_exp_month,
-             card_exp_year,
+             card_expiry,
              card_cvc,
              card_holder
-           ) VALUES ($1, $2, $3, $4, $5, $6)`,
-        [
-          paymentMethodId,
-          paymentMethod.cardNumber,
-          paymentMethod.cardExpMonth,
-          paymentMethod.cardExpYear,
-          paymentMethod.cardCvc,
-          paymentMethod.cardHolder,
-        ]
+           ) VALUES ($1, $2, $3, $4, $5)`,
+        [paymentMethodId, cardNumber, formattedExpiry, cardCvc, cardHolder]
       )
-    } else if (paymentMethod.type === 'iban') {
+    } else if (paymentType === 'iban') {
       await client.query(
         `INSERT INTO gym_manager.bank_accounts (
              payment_method_id,
              iban
            ) VALUES ($1, $2)`,
-        [paymentMethodId, paymentMethod.iban]
+        [paymentMethodId, iban]
       )
     }
 
@@ -141,6 +144,4 @@ export async function register(data: z.infer<typeof registerSchema>) {
   } finally {
     client.release()
   }
-
-  redirect('/dashboard')
 }

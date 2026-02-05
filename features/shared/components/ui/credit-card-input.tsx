@@ -6,9 +6,9 @@ import { FieldError } from 'react-hook-form'
 import { usePaymentInputs } from 'react-payment-inputs'
 import images, { type CardImages } from 'react-payment-inputs/images'
 
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { cn } from '@/lib/utils'
+import { Input } from '@/features/shared/components/ui/input'
+import { Label } from '@/features/shared/components/ui/label'
+import { cn } from '@/features/shared/lib/utils'
 
 interface CreditCardInputProps {
   onChange: (value: {
@@ -21,7 +21,11 @@ interface CreditCardInputProps {
     | { cardNumber?: string; cardExpiry?: string; cardCVC?: string }
     | undefined
   name: string
-  error?: FieldError
+  errors?: {
+    cardNumber?: FieldError
+    cardExpiry?: FieldError
+    cardCVC?: FieldError
+  }
 }
 
 export function CreditCardInput({
@@ -29,7 +33,7 @@ export function CreditCardInput({
   onBlur,
   value = {},
   name,
-  error,
+  errors,
 }: CreditCardInputProps) {
   const id = useId()
   const {
@@ -86,7 +90,7 @@ export function CreditCardInput({
             id={`number-${id}`}
             name={name}
             className={cn('peer rounded-b-none pr-9 shadow-none', {
-              'border-destructive': !!error,
+              'border-destructive': !!errors?.cardNumber,
             })}
           />
           <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center pr-3 peer-disabled:opacity-50">
@@ -113,7 +117,7 @@ export function CreditCardInput({
               value={cardExpiry}
               id={`expiry-${id}`}
               className={cn('rounded-t-none rounded-r-none shadow-none', {
-                'border-destructive': !!error,
+                'border-destructive': !!errors?.cardExpiry,
               })}
             />
           </div>
@@ -126,7 +130,7 @@ export function CreditCardInput({
               value={cardCVC}
               id={`cvc-${id}`}
               className={cn('rounded-t-none rounded-l-none shadow-none', {
-                'border-destructive': !!error,
+                'border-destructive': !!errors?.cardCVC,
               })}
             />
           </div>

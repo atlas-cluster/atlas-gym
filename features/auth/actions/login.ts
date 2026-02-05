@@ -2,17 +2,19 @@
 
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { loginSchema } from '@/features/auth/schemas/login'
+import { LoginError } from '@/features/auth/types'
 import { pool } from '@/features/shared/lib/db'
 
-export async function login(data: z.infer<typeof loginSchema>) {
+export async function login(
+  data: z.infer<typeof loginSchema>
+): Promise<{ error: LoginError } | void> {
   const validation = loginSchema.safeParse(data)
 
   if (!validation.success) {
-    return { error: 'Invalid form data' }
+    return { error: 'INVALID_INPUT' }
   }
 
   const { email, password } = validation.data
@@ -25,7 +27,7 @@ export async function login(data: z.infer<typeof loginSchema>) {
     )
 
     if (result.rows.length === 0) {
-      return { error: 'Invalid credentials' }
+      return { error: 'USER_NOT_FOUND' }
     }
 
     const user = result.rows[0]
@@ -33,7 +35,7 @@ export async function login(data: z.infer<typeof loginSchema>) {
     // 2. Verify password
     const validPassword = await bcrypt.compare(password, user.password_hash)
     if (!validPassword) {
-      return { error: 'Invalid credentials' }
+      return { error: 'INVALID_CREDENTIALS' }
     }
 
     // 3. Create session (valid for 7 days)
@@ -58,8 +60,6 @@ export async function login(data: z.infer<typeof loginSchema>) {
     })
   } catch (error) {
     console.error('Login error:', error)
-    return { error: 'An unexpected error occurred' }
+    return { error: 'UNKNOWN_ERROR' }
   }
-
-  redirect('/dashboard')
 }
