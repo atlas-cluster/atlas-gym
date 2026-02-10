@@ -1,10 +1,10 @@
 'use client'
 import { type VariantProps, cva } from 'class-variance-authority'
+import { Slot as SlotPrimitive } from 'radix-ui'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Slot } from '@radix-ui/react-slot'
 import * as Stepperize from '@stepperize/react'
 
 const StepperContext = React.createContext<Stepper.ConfigProps | null>(null)
@@ -217,7 +217,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
       Title,
       Description,
       Panel: ({ children, asChild, ...props }) => {
-        const Comp = asChild ? Slot : 'div'
+        const Comp = asChild ? SlotPrimitive.Slot : 'div'
         const { tracking } = useStepperProvider()
 
         return (
@@ -230,7 +230,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
         )
       },
       Controls: ({ children, className, asChild, ...props }) => {
-        const Comp = asChild ? Slot : 'div'
+        const Comp = asChild ? SlotPrimitive.Slot : 'div'
         return (
           <Comp
             date-component="stepper-controls"
@@ -250,7 +250,7 @@ const Title = ({
   asChild,
   ...props
 }: React.ComponentProps<'h4'> & { asChild?: boolean }) => {
-  const Comp = asChild ? Slot : 'h4'
+  const Comp = asChild ? SlotPrimitive.Slot : 'h4'
 
   return (
     <Comp
@@ -268,7 +268,7 @@ const Description = ({
   asChild,
   ...props
 }: React.ComponentProps<'p'> & { asChild?: boolean }) => {
-  const Comp = asChild ? Slot : 'p'
+  const Comp = asChild ? SlotPrimitive.Slot : 'p'
 
   return (
     <Comp
