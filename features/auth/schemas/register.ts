@@ -1,4 +1,3 @@
-import { creditCardSchema, ibanSchema } from './payment'
 import { z } from 'zod'
 
 import { addressSchema } from '@/features/shared/schemas/address'
@@ -8,6 +7,7 @@ import {
   optionalNameSchema,
   requiredNameSchema,
 } from '@/features/shared/schemas/name'
+import { creditCardSchema, ibanSchema } from '@/features/shared/schemas/payment'
 import { phoneSchema } from '@/features/shared/schemas/phone'
 
 export const registerSchema = z
