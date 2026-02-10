@@ -3,8 +3,8 @@ import { type VariantProps, cva } from 'class-variance-authority'
 import { Slot as SlotPrimitive } from 'radix-ui'
 import * as React from 'react'
 
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '@/features/shared/components/ui/button'
+import { cn } from '@/features/shared/lib/utils'
 import * as Stepperize from '@stepperize/react'
 
 const StepperContext = React.createContext<Stepper.ConfigProps | null>(null)
