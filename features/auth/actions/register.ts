@@ -88,12 +88,8 @@ export async function register(data: z.infer<typeof registerSchema>) {
     const paymentMethodId = paymentMethodResult.rows[0].id
 
     if (paymentType === 'credit_card') {
-      // Normalize expiry to MM/YY format to fit VARCHAR(5)
+      // Remove whitespace from expiry
       const cleanExpiry = (cardExpiry || '').replace(/\D/g, '')
-      const formattedExpiry =
-        cleanExpiry.length >= 4
-          ? `${cleanExpiry.slice(0, 2)}/${cleanExpiry.slice(-2)}`
-          : cardExpiry
 
       await client.query(
         `INSERT INTO gym_manager.credit_cards (
@@ -103,7 +99,7 @@ export async function register(data: z.infer<typeof registerSchema>) {
              card_cvc,
              card_holder
            ) VALUES ($1, $2, $3, $4, $5)`,
-        [paymentMethodId, cardNumber, formattedExpiry, cardCvc, cardHolder]
+        [paymentMethodId, cardNumber, cleanExpiry, cardCvc, cardHolder]
       )
     } else if (paymentType === 'iban') {
       await client.query(

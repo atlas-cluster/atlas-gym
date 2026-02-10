@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { AppStatus } from '@/features/app/components/app-status'
+import { useAuth } from '@/features/auth/components/auth-provider'
 import {
   Sidebar,
   SidebarContent,
@@ -42,6 +43,7 @@ const trainerNavItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   return (
     <Sidebar collapsible={'icon'}>
@@ -80,24 +82,26 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Trainer</SidebarGroupLabel>
-          <SidebarMenu>
-            {trainerNavItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.url}
-                  tooltip={item.title}>
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {user?.isTrainer && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Trainer</SidebarGroupLabel>
+            <SidebarMenu>
+              {trainerNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    tooltip={item.title}>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   )

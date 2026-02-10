@@ -1,10 +1,11 @@
 'use client'
 
 import { ChevronDownIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { useHookFormMask } from 'use-mask-input'
 import { z } from 'zod'
 
 import { checkEmail } from '@/features/auth/actions/check-email'
@@ -68,6 +69,7 @@ const { useStepper, steps, utils } = defineStepper(
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const stepper = useStepper()
   const currentIndex = utils.getIndex(stepper.current.id)
   const [loading, setLoading] = useState(false)
@@ -99,6 +101,8 @@ export function RegisterForm() {
     setError,
     formState: { errors },
   } = form
+
+  const registerWithMask = useHookFormMask(form.register)
 
   const validateCurrentStep = async () => {
     let fieldsToValidate: (keyof z.infer<typeof registerSchema>)[] = []
@@ -178,6 +182,12 @@ export function RegisterForm() {
     if (loading || isTransitioning) return
 
     setLoading(true)
+
+    // Clean IBAN (remove spaces)
+    if (data.paymentType === 'iban' && data.iban) {
+      data.iban = data.iban.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+    }
+
     const result = await register(data)
 
     if (result?.error) {
@@ -193,7 +203,8 @@ export function RegisterForm() {
       }
     } else {
       toast.success('Account created successfully!')
-      router.push('/dashboard')
+      const redirect = searchParams.get('redirect')
+      router.push(redirect || '/dashboard')
     }
     setLoading(false)
   }
@@ -639,36 +650,31 @@ export function RegisterForm() {
                   </div>
                 </TabsContent>
                 <TabsContent value={'iban'}>
-                  <Controller
-                    name="iban"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="iban">
-                          <span>
-                            IBAN<sup className={'text-destructive'}>*</sup>
-                          </span>
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          value={field.value || ''}
-                          id="iban"
-                          aria-invalid={fieldState.invalid}
-                          placeholder="DE89 3704 0044 0532 0130 00"
-                          autoComplete="off"
-                          onChange={(e) => {
-                            const newValue = e.target.value
-                              .toUpperCase()
-                              .replace(/[^A-Z0-9 ]/g, '') // Simple sanitization if needed
-                            field.onChange(newValue)
-                          }}
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
+                  <Field data-invalid={!!errors.iban}>
+                    <FieldLabel htmlFor="iban">
+                      <span>
+                        IBAN<sup className={'text-destructive'}>*</sup>
+                      </span>
+                    </FieldLabel>
+                    <Input
+                      id="iban"
+                      aria-invalid={!!errors.iban}
+                      placeholder="DE89 3704 0044 0532 0130 00"
+                      type="text"
+                      autoComplete="off"
+                      {...registerWithMask(
+                        'iban',
+                        ['AA99 **** **** **** **** **** **** ***'],
+                        {
+                          placeholder: '',
+                          showMaskOnHover: false,
+                          showMaskOnFocus: false,
+                          jitMasking: true,
+                        }
+                      )}
+                    />
+                    {errors.iban && <FieldError errors={[errors.iban]} />}
+                  </Field>
                 </TabsContent>
               </Tabs>
             )}

@@ -3,6 +3,8 @@ import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 
+import { getSession } from '@/features/auth/actions/get-session'
+import { AuthProvider } from '@/features/auth/components/auth-provider'
 import { Toaster } from '@/features/shared/components/ui/sonner'
 import '@/features/shared/styles/globals.css'
 
@@ -21,11 +23,13 @@ export const metadata: Metadata = {
   description: 'Gym Management System',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await getSession()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -35,8 +39,10 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange>
-          <Toaster />
-          {children}
+          <AuthProvider initialUser={session.user}>
+            <Toaster />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
