@@ -49,7 +49,7 @@ INSERT INTO gym_manager.users (
     phone
 ) VALUES (
              'user',
-             '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK', -- admin
+             '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
              'Regular',
              'Member',
              NULL,
