@@ -56,7 +56,7 @@ jobs:
 
   migrate:
     name: Run Database Migrations
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -107,7 +107,7 @@ jobs:
 
   deploy:
     name: Deploy Application
-    needs: [migrate, build]
+    needs: migrate
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH (through Jump Host)
