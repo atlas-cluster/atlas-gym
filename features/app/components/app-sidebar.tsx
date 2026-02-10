@@ -13,7 +13,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { AppStatus } from '@/features/app/components/app-status'
 import { SidebarUserMenu, useAuth } from '@/features/auth'
 import {
   Sidebar,
@@ -48,7 +47,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible={'icon'}>
-      <SidebarHeader className={'px-2 py-1'}>
+      <SidebarHeader className={'px-2 py-2'}>
         <div className={'flex items-center overflow-hidden'}>
           <Image
             src="/atlas_logo_rounded_m.png"
@@ -58,10 +57,9 @@ export function AppSidebar() {
             alt={'Logo'}
           />
 
-          <div className={'ml-2 grid'}>
-            <span className="text-md font-medium text-nowrap">Atlas Gym</span>
-            <AppStatus />
-          </div>
+          <h1 className={'ml-2 text-base font-semibold text-nowrap'}>
+            Atlas Gym
+          </h1>
         </div>
       </SidebarHeader>
       <SidebarSeparator className={'m-0'} />
