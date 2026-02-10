@@ -107,7 +107,7 @@ jobs:
 
   deploy:
     name: Deploy Application
-    needs: migrate
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH (through Jump Host)
