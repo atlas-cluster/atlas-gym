@@ -58,7 +58,7 @@ export function AppSidebar() {
           />
 
           <div className={'ml-2 grid'}>
-            <span className="text-md font-medium">Atlas Gym</span>
+            <span className="text-md font-medium text-nowrap">Atlas Gym</span>
             <AppStatus />
           </div>
         </div>
