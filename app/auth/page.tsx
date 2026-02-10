@@ -1,42 +1,47 @@
 import Image from 'next/image'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card } from '@/components/ui/card'
-import { LoginForm } from '@/components/login-form'
-import { RegisterForm } from '@/components/register-form'
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ redirect?: string }>
-}) {
-  const params = await searchParams
-  const redirectTo = params.redirect || '/'
+import { LoginForm } from '@/features/auth/components/login-form'
+import { RegisterForm } from '@/features/auth/components/register-form'
+import { Card } from '@/features/shared/components/ui/card'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/features/shared/components/ui/tabs'
 
+export default function AuthPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-2">
-      <div className="flex w-full max-w-sm flex-col items-center gap-8">
+    <div className="flex w-full min-h-screen items-center justify-center">
+      <div className="flex flex-col min-h-screen w-full max-w-sm items-center gap-8">
+        <div style={{ height: 100 }} />
         <Image
           src={'/atlas_logo_rounded_m.png'}
           width={100}
           height={100}
           alt={'Logo'}
         />
-        <div className={'min-h-[500px] w-full'}>
-          <Card className={'w-full pt-0'}>
-            <Tabs defaultValue="login">
-              <TabsList className={'mb-8 flex w-full'}>
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <LoginForm redirectTo={redirectTo} />
+        <Card className={'w-full p-0'} style={{ minHeight: '250px' }}>
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="w-full items-center">
+              <TabsTrigger value="login" className="flex-1">
+                Login
+              </TabsTrigger>
+              <TabsTrigger value="register" className="flex-1">
+                Register
+              </TabsTrigger>
+            </TabsList>
+            <div className="py-6">
+              <TabsContent value="login" className="mt-0">
+                <LoginForm />
               </TabsContent>
-              <TabsContent value="register">
+              <TabsContent value="register" className="mt-0">
                 <RegisterForm />
               </TabsContent>
-            </Tabs>
-          </Card>
-        </div>
+            </div>
+          </Tabs>
+        </Card>
+        <div style={{ height: 100 }} />
       </div>
     </div>
   )

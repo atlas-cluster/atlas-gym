@@ -1,11 +1,12 @@
+import { CircleAlertIcon } from 'lucide-react'
+
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/ui/empty'
-import { CircleAlertIcon } from 'lucide-react'
+} from '@/features/shared/components/ui/empty'
 
 export default function TrainersPage() {
   return (

@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: atlas-gym-postgres-dev
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - atlas-network
+
+  flyway:
+    image: flyway/flyway:11
+    container_name: atlas-gym-flyway-dev
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db/migrations:/flyway/sql:ro
+      - ./db/flyway.conf:/flyway/conf/flyway.conf:ro
+    command: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - atlas-network
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  atlas-network:
+    driver: bridge

@@ -11,21 +11,31 @@ import type { NextRequest } from 'next/server'
 
 const AUTH_ROUTE = '/auth'
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')
   const pathname = request.nextUrl.pathname
+  const searchParams = request.nextUrl.searchParams
+  const isSessionExpired = searchParams.get('session_expired') === 'true'
 
-  // If user has a session cookie and tries to access login/register, redirect to home
-  // The AuthProvider will validate the session and redirect back to login if invalid
   if (sessionCookie && pathname === AUTH_ROUTE) {
+    if (isSessionExpired) {
+      const response = NextResponse.next()
+      response.cookies.delete('session')
+      return response
+    }
+
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // If user doesn't have a session cookie and tries to access protected route, redirect to login
-  if (!sessionCookie && pathname !== AUTH_ROUTE) {
-    const loginUrl = new URL('/auth', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  if (pathname !== AUTH_ROUTE) {
+    if (!sessionCookie) {
+      const loginUrl = new URL('/auth', request.url)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // We trust the existance of the cookie here for performance (Edge).
+    // The AppLayout (Server) will validate the session against the DB
+    // and redirect back to /auth?session_expired=true if invalid.
   }
 
   return NextResponse.next()

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
+import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
-import { AuthProvider } from '@/components/auth-context'
-import { Toaster } from '@/components/ui/sonner'
+import React from 'react'
+
+import { getSession } from '@/features/auth/actions/get-session'
+import { AuthProvider } from '@/features/auth/components/auth-provider'
+import { Toaster } from '@/features/shared/components/ui/sonner'
+import '@/features/shared/styles/globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,13 +23,14 @@ export const metadata: Metadata = {
   description: 'Gym Management System',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await getSession()
+
   return (
-    // Suppressing hydration warning as theme is handled on client side
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -35,7 +39,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange>
-          <AuthProvider>
+          <AuthProvider initialUser={session.user}>
             <Toaster />
             {children}
           </AuthProvider>
