@@ -14,8 +14,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { AppStatus } from '@/features/app/components/app-status'
-import { useAuth } from '@/features/auth/components/auth-provider'
-import SidebarUserMenu from '@/features/auth/components/sidebar-user-menu'
+import { SidebarUserMenu, useAuth } from '@/features/auth'
 import {
   Sidebar,
   SidebarContent,
