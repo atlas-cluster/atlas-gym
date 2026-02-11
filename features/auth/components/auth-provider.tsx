@@ -5,14 +5,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { getSession } from '@/features/auth/actions/get-session'
 import { logout as logoutAction } from '@/features/auth/actions/logout'
-import { User } from '@/features/auth/types'
+import { Member } from '@/features/members'
 
 interface AuthContextType {
-  user: User | null
+  member: Member | null
   loading: boolean
   isAuthenticated: boolean
   logout: () => Promise<void>
-  refreshUser: () => Promise<void>
+  refreshMember: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -29,24 +29,24 @@ export function useAuth() {
 
 interface AuthProviderProps {
   children: React.ReactNode
-  initialUser?: User | null
+  initialMember?: Member | null
 }
 
-export function AuthProvider({ children, initialUser }: AuthProviderProps) {
+export function AuthProvider({ children, initialMember }: AuthProviderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [user, setUser] = useState<User | null>(initialUser || null)
-  const [loading, setLoading] = useState(!initialUser)
-  const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser)
+  const [member, setMember] = useState<Member | null>(initialMember || null)
+  const [loading, setLoading] = useState(!initialMember)
+  const [isAuthenticated, setIsAuthenticated] = useState(!!initialMember)
 
   // Explicitly handle session expiration cleanup
   useEffect(() => {
     if (searchParams.get('session_expired') === 'true') {
       const cleanup = async () => {
         // Middleware already clears the cookie when session_expired=true is present
-        setUser(null)
+        setMember(null)
         setIsAuthenticated(false)
         router.replace('/auth')
       }
@@ -54,21 +54,21 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     }
   }, [searchParams, router])
 
-  const fetchUser = async () => {
+  const fetchMember = async () => {
     try {
       const data = await getSession()
 
-      if (data.authenticated && data.user) {
-        setUser(data.user)
+      if (data.authenticated && data.member) {
+        setMember(data.member)
         setIsAuthenticated(true)
-        return data.user
+        return data.member
       } else {
-        setUser(null)
+        setMember(null)
         setIsAuthenticated(false)
         return null
       }
     } catch {
-      setUser(null)
+      setMember(null)
       setIsAuthenticated(false)
       return null
     }
@@ -77,19 +77,19 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const logout = async () => {
     try {
       await logoutAction()
-      setUser(null)
+      setMember(null)
       setIsAuthenticated(false)
       router.push('/auth')
     } catch {
       // Even if logout API fails, clear local state
-      setUser(null)
+      setMember(null)
       setIsAuthenticated(false)
       router.push('/auth')
     }
   }
 
-  const refreshUser = async () => {
-    await fetchUser()
+  const refreshMember = async () => {
+    await fetchMember()
   }
 
   useEffect(() => {
@@ -102,22 +102,22 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
         return
       }
 
-      // If we already have a user (hydrated from server), we can skip the fetch
+      // If we already have a member (hydrated from server), we can skip the fetch
       // unless we want to force re-verification.
       // Since AppLayout (Server) validates every page load/nav, we can trust the initial value or existing state
       // for the current view.
-      if (user) {
+      if (member) {
         setLoading(false)
         return
       }
 
-      // For protected routes, validate session with server if we don't have a user
-      const currentUser = await fetchUser()
+      // For protected routes, validate session with server if we don't have a member
+      const currentMember = await fetchMember()
 
       if (!isMounted) return
 
       // If session is invalid, redirect to login
-      if (!currentUser) {
+      if (!currentMember) {
         const loginUrl = `/auth?redirect=${encodeURIComponent(pathname)}`
         router.push(loginUrl)
         setLoading(false)
@@ -132,21 +132,21 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     return () => {
       isMounted = false
     }
-    // We add 'user' to dependency so if it changes (e.g. logout) we re-eval?
+    // We add 'member' to dependency so if it changes (e.g. logout) we re-eval?
     // Actually, we want to run this mostly on mount or path change.
-    // If we add 'user', and 'fetchUser' sets user, we might loop if we are not careful.
-    // But we check `if (user) return`. So if user is set, we stop.
-  }, [pathname, router, user])
+    // If we add 'member', and 'fetchMember' sets member, we might loop if we are not careful.
+    // But we check `if (member) return`. So if member is set, we stop.
+  }, [pathname, router, member])
 
   // Always render children - no loading screen
   return (
     <AuthContext.Provider
       value={{
-        user,
+        member,
         loading,
         isAuthenticated,
         logout,
-        refreshUser,
+        refreshMember,
       }}>
       {children}
     </AuthContext.Provider>

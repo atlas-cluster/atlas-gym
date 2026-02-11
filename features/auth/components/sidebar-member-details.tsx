@@ -21,13 +21,13 @@ import {
 } from '@/features/shared/components/ui/sidebar'
 import { Skeleton } from '@/features/shared/components/ui/skeleton'
 
-const UserButtonContent = ({
-  userExists,
+const MemberDetails = ({
+  memberExists,
   getInitials,
   getFullName,
   getEmail,
 }: {
-  userExists: boolean
+  memberExists: boolean
   getInitials: () => string
   getFullName: () => string
   getEmail: () => string
@@ -35,25 +35,33 @@ const UserButtonContent = ({
   <>
     <div className={'flex size-8 items-center justify-center'}>
       <Avatar>
-        <AvatarFallback>{userExists ? getInitials() : ''}</AvatarFallback>
+        <AvatarFallback>{memberExists ? getInitials() : ''}</AvatarFallback>
       </Avatar>
     </div>
     <div className="grid flex-1 text-left text-sm leading-tight data-[state=closed]:w-0">
       <span className="h-4 truncate font-medium">
-        {userExists ? getFullName() : <Skeleton className={'w-f m-1 h-full'} />}
+        {memberExists ? (
+          getFullName()
+        ) : (
+          <Skeleton className={'w-f m-1 h-full'} />
+        )}
       </span>
       <span className="text-muted-foreground h-[10pt] truncate text-xs">
-        {userExists ? getEmail() : <Skeleton className={'m-1 h-full w-4/5'} />}
+        {memberExists ? (
+          getEmail()
+        ) : (
+          <Skeleton className={'m-1 h-full w-4/5'} />
+        )}
       </span>
     </div>
   </>
 )
 
-export function SidebarUserMenu() {
+export function SidebarMemberDetails() {
   const { isMobile } = useSidebar()
-  const { user, loading, logout } = useAuth()
+  const { member, loading, logout } = useAuth()
 
-  const userExists = Boolean(user && !loading)
+  const memberExists = Boolean(member && !loading)
 
   const handleLogout = async () => {
     try {
@@ -66,23 +74,25 @@ export function SidebarUserMenu() {
   }
 
   const getInitials = () => {
-    // Assume `user` exists when this is called.
+    // Assume `member` exists when this is called.
     // Use optional chaining only to avoid runtime errors in unexpected cases.
-    const firstInitial = user?.firstname?.[0] || ''
-    const lastInitial = user?.lastname?.[0] || ''
+    const firstInitial = member?.firstname?.[0] || ''
+    const lastInitial = member?.lastname?.[0] || ''
     return (firstInitial + lastInitial).toUpperCase()
   }
 
   const getFullName = () => {
-    // Assume `user` exists when this is called.
-    const parts = [user?.firstname, user?.middlename, user?.lastname].filter(
-      Boolean
-    )
+    // Assume `member` exists when this is called.
+    const parts = [
+      member?.firstname,
+      member?.middlename,
+      member?.lastname,
+    ].filter(Boolean)
     return parts.join(' ')
   }
 
   const getEmail = () => {
-    return user?.email || ''
+    return member?.email || ''
   }
 
   if (loading) {
@@ -92,8 +102,8 @@ export function SidebarUserMenu() {
           <SidebarMenuButton
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-            <UserButtonContent
-              userExists={userExists}
+            <MemberDetails
+              memberExists={memberExists}
               getInitials={getInitials}
               getFullName={getFullName}
               getEmail={getEmail}
@@ -112,8 +122,8 @@ export function SidebarUserMenu() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <UserButtonContent
-                userExists={userExists}
+              <MemberDetails
+                memberExists={memberExists}
                 getInitials={getInitials}
                 getFullName={getFullName}
                 getEmail={getEmail}
@@ -127,8 +137,8 @@ export function SidebarUserMenu() {
             sideOffset={4}>
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <UserButtonContent
-                  userExists={userExists}
+                <MemberDetails
+                  memberExists={memberExists}
                   getInitials={getInitials}
                   getFullName={getFullName}
                   getEmail={getEmail}

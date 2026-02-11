@@ -10,8 +10,8 @@ export default async function TrainerLayout({
 }) {
   const session = await getSession()
 
-  // If user is not authenticated or not a trainer, redirect to dashboard
-  if (!session.user?.isTrainer) {
+  // If member is not authenticated or not a trainer, redirect to dashboard
+  if (!session.member?.isTrainer) {
     redirect('/dashboard')
   }
 

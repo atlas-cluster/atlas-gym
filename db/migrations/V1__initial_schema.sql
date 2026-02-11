@@ -1,10 +1,9 @@
--- Flyway migration will have already created the schema, but we include it here for completeness
 CREATE SCHEMA IF NOT EXISTS gym_manager;
 SET search_path TO gym_manager;
 
 CREATE EXTENSION IF NOT EXISTS citext;
 
-CREATE TABLE users (
+CREATE TABLE members (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email      CITEXT       NOT NULL UNIQUE,
     password_hash   TEXT         NOT NULL,
@@ -20,14 +19,14 @@ CREATE TABLE users (
 
 CREATE TABLE sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    member_id UUID REFERENCES members(id) ON DELETE CASCADE,
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE trainers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    member_id UUID NOT NULL UNIQUE REFERENCES members(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -35,13 +34,13 @@ CREATE TYPE payment_type AS ENUM ('credit_card', 'iban');
 
 CREATE TABLE payment_methods (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    member_id             UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
     type                payment_type NOT NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    -- Ensure a payment method is unique per type for the user if needed
-    UNIQUE(user_id, type)
+    -- Ensure a payment method is unique per type for the member if needed
+    UNIQUE(member_id, type)
 );
 
 CREATE TABLE credit_cards (

@@ -38,7 +38,7 @@ export async function register(data: z.infer<typeof registerSchema>) {
 
     // 1. Check if email exists
     const existing = await client.query(
-      `SELECT id FROM gym_manager.users WHERE email = $1`,
+      `SELECT id FROM gym_manager.members WHERE email = $1`,
       [email]
     )
 
@@ -50,9 +50,9 @@ export async function register(data: z.infer<typeof registerSchema>) {
     // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // 3. Insert user
+    // 3. Insert member
     const insertResult = await client.query<{ id: string }>(
-      `INSERT INTO gym_manager.users (
+      `INSERT INTO gym_manager.members (
         email, 
         password_hash, 
         firstname, 
@@ -75,14 +75,14 @@ export async function register(data: z.infer<typeof registerSchema>) {
       ]
     )
 
-    const userId = insertResult.rows[0].id
+    const memberId = insertResult.rows[0].id
 
     // 4. Insert payment method
     const paymentMethodResult = await client.query<{ id: string }>(
-      `INSERT INTO gym_manager.payment_methods (user_id, type)
+      `INSERT INTO gym_manager.payment_methods (member_id, type)
          VALUES ($1, $2)
          RETURNING id`,
-      [userId, paymentType]
+      [memberId, paymentType]
     )
 
     const paymentMethodId = paymentMethodResult.rows[0].id
@@ -114,10 +114,10 @@ export async function register(data: z.infer<typeof registerSchema>) {
     // 5. Create session (valid for 7 days)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     const sessionResult = await client.query<{ id: string }>(
-      `INSERT INTO gym_manager.sessions (user_id, expires_at) 
+      `INSERT INTO gym_manager.sessions (member_id, expires_at) 
        VALUES ($1, $2) 
        RETURNING id`,
-      [userId, expiresAt]
+      [memberId, expiresAt]
     )
 
     const sessionId = sessionResult.rows[0].id

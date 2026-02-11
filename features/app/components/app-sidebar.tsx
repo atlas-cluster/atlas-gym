@@ -13,7 +13,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { SidebarUserMenu, useAuth } from '@/features/auth'
+import { SidebarMemberDetails, useAuth } from '@/features/auth'
 import {
   Sidebar,
   SidebarContent,
@@ -43,7 +43,7 @@ const trainerNavItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { user } = useAuth()
+  const { member } = useAuth()
 
   return (
     <Sidebar collapsible={'icon'}>
@@ -81,7 +81,7 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        {user?.isTrainer && (
+        {member?.isTrainer && (
           <SidebarGroup>
             <SidebarGroupLabel>Trainer</SidebarGroupLabel>
             <SidebarMenu>
@@ -104,7 +104,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarSeparator className={'m-0'} />
       <SidebarFooter>
-        <SidebarUserMenu />
+        <SidebarMemberDetails />
       </SidebarFooter>
     </Sidebar>
   )

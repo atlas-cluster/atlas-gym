@@ -43,8 +43,8 @@ export function LoginForm() {
 
     if (result?.error) {
       switch (result.error) {
-        case 'USER_NOT_FOUND':
-          form.setError('email', { message: 'User not found' })
+        case 'MEMBER_NOT_FOUND':
+          form.setError('email', { message: 'Member not found' })
           form.setFocus('email')
           break
         case 'INVALID_CREDENTIALS':

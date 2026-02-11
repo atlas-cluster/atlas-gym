@@ -20,20 +20,20 @@ export async function login(
   const { email, password } = validation.data
 
   try {
-    // 1. Find user
+    // 1. Find member
     const result = await pool.query(
-      `SELECT id, password_hash FROM gym_manager.users WHERE email = $1`,
+      `SELECT id, password_hash FROM gym_manager.members WHERE email = $1`,
       [email]
     )
 
     if (result.rows.length === 0) {
-      return { error: 'USER_NOT_FOUND' }
+      return { error: 'MEMBER_NOT_FOUND' }
     }
 
-    const user = result.rows[0]
+    const member = result.rows[0]
 
     // 2. Verify password
-    const validPassword = await bcrypt.compare(password, user.password_hash)
+    const validPassword = await bcrypt.compare(password, member.password_hash)
     if (!validPassword) {
       return { error: 'INVALID_CREDENTIALS' }
     }
@@ -41,10 +41,10 @@ export async function login(
     // 3. Create session (valid for 7 days)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     const sessionResult = await pool.query<{ id: string }>(
-      `INSERT INTO gym_manager.sessions (user_id, expires_at) 
+      `INSERT INTO gym_manager.sessions (member_id, expires_at) 
        VALUES ($1, $2) 
        RETURNING id`,
-      [user.id, expiresAt]
+      [member.id, expiresAt]
     )
 
     const sessionId = sessionResult.rows[0].id
