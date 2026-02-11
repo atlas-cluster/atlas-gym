@@ -23,3 +23,20 @@ export interface CreditCardDetails {
 export interface BankAccountDetails {
   iban: string
 }
+
+export interface GetMembersParams {
+  pageIndex: number
+  pageSize: number
+  sorting?: { id: string; desc: boolean }[]
+  columnFilters?: { id: string; value: unknown }[]
+  globalFilter?: string
+}
+
+export interface GetMembersResponse {
+  data: Member[]
+  pageCount: number
+  rowCount: number
+  facets: {
+    isTrainer: Record<string, number>
+  }
+}
