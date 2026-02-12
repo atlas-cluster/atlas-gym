@@ -26,6 +26,7 @@ const getPlansCached = unstable_cache(
     const result = await pool.query(query)
     return result.rows.map((row) => ({
       ...row,
+      price: parseFloat(row.price),
       subscriptionCount: parseInt(row.subscriptionCount) || 0,
     }))
   },
