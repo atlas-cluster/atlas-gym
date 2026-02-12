@@ -1,10 +1,3 @@
-export interface Session {
-  id: string
-  member_id: string
-  expires_at: Date
-  created_at: Date
-}
-
 export type LoginError =
   | 'INVALID_CREDENTIALS'
   | 'MEMBER_NOT_FOUND'

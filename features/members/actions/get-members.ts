@@ -8,29 +8,21 @@ import { pool } from '@/features/shared/lib/db'
 const getMembersCached = unstable_cache(
   async (): Promise<MemberDisplay[]> => {
     const query = `
-    SELECT
-      m.id,
-      m.email,
-      m.created_at,
-      m.firstname,
-      m.lastname,
-      m.middlename,
-      m.address,
-      m.birthdate,
-      m.phone,
-      pm.type as "paymentType",
-      CASE WHEN t.id IS NOT NULL THEN true ELSE false END as "isTrainer"
-    FROM members m
-    LEFT JOIN trainers t ON m.id = t.member_id
-    LEFT JOIN LATERAL (
-      SELECT type
-      FROM payment_methods pm
-      WHERE pm.member_id = m.id
-      ORDER BY pm.updated_at DESC
-      LIMIT 1
-    ) pm ON true
-    ORDER BY m.lastname ASC, m.firstname ASC
-  `
+      SELECT m.id,
+             m.email,
+             m.created_at,
+             m.firstname,
+             m.lastname,
+             m.middlename,
+             m.address,
+             m.birthdate,
+             m.phone,
+             m.payment_type                                      as "paymentType",
+             CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer"
+      FROM members m
+             LEFT JOIN trainers t ON m.id = t.member_id
+      ORDER BY m.lastname, m.firstname
+    `
 
     const result = await pool.query(query)
     return result.rows

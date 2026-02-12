@@ -1,6 +1,7 @@
 'use server'
 
 import bcrypt from 'bcryptjs'
+import { updateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
@@ -60,8 +61,9 @@ export async function register(data: z.infer<typeof registerSchema>) {
         middlename, 
         address, 
         birthdate, 
-        phone
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        phone,
+        payment_type
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id`,
       [
         email,
@@ -72,20 +74,11 @@ export async function register(data: z.infer<typeof registerSchema>) {
         address,
         birthdate,
         phone,
+        paymentType,
       ]
     )
 
     const memberId = insertResult.rows[0].id
-
-    // 4. Insert payment method
-    const paymentMethodResult = await client.query<{ id: string }>(
-      `INSERT INTO payment_methods (member_id, type)
-         VALUES ($1, $2)
-         RETURNING id`,
-      [memberId, paymentType]
-    )
-
-    const paymentMethodId = paymentMethodResult.rows[0].id
 
     if (paymentType === 'credit_card') {
       // Remove whitespace from expiry
@@ -93,21 +86,21 @@ export async function register(data: z.infer<typeof registerSchema>) {
 
       await client.query(
         `INSERT INTO credit_cards (
-             payment_method_id,
+             member_id,
              card_number,
              card_expiry,
              card_cvc,
              card_holder
            ) VALUES ($1, $2, $3, $4, $5)`,
-        [paymentMethodId, cardNumber, cleanExpiry, cardCvc, cardHolder]
+        [memberId, cardNumber, cleanExpiry, cardCvc, cardHolder]
       )
     } else if (paymentType === 'iban') {
       await client.query(
         `INSERT INTO bank_accounts (
-             payment_method_id,
+             member_id,
              iban
            ) VALUES ($1, $2)`,
-        [paymentMethodId, iban]
+        [memberId, iban]
       )
     }
 
@@ -123,6 +116,7 @@ export async function register(data: z.infer<typeof registerSchema>) {
     const sessionId = sessionResult.rows[0].id
 
     await client.query('COMMIT')
+    updateTag('members')
 
     // 6. Set cookie
     const cookieStore = await cookies()

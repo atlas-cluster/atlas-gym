@@ -24,58 +24,36 @@ export async function updateMemberPayment(
   try {
     await client.query('BEGIN')
 
-    const existing = await client.query<{ id: string }>(
-      `SELECT id FROM payment_methods WHERE member_id = $1`,
-      [id]
-    )
+    await client.query(`UPDATE members SET payment_type = $2 WHERE id = $1`, [
+      id,
+      paymentType,
+    ])
 
-    const existingIds = existing.rows.map((row) => row.id)
-
-    if (existingIds.length > 0) {
-      await client.query(
-        `DELETE FROM credit_cards WHERE payment_method_id = ANY($1::uuid[])`,
-        [existingIds]
-      )
-      await client.query(
-        `DELETE FROM bank_accounts WHERE payment_method_id = ANY($1::uuid[])`,
-        [existingIds]
-      )
-      await client.query(`DELETE FROM payment_methods WHERE member_id = $1`, [
-        id,
-      ])
-    }
-
-    const paymentMethodResult = await client.query<{ id: string }>(
-      `INSERT INTO payment_methods (member_id, type)
-       VALUES ($1, $2)
-       RETURNING id`,
-      [id, paymentType]
-    )
-
-    const paymentMethodId = paymentMethodResult.rows[0].id
+    await client.query('DELETE FROM credit_cards WHERE member_id = $1', [id])
+    await client.query('DELETE FROM bank_accounts WHERE member_id = $1', [id])
 
     if (paymentType === 'credit_card') {
       const cleanExpiry = (cardExpiry || '').replace(/\D/g, '')
 
       await client.query(
         `INSERT INTO credit_cards (
-           payment_method_id,
+           member_id,
            card_number,
            card_expiry,
            card_cvc,
            card_holder
          ) VALUES ($1, $2, $3, $4, $5)`,
-        [paymentMethodId, cardNumber, cleanExpiry, cardCvc, cardHolder]
+        [id, cardNumber, cleanExpiry, cardCvc, cardHolder]
       )
     } else {
       const cleanIban = (iban || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
 
       await client.query(
         `INSERT INTO bank_accounts (
-           payment_method_id,
+           member_id,
            iban
          ) VALUES ($1, $2)`,
-        [paymentMethodId, cleanIban]
+        [id, cleanIban]
       )
     }
 

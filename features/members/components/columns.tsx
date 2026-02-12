@@ -6,7 +6,6 @@ import {
   GraduationCap,
   KeyRound,
   Landmark,
-  LockIcon,
   MoreHorizontalIcon,
   PencilIcon,
   TrashIcon,
@@ -26,17 +25,6 @@ import {
 } from '@/features/shared/components/ui/dropdown-menu'
 import { Table } from '@tanstack/react-table'
 import { ColumnDef, Row } from '@tanstack/table-core'
-
-const paymentTypeConfig = {
-  credit_card: {
-    label: 'Credit card',
-    icon: CreditCard,
-  },
-  iban: {
-    label: 'IBAN',
-    icon: Landmark,
-  },
-}
 
 export const columns: ColumnDef<MemberDisplay>[] = [
   {
@@ -108,12 +96,19 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     id: 'payment',
     header: 'Payment',
     cell: ({ row }) => {
-      const config = paymentTypeConfig[row.original.paymentType]
-      const Icon = config.icon
       return (
         <Badge variant="outline">
-          <Icon />
-          {config.label}
+          {row.original.paymentType === 'credit_card' ? (
+            <>
+              <CreditCard />
+              <span>Credit Card</span>
+            </>
+          ) : (
+            <>
+              <Landmark />
+              IBAN
+            </>
+          )}
         </Badge>
       )
     },

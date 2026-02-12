@@ -16,11 +16,10 @@ export interface Member {
   birthdate: Date
   phone?: string
   isTrainer?: boolean
+  paymentType?: PaymentType
 }
 
-export interface MemberDisplay extends Member {
-  paymentType: PaymentType
-}
+export type MemberDisplay = Member
 
 export interface MembersTableMeta {
   updateMember: (id: string, data: z.infer<typeof memberDetailsSchema>) => void

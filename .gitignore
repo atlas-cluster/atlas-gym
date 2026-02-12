@@ -28,6 +28,7 @@
 .DS_Store
 *.pem
 *.drawio.dtmp
+*.drawio.bkp
 
 # debug
 npm-debug.log*

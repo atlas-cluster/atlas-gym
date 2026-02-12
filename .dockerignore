@@ -49,3 +49,4 @@ coverage
 .prettierignore
 .prettierrc
 *.drawio.dtmp
+*.drawio.bkp

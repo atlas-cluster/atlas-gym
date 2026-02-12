@@ -7,7 +7,8 @@ INSERT INTO
     middlename,
     birthdate,
     address,
-    phone
+    phone,
+    payment_type
   )
 VALUES
   (
@@ -18,7 +19,8 @@ VALUES
     NULL,
     '2000-01-01',
     'Musterstrasse 67, Musterstadt',
-    '+491234567890'
+    '+491234567890',
+    'credit_card'
   ),
   (
     'lena.hartmann@gmx.de',
@@ -28,7 +30,8 @@ VALUES
     NULL,
     '1990-03-08',
     'Ludwigstrasse 7, 80539 Muenchen',
-    '+491503112233'
+    '+491503112233',
+    'iban'
   ),
   (
     'jonas.weber@web.de',
@@ -38,7 +41,8 @@ VALUES
     NULL,
     '1988-11-30',
     'Rothenbaumchaussee 65, 20148 Hamburg',
-    '+491511876543'
+    '+491511876543',
+    'credit_card'
   ),
   (
     'maria.schmidt@t-online.de',
@@ -48,7 +52,8 @@ VALUES
     NULL,
     '1994-07-12',
     'Grafstrasse 21, 40210 Duesseldorf',
-    '+491577890123'
+    '+491577890123',
+    'iban'
   ),
   (
     'lukas.fischer@outlook.de',
@@ -58,7 +63,8 @@ VALUES
     NULL,
     '1989-09-25',
     'Bismarckstrasse 19, 45127 Essen',
-    '+491522334455'
+    '+491522334455',
+    'credit_card'
   ),
   (
     'sophie.mueller@web.de',
@@ -68,7 +74,8 @@ VALUES
     NULL,
     '1993-02-04',
     'Rosenstrasse 3, 70173 Stuttgart',
-    '+491511112223'
+    '+491511112223',
+    'credit_card'
   ),
   (
     'tim.becker@gmail.com',
@@ -78,7 +85,8 @@ VALUES
     NULL,
     '1991-06-19',
     'Hofgartenstrasse 9, 80333 Muenchen',
-    '+491511223344'
+    '+491511223344',
+    'iban'
   ),
   (
     'hannah.wolf@mail.de',
@@ -88,7 +96,8 @@ VALUES
     NULL,
     '1995-10-03',
     'Seestrasse 11, 01067 Dresden',
-    '+491511334455'
+    '+491511334455',
+    'credit_card'
   ),
   (
     'max.neumann@t-online.de',
@@ -98,7 +107,8 @@ VALUES
     NULL,
     '1987-12-14',
     'Schlossstrasse 28, 04109 Leipzig',
-    '+491511445566'
+    '+491511445566',
+    'credit_card'
   ),
   (
     'lea.koch@gmx.de',
@@ -108,7 +118,8 @@ VALUES
     NULL,
     '1992-04-27',
     'Wiesenweg 5, 86150 Augsburg',
-    '+491511556677'
+    '+491511556677',
+    'iban'
   ),
   (
     'paul.bauer@outlook.de',
@@ -118,7 +129,8 @@ VALUES
     NULL,
     '1985-08-09',
     'Koenigstrasse 41, 70173 Stuttgart',
-    '+491511667788'
+    '+491511667788',
+    'credit_card'
   ),
   (
     'juliane.schwarz@web.de',
@@ -128,7 +140,8 @@ VALUES
     NULL,
     '1990-12-01',
     'Theodorstrasse 2, 86150 Augsburg',
-    '+491511778899'
+    '+491511778899',
+    'credit_card'
   ),
   (
     'ben.vogel@gmx.de',
@@ -138,7 +151,8 @@ VALUES
     NULL,
     '1989-01-17',
     'Amalienstrasse 12, 80333 Muenchen',
-    '+491517001122'
+    '+491517001122',
+    'iban'
   ),
   (
     'emily.kaiser@t-online.de',
@@ -148,7 +162,8 @@ VALUES
     NULL,
     '1993-05-06',
     'Marktstrasse 1, 79098 Freiburg',
-    '+491517112233'
+    '+491517112233',
+    'credit_card'
   ),
   (
     'nico.herrmann@web.de',
@@ -158,7 +173,8 @@ VALUES
     NULL,
     '1988-03-23',
     'Bahnhofstrasse 33, 34117 Kassel',
-    '+491517223344'
+    '+491517223344',
+    'credit_card'
   ),
   (
     'lara.schulz@mail.de',
@@ -168,7 +184,8 @@ VALUES
     NULL,
     '1994-09-15',
     'Hochstrasse 6, 68159 Mannheim',
-    '+491517334455'
+    '+491517334455',
+    'credit_card'
   ),
   (
     'daniel.werner@outlook.de',
@@ -178,7 +195,8 @@ VALUES
     NULL,
     '1991-07-28',
     'Koenigstrasse 9, 99084 Erfurt',
-    '+491517445566'
+    '+491517445566',
+    'iban'
   ),
   (
     'sarah.maier@web.de',
@@ -188,7 +206,8 @@ VALUES
     NULL,
     '1995-02-11',
     'Ringstrasse 2, 66111 Saarbruecken',
-    '+491517556677'
+    '+491517556677',
+    'credit_card'
   ),
   (
     'felix.hoffmann@gmx.de',
@@ -198,7 +217,8 @@ VALUES
     NULL,
     '1987-06-02',
     'Parkstrasse 3, 70173 Stuttgart',
-    '+491517667788'
+    '+491517667788',
+    'iban'
   ),
   (
     'mila.lehmann@t-online.de',
@@ -208,7 +228,8 @@ VALUES
     NULL,
     '1992-11-19',
     'Bismarckstrasse 23, 65183 Wiesbaden',
-    '+491517778899'
+    '+491517778899',
+    'credit_card'
   ),
   (
     'tom.reuter@web.de',
@@ -218,7 +239,8 @@ VALUES
     NULL,
     '1986-04-10',
     'Mozartstrasse 5, 93047 Regensburg',
-    '+491517889900'
+    '+491517889900',
+    'credit_card'
   ),
   (
     'nora.peters@mail.de',
@@ -228,7 +250,8 @@ VALUES
     NULL,
     '1993-08-24',
     'Lindenallee 4, 04109 Leipzig',
-    '+491517990011'
+    '+491517990011',
+    'credit_card'
   ),
   (
     'jan.koenig@outlook.de',
@@ -238,7 +261,8 @@ VALUES
     NULL,
     '1989-10-21',
     'Poststrasse 4, 89073 Ulm',
-    '+491518001122'
+    '+491518001122',
+    'iban'
   ),
   (
     'clara.braun@gmx.de',
@@ -248,7 +272,8 @@ VALUES
     NULL,
     '1990-12-29',
     'Hafenstrasse 15, 18055 Rostock',
-    '+491518112233'
+    '+491518112233',
+    'credit_card'
   ),
   (
     'leon.zimmermann@web.de',
@@ -258,5 +283,6 @@ VALUES
     NULL,
     '1994-01-05',
     'Seestrasse 7, 24103 Kiel',
-    '+491518223344'
+    '+491518223344',
+    'credit_card'
   );

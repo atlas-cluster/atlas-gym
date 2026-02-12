@@ -30,7 +30,7 @@ export const getSession = cache(
          m.birthdate, 
          m.phone,
          m.created_at,
-        CASE WHEN t.id IS NOT NULL THEN true ELSE false END as is_trainer
+        CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as is_trainer
        FROM sessions s
        JOIN members m ON s.member_id = m.id
        LEFT JOIN trainers t ON m.id = t.member_id

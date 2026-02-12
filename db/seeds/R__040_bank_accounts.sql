@@ -1,7 +1,7 @@
 INSERT INTO
-  bank_accounts (payment_method_id, iban)
+  bank_accounts (member_id, iban)
 SELECT
-  pm.id,
+  m.id,
   v.iban
 FROM
   (
@@ -21,6 +21,4 @@ FROM
       ('felix.hoffmann@gmx.de', 'DE12500105170012345679'),
       ('jan.koenig@outlook.de', 'DE21500105170123456789')
   ) AS v (email, iban)
-  JOIN members m ON m.email = v.email
-  JOIN payment_methods pm ON pm.member_id = m.id
-  AND pm.type = 'iban';
+  JOIN members m ON m.email = v.email;
