@@ -43,7 +43,6 @@ import {
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
@@ -285,7 +284,13 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle>{plan.name}</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      {plan.name}
+                      <Badge variant="secondary" className="text-xs">
+                        <UsersIcon className="w-3 h-3" />
+                        {plan.subscriptionCount || 0}
+                      </Badge>
+                    </CardTitle>
                     <CardDescription className="mt-2">
                       {plan.description || 'No description'}
                     </CardDescription>
@@ -325,17 +330,6 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   </span>
                 </div>
               </CardContent>
-              <CardFooter className="border-t pt-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <UsersIcon className="w-4 h-4" />
-                  <span>
-                    {plan.subscriptionCount || 0} active{' '}
-                    {plan.subscriptionCount === 1
-                      ? 'subscription'
-                      : 'subscriptions'}
-                  </span>
-                </div>
-              </CardFooter>
             </Card>
           ))}
         </div>
