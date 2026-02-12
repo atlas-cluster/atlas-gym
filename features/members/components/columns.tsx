@@ -4,7 +4,9 @@ import {
   ArrowUpDown,
   CreditCard,
   GraduationCap,
+  KeyRound,
   Landmark,
+  LockIcon,
   MoreHorizontalIcon,
   PencilIcon,
   TrashIcon,
@@ -211,6 +213,11 @@ function ActionsCell({
                 onSelect={() => meta?.openMemberPayment?.(course)}>
                 <CreditCard />
                 Edit Payment
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => meta?.openChangePassword?.(course)}>
+                <KeyRound />
+                Change Password
               </DropdownMenuItem>
               {row.original.isTrainer ? (
                 <DropdownMenuItem

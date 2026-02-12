@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { useAuth } from '@/features/auth'
 import {
   MemberDisplay,
+  changePassword,
+  changePasswordSchema,
   convertToMember,
   convertToTrainer,
   deleteMember,
@@ -19,6 +21,7 @@ import {
   updateMemberPayment,
 } from '@/features/members'
 import { columns } from '@/features/members/components/columns'
+import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
@@ -59,10 +62,14 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
+  const [passwordOpen, setPasswordOpen] = useState(false)
   const [detailsMember, setDetailsMember] = useState<
     MemberDisplay | undefined
   >()
   const [paymentMember, setPaymentMember] = useState<
+    MemberDisplay | undefined
+  >()
+  const [passwordMember, setPasswordMember] = useState<
     MemberDisplay | undefined
   >()
 
@@ -199,6 +206,22 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     })
   }
 
+  const handlePasswordChange = async (
+    data: z.infer<typeof changePasswordSchema>
+  ) => {
+    if (!passwordMember) return
+
+    const promise = changePassword(passwordMember.id, data)
+
+    toast.promise(promise, {
+      loading: 'Changing password...',
+      success: 'Password changed successfully',
+      error: 'Failed to change password',
+    })
+
+    return promise
+  }
+
   const table = useReactTable({
     data: tableData,
     columns,
@@ -213,6 +236,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       openMemberPayment: (member: MemberDisplay) => {
         setPaymentMember(member)
         setPaymentOpen(true)
+      },
+      openChangePassword: (member: MemberDisplay) => {
+        setPasswordMember(member)
+        setPasswordOpen(true)
       },
       deleteMember: handleDelete,
       deleteMembers: handleDeleteMany,
@@ -259,14 +286,18 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         }
       />
       <MemberPaymentDialog
-        member={paymentMember}
         open={paymentOpen}
-        onOpenChange={handlePaymentOpenChange}
-        onSubmit={(payload) =>
-          paymentMember
-            ? handleUpdatePayment(paymentMember.id, payload)
-            : undefined
+        onOpenChange={setPaymentOpen}
+        member={paymentMember}
+        onSubmit={(data) =>
+          paymentMember && handleUpdatePayment(paymentMember.id, data)
         }
+      />
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onOpenChange={setPasswordOpen}
+        member={passwordMember}
+        onSubmit={handlePasswordChange}
       />
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">

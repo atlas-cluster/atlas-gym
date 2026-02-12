@@ -30,6 +30,7 @@ export interface MembersTableMeta {
   ) => void
   openMemberDetails: (member: MemberDisplay) => void
   openMemberPayment: (member: MemberDisplay) => void
+  openChangePassword: (member: MemberDisplay) => void
   deleteMember: (id: string) => void
   deleteMembers: (ids: string[]) => void
   convertToMember: (id: string) => void
