@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { useAuth } from '@/features/auth'
 import {
   MemberDisplay,
   convertToMember,
@@ -53,6 +54,7 @@ import {
 } from '@tanstack/table-core'
 
 export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
+  const { member: currentMember, refreshMember } = useAuth()
   const [isPending, startTransition] = useTransition()
   const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -89,7 +91,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     id: string,
     data: z.infer<typeof memberDetailsSchema>
   ) => {
-    const promise = updateMember(id, data).then(() => {
+    const promise = updateMember(id, data).then(async () => {
       updateMemberInState(id, {
         firstname: data.firstname,
         middlename: data.middlename || undefined,
@@ -99,6 +101,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         address: data.address || undefined,
         birthdate: new Date(data.birthdate),
       })
+
+      if (currentMember?.id === id) {
+        await refreshMember()
+      }
     })
 
     toast.promise(promise, {
@@ -152,7 +158,12 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleConvertToMember = (id: string) => {
-    const promise = convertToMember(id).then(() => fetchData())
+    const promise = convertToMember(id).then(async () => {
+      fetchData()
+      if (currentMember?.id === id) {
+        await refreshMember()
+      }
+    })
 
     toast.promise(promise, {
       loading: 'Changing to member...',
@@ -162,7 +173,12 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleConvertToTrainer = (id: string) => {
-    const promise = convertToTrainer(id).then(() => fetchData())
+    const promise = convertToTrainer(id).then(async () => {
+      fetchData()
+      if (currentMember?.id === id) {
+        await refreshMember()
+      }
+    })
 
     toast.promise(promise, {
       loading: 'Changing to trainer...',
