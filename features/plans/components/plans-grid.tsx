@@ -26,7 +26,6 @@ import {
   updatePlan,
 } from '@/features/plans'
 import { PlanDetailsDialog } from '@/features/plans/dialog/plan-details'
-import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +62,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/features/shared/components/ui/select'
+import { Slider } from '@/features/shared/components/ui/slider'
 
 export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const [isPending, startTransition] = useTransition()
@@ -80,7 +80,12 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
     'name' | 'price' | 'minDuration' | 'subscriptionCount'
   >('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  const [minDurationFilter, setMinDurationFilter] = useState<number[]>([])
+  const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
+
+  // Calculate min/max values from data
+  const minPrice = Math.min(...plansData.map((p) => p.price), 0)
+  const maxPrice = Math.max(...plansData.map((p) => p.price), 200)
 
   useEffect(() => {
     setPlansData(initialData)
@@ -172,11 +177,17 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
         if (!matchesSearch) return false
       }
 
-      // Min duration filter
-      if (minDurationFilter.length > 0) {
-        if (!minDurationFilter.includes(plan.minDurationMonths)) {
-          return false
-        }
+      // Duration range filter
+      if (
+        plan.minDurationMonths < durationRange[0] ||
+        plan.minDurationMonths > durationRange[1]
+      ) {
+        return false
+      }
+
+      // Price range filter
+      if (plan.price < priceRange[0] || plan.price > priceRange[1]) {
+        return false
       }
 
       return true
@@ -212,7 +223,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   // Reset to first page when search or filters change
   useEffect(() => {
     setCurrentPage(0)
-  }, [searchQuery, minDurationFilter, sortBy, sortOrder])
+  }, [searchQuery, durationRange, priceRange, sortBy, sortOrder])
 
   return (
     <div className="w-full space-y-4">
@@ -242,24 +253,196 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       </AlertDialog>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-        <div className="flex w-full flex-wrap items-center gap-2">
-          <div className="flex w-full gap-2 md:w-64">
-            {/* Desktop: Show input only */}
-            <Input
-              className={'hidden md:flex'}
-              placeholder="Search plans..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {/* Mobile: Show input and refresh button */}
-            <div className={'flex w-full gap-2 md:hidden'}>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <div className="flex w-full gap-2 md:w-64">
+              {/* Desktop: Show input only */}
               <Input
-                className="flex-1"
+                className={'hidden md:flex'}
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              {/* Mobile: Show input and buttons */}
+              <div className={'flex w-full gap-2 md:hidden'}>
+                <Input
+                  className="flex-1"
+                  placeholder="Search plans..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <ButtonGroup>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        suppressHydrationWarning>
+                        <ArrowUpDown className="h-4 w-4" />
+                        <span className="sr-only">Sort</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSortBy('name')
+                          setSortOrder(
+                            sortBy === 'name' && sortOrder === 'asc'
+                              ? 'desc'
+                              : 'asc'
+                          )
+                        }}>
+                        Name{' '}
+                        {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSortBy('price')
+                          setSortOrder(
+                            sortBy === 'price' && sortOrder === 'asc'
+                              ? 'desc'
+                              : 'asc'
+                          )
+                        }}>
+                        Price{' '}
+                        {sortBy === 'price' &&
+                          (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSortBy('minDuration')
+                          setSortOrder(
+                            sortBy === 'minDuration' && sortOrder === 'asc'
+                              ? 'desc'
+                              : 'asc'
+                          )
+                        }}>
+                        Min Duration{' '}
+                        {sortBy === 'minDuration' &&
+                          (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSortBy('subscriptionCount')
+                          setSortOrder(
+                            sortBy === 'subscriptionCount' &&
+                              sortOrder === 'asc'
+                              ? 'desc'
+                              : 'asc'
+                          )
+                        }}>
+                        Subscriptions{' '}
+                        {sortBy === 'subscriptionCount' &&
+                          (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    type="button"
+                    disabled={isPending}
+                    suppressHydrationWarning
+                    onClick={handleRefresh}>
+                    <RefreshCwIcon
+                      className={isPending ? 'animate-spin' : ''}
+                    />
+                    <span className={'sr-only'}>Refresh Data</span>
+                  </Button>
+                </ButtonGroup>
+              </div>
+            </div>
+
+            {(searchQuery ||
+              durationRange[0] !== 0 ||
+              durationRange[1] !== 36 ||
+              priceRange[0] !== minPrice ||
+              priceRange[1] !== maxPrice) && (
+              <Button
+                variant="ghost"
+                size={'icon'}
+                onClick={() => {
+                  setSearchQuery('')
+                  setDurationRange([0, 36])
+                  setPriceRange([minPrice, maxPrice])
+                }}
+                suppressHydrationWarning>
+                <XIcon />
+                <span className={'sr-only'}>Clear filters</span>
+              </Button>
+            )}
+          </div>
+
+          {/* Desktop: Show sorting and action buttons on the right */}
+          <div className={'hidden md:flex gap-2'}>
+            <ButtonGroup>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    suppressHydrationWarning>
+                    <ArrowUpDown className="h-4 w-4" />
+                    <span className="sr-only">Sort</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSortBy('name')
+                      setSortOrder(
+                        sortBy === 'name' && sortOrder === 'asc'
+                          ? 'desc'
+                          : 'asc'
+                      )
+                    }}>
+                    Name{' '}
+                    {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSortBy('price')
+                      setSortOrder(
+                        sortBy === 'price' && sortOrder === 'asc'
+                          ? 'desc'
+                          : 'asc'
+                      )
+                    }}>
+                    Price{' '}
+                    {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSortBy('minDuration')
+                      setSortOrder(
+                        sortBy === 'minDuration' && sortOrder === 'asc'
+                          ? 'desc'
+                          : 'asc'
+                      )
+                    }}>
+                    Min Duration{' '}
+                    {sortBy === 'minDuration' &&
+                      (sortOrder === 'asc' ? '↑' : '↓')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSortBy('subscriptionCount')
+                      setSortOrder(
+                        sortBy === 'subscriptionCount' && sortOrder === 'asc'
+                          ? 'desc'
+                          : 'asc'
+                      )
+                    }}>
+                    Subscriptions{' '}
+                    {sortBy === 'subscriptionCount' &&
+                      (sortOrder === 'asc' ? '↑' : '↓')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 variant="outline"
                 size="icon"
@@ -270,198 +453,66 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                 <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
                 <span className={'sr-only'}>Refresh Data</span>
               </Button>
-            </div>
-          </div>
-
-          {/* Min Duration Filter */}
-          <DataTableFacetedFilter
-            title={'Duration'}
-            options={Array.from(
-              new Set(plansData.map((p) => p.minDurationMonths))
-            )
-              .sort((a, b) => a - b)
-              .map((months) => ({
-                value: String(months),
-                label: `${months} ${months === 1 ? 'month' : 'months'}`,
-              }))}
-            column={{
-              getFilterValue: () =>
-                minDurationFilter.length > 0
-                  ? minDurationFilter.map(String)
-                  : undefined,
-              setFilterValue: (value: string[] | undefined) => {
-                setMinDurationFilter(value ? value.map((v) => parseInt(v)) : [])
-              },
-              getFacetedUniqueValues: () => {
-                const map = new Map()
-                plansData.forEach((plan) => {
-                  const count = map.get(String(plan.minDurationMonths)) || 0
-                  map.set(String(plan.minDurationMonths), count + 1)
-                })
-                return map
-              },
-            }}
-          />
-
-          {(searchQuery || minDurationFilter.length > 0) && (
+            </ButtonGroup>
             <Button
-              variant="ghost"
-              size={'icon'}
-              onClick={() => {
-                setSearchQuery('')
-                setMinDurationFilter([])
-              }}
+              variant="default"
+              size="default"
+              type="button"
+              onClick={handleCreate}
               suppressHydrationWarning>
-              <XIcon />
-              <span className={'sr-only'}>Clear filters</span>
+              <PlusIcon className="md:mr-2" />
+              <span className="hidden md:inline">Create Plan</span>
             </Button>
-          )}
+          </div>
         </div>
 
-        {/* Desktop: Show sorting and action buttons on the right */}
-        <div className={'hidden md:flex gap-2'}>
-          {/* Sort Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="default" suppressHydrationWarning>
-                <ArrowUpDown className="h-4 w-4" />
-                <span className="ml-2">Sort</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSortBy('name')
-                  setSortOrder(
-                    sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc'
-                  )
-                }}>
-                Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSortBy('price')
-                  setSortOrder(
-                    sortBy === 'price' && sortOrder === 'asc' ? 'desc' : 'asc'
-                  )
-                }}>
-                Price {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSortBy('minDuration')
-                  setSortOrder(
-                    sortBy === 'minDuration' && sortOrder === 'asc'
-                      ? 'desc'
-                      : 'asc'
-                  )
-                }}>
-                Min Duration{' '}
-                {sortBy === 'minDuration' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setSortBy('subscriptionCount')
-                  setSortOrder(
-                    sortBy === 'subscriptionCount' && sortOrder === 'asc'
-                      ? 'desc'
-                      : 'asc'
-                  )
-                }}>
-                Subscriptions{' '}
-                {sortBy === 'subscriptionCount' &&
-                  (sortOrder === 'asc' ? '↑' : '↓')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Range Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Duration Range */}
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">
+                Duration: {durationRange[0]}-{durationRange[1]} months
+              </label>
+            </div>
+            <Slider
+              value={durationRange}
+              onValueChange={(value) =>
+                setDurationRange(value as [number, number])
+              }
+              min={0}
+              max={36}
+              step={1}
+              className="w-full"
+            />
+          </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            type="button"
-            disabled={isPending}
-            suppressHydrationWarning
-            onClick={handleRefresh}>
-            <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
-            <span className={'sr-only'}>Refresh Data</span>
-          </Button>
-          <Button
-            variant="default"
-            size="default"
-            type="button"
-            onClick={handleCreate}
-            suppressHydrationWarning>
-            <PlusIcon className="md:mr-2" />
-            <span className="hidden md:inline">Create Plan</span>
-          </Button>
+          {/* Price Range */}
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">
+                Price: €{priceRange[0]}-€{priceRange[1]}
+              </label>
+            </div>
+            <Slider
+              value={priceRange}
+              onValueChange={(value) =>
+                setPriceRange(value as [number, number])
+              }
+              min={Math.floor(minPrice)}
+              max={Math.ceil(maxPrice)}
+              step={1}
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Mobile: Sort and Create buttons */}
-      <div className="md:hidden flex gap-2">
-        {/* Sort Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="flex-1"
-              suppressHydrationWarning>
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              Sort
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => {
-                setSortBy('name')
-                setSortOrder(
-                  sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc'
-                )
-              }}>
-              Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setSortBy('price')
-                setSortOrder(
-                  sortBy === 'price' && sortOrder === 'asc' ? 'desc' : 'asc'
-                )
-              }}>
-              Price {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setSortBy('minDuration')
-                setSortOrder(
-                  sortBy === 'minDuration' && sortOrder === 'asc'
-                    ? 'desc'
-                    : 'asc'
-                )
-              }}>
-              Min Duration{' '}
-              {sortBy === 'minDuration' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setSortBy('subscriptionCount')
-                setSortOrder(
-                  sortBy === 'subscriptionCount' && sortOrder === 'asc'
-                    ? 'desc'
-                    : 'asc'
-                )
-              }}>
-              Subscriptions{' '}
-              {sortBy === 'subscriptionCount' &&
-                (sortOrder === 'asc' ? '↑' : '↓')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+      {/* Mobile: Create button */}
+      <div className="md:hidden">
         <Button
           variant="default"
-          className="flex-1"
+          className="w-full"
           type="button"
           onClick={handleCreate}
           suppressHydrationWarning>

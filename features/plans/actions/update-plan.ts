@@ -30,4 +30,5 @@ export async function updatePlan(
   )
 
   updateTag('plans')
+  updateTag('members') // Invalidate members cache since they display plan names
 }
