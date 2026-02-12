@@ -1,13 +1,13 @@
 'use client'
 
 import {
+  CheckCircle2Icon,
+  PencilIcon,
   PlusIcon,
   RefreshCwIcon,
-  XIcon,
-  PencilIcon,
   TrashIcon,
-  CheckCircle2Icon,
   UsersIcon,
+  XIcon,
 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -15,13 +15,23 @@ import { z } from 'zod'
 
 import {
   PlanDisplay,
+  createPlan,
+  deletePlan,
   getPlans,
   planDetailsSchema,
   updatePlan,
-  deletePlan,
-  createPlan,
 } from '@/features/plans'
 import { PlanDetailsDialog } from '@/features/plans/dialog/plan-details'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/features/shared/components/ui/alert-dialog'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
@@ -35,16 +45,6 @@ import {
   CardTitle,
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/features/shared/components/ui/alert-dialog'
 
 export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const [isPending, startTransition] = useTransition()
@@ -57,7 +57,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(0)
-  const [pageSize, setPageSize] = useState(12)
+  const pageSize = 12
 
   useEffect(() => {
     setPlansData(initialData)
@@ -173,8 +173,8 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the plan &quot;{planToDelete?.name}&quot;.
-              This action cannot be undone.
+              This will permanently delete the plan &quot;{planToDelete?.name}
+              &quot;. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -316,9 +316,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   <p className="text-sm text-muted-foreground">per month</p>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">
-                    Min. Duration:
-                  </span>
+                  <span className="text-muted-foreground">Min. Duration:</span>
                   <span className="font-medium">
                     {plan.minDurationMonths}{' '}
                     {plan.minDurationMonths === 1 ? 'month' : 'months'}
@@ -330,7 +328,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   <UsersIcon className="w-4 h-4" />
                   <span>
                     {plan.subscriptionCount || 0} active{' '}
-                    {plan.subscriptionCount === 1 ? 'subscription' : 'subscriptions'}
+                    {plan.subscriptionCount === 1
+                      ? 'subscription'
+                      : 'subscriptions'}
                   </span>
                 </div>
               </CardFooter>
@@ -340,7 +340,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       ) : (
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">
-            {searchQuery ? 'No plans found matching your search.' : 'No plans available.'}
+            {searchQuery
+              ? 'No plans found matching your search.'
+              : 'No plans available.'}
           </p>
         </div>
       )}
@@ -367,7 +369,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+              onClick={() =>
+                setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
+              }
               disabled={currentPage >= totalPages - 1}>
               Next
             </Button>

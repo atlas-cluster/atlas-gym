@@ -1,5 +1,11 @@
 INSERT INTO
-  plans (name, price, min_duration_months, description, is_default)
+  plans (
+    name,
+    price,
+    min_duration_months,
+    description,
+    is_default
+  )
 VALUES
   (
     'Basic',
@@ -42,5 +48,4 @@ VALUES
     1,
     'Designed for seniors 65+. Full gym access with specialized senior fitness classes.',
     false
-  )
-ON CONFLICT (name) DO NOTHING;
+  ) ON CONFLICT (name) DO NOTHING;

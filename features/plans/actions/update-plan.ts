@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
@@ -44,7 +44,7 @@ export async function updatePlan(
     )
 
     await client.query('COMMIT')
-    revalidateTag('plans')
+    updateTag('plans')
   } catch (error) {
     await client.query('ROLLBACK')
     throw error

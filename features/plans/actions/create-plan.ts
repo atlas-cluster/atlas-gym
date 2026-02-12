@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
@@ -15,7 +15,9 @@ export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
 
     // If this plan is set as default, unset other defaults
     if (validated.isDefault) {
-      await client.query('UPDATE plans SET is_default = false WHERE is_default = true')
+      await client.query(
+        'UPDATE plans SET is_default = false WHERE is_default = true'
+      )
     }
 
     await client.query(
@@ -31,7 +33,7 @@ export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
     )
 
     await client.query('COMMIT')
-    revalidateTag('plans')
+    updateTag('plans')
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
