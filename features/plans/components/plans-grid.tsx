@@ -266,13 +266,12 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
             />
             {/* Mobile: Show input and buttons */}
             <div className={'flex w-full gap-2 md:hidden'}>
-              <Input
-                className="flex-1"
-                placeholder="Search plans..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <ButtonGroup>
+              <ButtonGroup className="flex-1">
+                <Input
+                  placeholder="Search plans..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -349,6 +348,15 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   <span className={'sr-only'}>Refresh Data</span>
                 </Button>
               </ButtonGroup>
+              <Button
+                variant="default"
+                size="icon"
+                type="button"
+                onClick={handleCreate}
+                suppressHydrationWarning>
+                <PlusIcon />
+                <span className="sr-only">Create Plan</span>
+              </Button>
             </div>
           </div>
 
@@ -475,19 +483,6 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
             <span className="hidden md:inline">Create Plan</span>
           </Button>
         </div>
-      </div>
-
-      {/* Mobile: Create button */}
-      <div className="md:hidden">
-        <Button
-          variant="default"
-          className="w-full"
-          type="button"
-          onClick={handleCreate}
-          suppressHydrationWarning>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Create Plan
-        </Button>
       </div>
 
       {/* Plans Grid */}
