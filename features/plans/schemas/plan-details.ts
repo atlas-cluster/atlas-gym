@@ -11,5 +11,4 @@ export const planDetailsSchema = z.object({
     .int()
     .min(0, 'Minimum duration must be non-negative'),
   description: z.string().optional(),
-  isDefault: z.boolean().default(false),
 })

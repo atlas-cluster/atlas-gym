@@ -12,43 +12,22 @@ export async function updatePlan(
 ) {
   const validated = planDetailsSchema.parse(data)
 
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
+  await pool.query(
+    `UPDATE plans 
+     SET name = $1, 
+         price = $2, 
+         min_duration_months = $3, 
+         description = $4,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $5`,
+    [
+      validated.name,
+      validated.price,
+      validated.minDurationMonths,
+      validated.description || null,
+      id,
+    ]
+  )
 
-    // If this plan is set as default, unset other defaults
-    if (validated.isDefault) {
-      await client.query(
-        'UPDATE plans SET is_default = false WHERE is_default = true AND id != $1',
-        [id]
-      )
-    }
-
-    await client.query(
-      `UPDATE plans 
-       SET name = $1, 
-           price = $2, 
-           min_duration_months = $3, 
-           description = $4, 
-           is_default = $5,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6`,
-      [
-        validated.name,
-        validated.price,
-        validated.minDurationMonths,
-        validated.description || null,
-        validated.isDefault,
-        id,
-      ]
-    )
-
-    await client.query('COMMIT')
-    updateTag('plans')
-  } catch (error) {
-    await client.query('ROLLBACK')
-    throw error
-  } finally {
-    client.release()
-  }
+  updateTag('plans')
 }

@@ -7,7 +7,6 @@ import { z } from 'zod'
 import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
 import { PlanDisplay } from '@/features/plans/types'
 import { Button } from '@/features/shared/components/ui/button'
-import { Checkbox } from '@/features/shared/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -157,21 +156,6 @@ export function PlanDetailsDialog({
                 {form.formState.errors.description.message}
               </p>
             )}
-          </Field>
-
-          <Field>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="isDefault"
-                checked={form.watch('isDefault')}
-                onCheckedChange={(checked) =>
-                  form.setValue('isDefault', checked === true)
-                }
-              />
-              <FieldLabel htmlFor="isDefault" className="cursor-pointer">
-                Set as default plan
-              </FieldLabel>
-            </div>
           </Field>
 
           <DialogFooter>

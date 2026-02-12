@@ -13,7 +13,6 @@ const getPlansCached = unstable_cache(
              p.price,
              p.min_duration_months as "minDurationMonths",
              p.description,
-             p.is_default as "isDefault",
              p.created_at as "createdAt",
              p.updated_at as "updatedAt",
              COUNT(s.id) FILTER (WHERE s.end_date IS NULL) as "subscriptionCount"

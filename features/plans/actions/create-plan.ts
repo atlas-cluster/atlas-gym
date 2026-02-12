@@ -9,35 +9,16 @@ import { pool } from '@/features/shared/lib/db'
 export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
   const validated = planDetailsSchema.parse(data)
 
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
+  await pool.query(
+    `INSERT INTO plans (name, price, min_duration_months, description)
+     VALUES ($1, $2, $3, $4)`,
+    [
+      validated.name,
+      validated.price,
+      validated.minDurationMonths,
+      validated.description || null,
+    ]
+  )
 
-    // If this plan is set as default, unset other defaults
-    if (validated.isDefault) {
-      await client.query(
-        'UPDATE plans SET is_default = false WHERE is_default = true'
-      )
-    }
-
-    await client.query(
-      `INSERT INTO plans (name, price, min_duration_months, description, is_default)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [
-        validated.name,
-        validated.price,
-        validated.minDurationMonths,
-        validated.description || null,
-        validated.isDefault,
-      ]
-    )
-
-    await client.query('COMMIT')
-    updateTag('plans')
-  } catch (error) {
-    await client.query('ROLLBACK')
-    throw error
-  } finally {
-    client.release()
-  }
+  updateTag('plans')
 }

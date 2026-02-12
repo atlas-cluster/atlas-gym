@@ -1,7 +1,10 @@
 'use client'
 
 import {
-  CheckCircle2Icon,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   PencilIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -45,6 +48,13 @@ import {
   CardTitle,
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/features/shared/components/ui/select'
 
 export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const [isPending, startTransition] = useTransition()
@@ -57,7 +67,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(0)
-  const pageSize = 12
+  const [pageSize, setPageSize] = useState(12)
 
   useEffect(() => {
     setPlansData(initialData)
@@ -275,15 +285,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2">
-                      {plan.name}
-                      {plan.isDefault && (
-                        <Badge variant="default" className="text-xs">
-                          <CheckCircle2Icon className="w-3 h-3" />
-                          Default
-                        </Badge>
-                      )}
-                    </CardTitle>
+                    <CardTitle>{plan.name}</CardTitle>
                     <CardDescription className="mt-2">
                       {plan.description || 'No description'}
                     </CardDescription>
@@ -350,31 +352,75 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       {/* Pagination */}
       {filteredPlans.length > 0 && (
         <div className="flex items-center justify-between px-2">
-          <div className="text-muted-foreground text-sm">
+          <div className="text-muted-foreground flex-1 text-sm">
             Showing {currentPage * pageSize + 1} to{' '}
             {Math.min((currentPage + 1) * pageSize, filteredPlans.length)} of{' '}
-            {filteredPlans.length} plans
+            {filteredPlans.length} plan(s)
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              disabled={currentPage === 0}>
-              Previous
-            </Button>
-            <div className="text-sm">
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-medium">Items per page</p>
+              <Select
+                value={`${pageSize}`}
+                onValueChange={(value) => {
+                  setPageSize(Number(value))
+                  setCurrentPage(0)
+                }}>
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue placeholder={pageSize} />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[6, 12, 24, 48, 999999999].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size === 999999999 ? 'All' : size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
               Page {currentPage + 1} of {totalPages || 1}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
-              }
-              disabled={currentPage >= totalPages - 1}>
-              Next
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="hidden size-8 lg:flex"
+                onClick={() => setCurrentPage(0)}
+                disabled={currentPage === 0}>
+                <span className="sr-only">Go to first page</span>
+                <ChevronsLeft />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                disabled={currentPage === 0}>
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
+                }
+                disabled={currentPage >= totalPages - 1}>
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="hidden size-8 lg:flex"
+                onClick={() => setCurrentPage(totalPages - 1)}
+                disabled={currentPage >= totalPages - 1}>
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight />
+              </Button>
+            </div>
           </div>
         </div>
       )}
