@@ -1,0 +1,262 @@
+INSERT INTO
+  members (
+    email,
+    password_hash,
+    firstname,
+    lastname,
+    middlename,
+    birthdate,
+    address,
+    phone
+  )
+VALUES
+  (
+    'admin',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'admin',
+    'admin',
+    NULL,
+    '2000-01-01',
+    'Musterstrasse 67, Musterstadt',
+    '+491234567890'
+  ),
+  (
+    'lena.hartmann@gmx.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Lena',
+    'Hartmann',
+    NULL,
+    '1990-03-08',
+    'Ludwigstrasse 7, 80539 Muenchen',
+    '+491503112233'
+  ),
+  (
+    'jonas.weber@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Jonas',
+    'Weber',
+    NULL,
+    '1988-11-30',
+    'Rothenbaumchaussee 65, 20148 Hamburg',
+    '+491511876543'
+  ),
+  (
+    'maria.schmidt@t-online.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Maria',
+    'Schmidt',
+    NULL,
+    '1994-07-12',
+    'Grafstrasse 21, 40210 Duesseldorf',
+    '+491577890123'
+  ),
+  (
+    'lukas.fischer@outlook.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Lukas',
+    'Fischer',
+    NULL,
+    '1989-09-25',
+    'Bismarckstrasse 19, 45127 Essen',
+    '+491522334455'
+  ),
+  (
+    'sophie.mueller@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Sophie',
+    'Mueller',
+    NULL,
+    '1993-02-04',
+    'Rosenstrasse 3, 70173 Stuttgart',
+    '+491511112223'
+  ),
+  (
+    'tim.becker@gmail.com',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Tim',
+    'Becker',
+    NULL,
+    '1991-06-19',
+    'Hofgartenstrasse 9, 80333 Muenchen',
+    '+491511223344'
+  ),
+  (
+    'hannah.wolf@mail.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Hannah',
+    'Wolf',
+    NULL,
+    '1995-10-03',
+    'Seestrasse 11, 01067 Dresden',
+    '+491511334455'
+  ),
+  (
+    'max.neumann@t-online.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Max',
+    'Neumann',
+    NULL,
+    '1987-12-14',
+    'Schlossstrasse 28, 04109 Leipzig',
+    '+491511445566'
+  ),
+  (
+    'lea.koch@gmx.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Lea',
+    'Koch',
+    NULL,
+    '1992-04-27',
+    'Wiesenweg 5, 86150 Augsburg',
+    '+491511556677'
+  ),
+  (
+    'paul.bauer@outlook.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Paul',
+    'Bauer',
+    NULL,
+    '1985-08-09',
+    'Koenigstrasse 41, 70173 Stuttgart',
+    '+491511667788'
+  ),
+  (
+    'juliane.schwarz@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Juliane',
+    'Schwarz',
+    NULL,
+    '1990-12-01',
+    'Theodorstrasse 2, 86150 Augsburg',
+    '+491511778899'
+  ),
+  (
+    'ben.vogel@gmx.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Ben',
+    'Vogel',
+    NULL,
+    '1989-01-17',
+    'Amalienstrasse 12, 80333 Muenchen',
+    '+491517001122'
+  ),
+  (
+    'emily.kaiser@t-online.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Emily',
+    'Kaiser',
+    NULL,
+    '1993-05-06',
+    'Marktstrasse 1, 79098 Freiburg',
+    '+491517112233'
+  ),
+  (
+    'nico.herrmann@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Nico',
+    'Herrmann',
+    NULL,
+    '1988-03-23',
+    'Bahnhofstrasse 33, 34117 Kassel',
+    '+491517223344'
+  ),
+  (
+    'lara.schulz@mail.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Lara',
+    'Schulz',
+    NULL,
+    '1994-09-15',
+    'Hochstrasse 6, 68159 Mannheim',
+    '+491517334455'
+  ),
+  (
+    'daniel.werner@outlook.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Daniel',
+    'Werner',
+    NULL,
+    '1991-07-28',
+    'Koenigstrasse 9, 99084 Erfurt',
+    '+491517445566'
+  ),
+  (
+    'sarah.maier@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Sarah',
+    'Maier',
+    NULL,
+    '1995-02-11',
+    'Ringstrasse 2, 66111 Saarbruecken',
+    '+491517556677'
+  ),
+  (
+    'felix.hoffmann@gmx.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Felix',
+    'Hoffmann',
+    NULL,
+    '1987-06-02',
+    'Parkstrasse 3, 70173 Stuttgart',
+    '+491517667788'
+  ),
+  (
+    'mila.lehmann@t-online.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Mila',
+    'Lehmann',
+    NULL,
+    '1992-11-19',
+    'Bismarckstrasse 23, 65183 Wiesbaden',
+    '+491517778899'
+  ),
+  (
+    'tom.reuter@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Tom',
+    'Reuter',
+    NULL,
+    '1986-04-10',
+    'Mozartstrasse 5, 93047 Regensburg',
+    '+491517889900'
+  ),
+  (
+    'nora.peters@mail.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Nora',
+    'Peters',
+    NULL,
+    '1993-08-24',
+    'Lindenallee 4, 04109 Leipzig',
+    '+491517990011'
+  ),
+  (
+    'jan.koenig@outlook.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Jan',
+    'Koenig',
+    NULL,
+    '1989-10-21',
+    'Poststrasse 4, 89073 Ulm',
+    '+491518001122'
+  ),
+  (
+    'clara.braun@gmx.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Clara',
+    'Braun',
+    NULL,
+    '1990-12-29',
+    'Hafenstrasse 15, 18055 Rostock',
+    '+491518112233'
+  ),
+  (
+    'leon.zimmermann@web.de',
+    '$2a$10$3W1fOUdvSq7DxxuqP58T1OR0AViu42IxdZtBgxNeWUXlNx0j3HfjK',
+    'Leon',
+    'Zimmermann',
+    NULL,
+    '1994-01-05',
+    'Seestrasse 7, 24103 Kiel',
+    '+491518223344'
+  );

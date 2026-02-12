@@ -24,7 +24,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
-      - ./db/migrations:/flyway/sql:ro
+      - ./db/migrations:/flyway/sql/migrations:ro
+      - ./db/seeds:/flyway/sql/seeds:ro
       - ./db/flyway.conf:/flyway/conf/flyway.conf:ro
     command: migrate
     depends_on:
