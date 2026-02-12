@@ -29,7 +29,7 @@ const getMembersCached = unstable_cache(
       ORDER BY pm.updated_at DESC
       LIMIT 1
     ) pm ON true
-    ORDER BY m.created_at DESC
+    ORDER BY m.lastname ASC, m.firstname ASC
   `
 
     const result = await pool.query(query)
