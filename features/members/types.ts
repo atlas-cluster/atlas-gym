@@ -1,3 +1,9 @@
+import { z } from 'zod'
+
+import { memberSchema } from '@/features/members/schemas/member'
+
+export type PaymentType = 'credit_card' | 'iban'
+
 export interface Member {
   id: string
   email: string
@@ -8,6 +14,7 @@ export interface Member {
   address?: string
   birthdate: Date
   phone?: string
+  paymentType: PaymentType
   isTrainer?: boolean
 }
 
@@ -24,19 +31,11 @@ export interface BankAccountDetails {
   iban: string
 }
 
-export interface GetMembersParams {
-  pageIndex: number
-  pageSize: number
-  sorting?: { id: string; desc: boolean }[]
-  columnFilters?: { id: string; value: unknown }[]
-  globalFilter?: string
-}
-
-export interface GetMembersResponse {
-  data: Member[]
-  pageCount: number
-  rowCount: number
-  facets: {
-    isTrainer: Record<string, number>
-  }
+export interface MembersTableMeta {
+  updateMember: (id: string, data: z.infer<typeof memberSchema>) => void
+  deleteMember: (id: string) => void
+  deleteMembers: (ids: string[]) => void
+  convertToMember: (id: string) => void
+  convertToTrainer: (id: string) => void
+  refreshMembers: () => void
 }

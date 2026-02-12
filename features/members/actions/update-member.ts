@@ -50,7 +50,7 @@ export async function updateMember(
     }
 
     await client.query('COMMIT')
-    updateTag('/members')
+    updateTag('members')
   } catch (e) {
     await client.query('ROLLBACK')
     throw e

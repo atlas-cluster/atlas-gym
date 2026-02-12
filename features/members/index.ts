@@ -4,5 +4,7 @@ export * from '@/features/members/actions/get-members'
 export * from '@/features/members/actions/update-member'
 export * from '@/features/members/actions/delete-member'
 export * from '@/features/members/actions/delete-members'
+export * from '@/features/members/actions/convert-to-member'
+export * from '@/features/members/actions/convert-to-trainer'
 
 export { DataTable as MembersDataTable } from '@/features/members/components/data-table'

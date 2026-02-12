@@ -1,13 +1,14 @@
 'use client'
 
-import { RefreshCwIcon, UserStarIcon, UsersIcon, XIcon } from 'lucide-react'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { GraduationCap, RefreshCwIcon, UserIcon, XIcon } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import {
-  GetMembersResponse,
   Member,
+  convertToMember,
+  convertToTrainer,
   deleteMember,
   deleteMembers,
   getMembers,
@@ -29,11 +30,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/features/shared/components/ui/table'
-import { useDebounce } from '@/features/shared/hooks/use-debounce'
-import { flexRender, useReactTable } from '@tanstack/react-table'
+import {
+  flexRender,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
 import {
   ColumnFiltersState,
-  OnChangeFn,
   PaginationState,
   RowSelectionState,
   SortingState,
@@ -41,12 +48,9 @@ import {
   getCoreRowModel,
 } from '@tanstack/table-core'
 
-export function DataTable({
-  initialData,
-}: {
-  initialData: GetMembersResponse
-}) {
+export function DataTable({ initialData }: { initialData: Member[] }) {
   const [isPending, startTransition] = useTransition()
+  const [tableData, setTableData] = useState<Member[]>(initialData)
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([])
@@ -59,73 +63,17 @@ export function DataTable({
     pageSize: 10,
   })
 
-  // Debounce global filter
-  const [inputValue, setInputValue] = useState<string>(globalFilter)
-  const debouncedInputValue = useDebounce(inputValue)
-  const skipNextDebouncedUpdate = useRef(false)
-
   useEffect(() => {
-    if (skipNextDebouncedUpdate.current) {
-      skipNextDebouncedUpdate.current = false
-      return
-    }
-    if (debouncedInputValue !== globalFilter) {
-      setGlobalFilter(debouncedInputValue)
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-    }
-  }, [debouncedInputValue, globalFilter])
-
-  // Data State
-  const [data, setData] = useState<Member[]>(initialData.data)
-  const [rowCount, setRowCount] = useState<number>(initialData.rowCount)
-  const [pageCount, setPageCount] = useState<number>(initialData.pageCount)
-  const [facets, setFacets] = useState(initialData.facets)
-
-  const fetchData = (
-    currentPagination = pagination,
-    currentSorting = sorting,
-    currentFilters = columnFilters,
-    currentGlobal = globalFilter
-  ) => {
-    startTransition(async () => {
-      const result = await getMembers({
-        pageIndex: currentPagination.pageIndex,
-        pageSize: currentPagination.pageSize,
-        sorting: currentSorting as { id: string; desc: boolean }[],
-        columnFilters: currentFilters as { id: string; value: unknown }[],
-        globalFilter: currentGlobal,
-      })
-      setRowSelection({})
-      setData(result.data)
-      setPageCount(result.pageCount)
-      setRowCount(result.rowCount)
-      setFacets(result.facets)
-    })
-  }
-
-  const isMounted = useRef(false)
-  const skipNextFetch = useRef(false)
-
-  useEffect(() => {
-    if (isMounted.current) {
-      if (skipNextFetch.current) {
-        skipNextFetch.current = false
-        return
-      }
-      fetchData()
-    } else {
-      isMounted.current = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination, sorting, columnFilters, globalFilter])
+    setTableData(initialData)
+  }, [initialData])
 
   const handleUpdate = (id: string, data: z.infer<typeof memberSchema>) => {
     const promise = updateMember(id, data).then(() => fetchData())
 
     toast.promise(promise, {
-      loading: 'Dozent wird aktualisiert...',
-      success: 'Erfolgreich Dozenten aktualisiert',
-      error: 'Fehler beim Aktualisieren des Dozenten',
+      loading: 'Updating member...',
+      success: 'Member updated successfully',
+      error: 'Error updating member',
     })
   }
 
@@ -133,9 +81,9 @@ export function DataTable({
     const promise = deleteMember(id).then(() => fetchData())
 
     toast.promise(promise, {
-      loading: 'Dozent wird gelöscht...',
-      success: 'Erfolgreich Dozenten gelöscht',
-      error: 'Fehler beim Löschen des Dozenten',
+      loading: 'Deleting member...',
+      success: 'Member deleted successfully',
+      error: 'Error deleting member',
     })
   }
 
@@ -143,9 +91,29 @@ export function DataTable({
     const promise = deleteMembers(ids).then(() => fetchData())
 
     toast.promise(promise, {
-      loading: 'Dozenten werden gelöscht...',
-      success: 'Erfolgreich Dozenten gelöscht',
-      error: 'Fehler beim Löschen der Dozenten',
+      loading: 'Deleting members...',
+      success: 'Members deleted successfully',
+      error: 'Error deleting members',
+    })
+  }
+
+  const handleConvertToMember = (id: string) => {
+    const promise = convertToMember(id).then(() => fetchData())
+
+    toast.promise(promise, {
+      loading: 'Changing to member...',
+      success: 'Member updated successfully',
+      error: 'Error changing member type',
+    })
+  }
+
+  const handleConvertToTrainer = (id: string) => {
+    const promise = convertToTrainer(id).then(() => fetchData())
+
+    toast.promise(promise, {
+      loading: 'Changing to trainer...',
+      success: 'Trainer updated successfully',
+      error: 'Error changing member type',
     })
   }
 
@@ -153,57 +121,43 @@ export function DataTable({
     fetchData()
   }
 
-  const handleClearFilters = () => {
-    const nextPagination = { ...pagination, pageIndex: 0 }
-
-    skipNextFetch.current = true
-    skipNextDebouncedUpdate.current = true
-    setColumnFilters([])
-    setGlobalFilter('')
-    setInputValue('')
-    setPagination(nextPagination)
-
-    fetchData(nextPagination, sorting, [], '')
-  }
-
-  const onColumnFiltersChange: OnChangeFn<ColumnFiltersState> = (
-    updaterOrValue
-  ) => {
-    setColumnFilters(updaterOrValue)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
-
-  const onGlobalFilterChange: OnChangeFn<string> = (updaterOrValue) => {
-    setGlobalFilter(updaterOrValue)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  const fetchData = () => {
+    startTransition(async () => {
+      const result = await getMembers()
+      setRowSelection({})
+      setTableData(result)
+    })
   }
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
-    pageCount,
-    rowCount,
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
 
     meta: {
-      updateLecturer: handleUpdate,
-      deleteLecturer: handleDelete,
-      deleteLecturers: handleDeleteMany,
-      refreshLecturers: handleRefresh,
+      updateMember: handleUpdate,
+      deleteMember: handleDelete,
+      deleteMembers: handleDeleteMany,
+      convertToMember: handleConvertToMember,
+      convertToTrainer: handleConvertToTrainer,
+      refreshMembers: handleRefresh,
     },
 
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: onColumnFiltersChange,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: onGlobalFilterChange,
+    onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
 
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     autoResetPageIndex: false,
+
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
 
     state: {
       sorting,
@@ -215,13 +169,6 @@ export function DataTable({
     },
   })
 
-  const isTrainerCounts = new Map<string, number>()
-  if (facets.isTrainer) {
-    Object.entries(facets.isTrainer).forEach(([key, value]) => {
-      isTrainerCounts.set(key, value)
-    })
-  }
-
   return (
     <div className="w-full space-y-3">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
@@ -231,15 +178,15 @@ export function DataTable({
             <Input
               className={'hidden md:flex'}
               placeholder="Search members..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={globalFilter}
+              onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
             {/** Mobile only: Show input, view options and refresh button */}
             <ButtonGroup className={'w-full flex-1 md:hidden'}>
               <Input
                 placeholder="Search members..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                value={globalFilter}
+                onChange={(e) => table.setGlobalFilter(String(e.target.value))}
               />
               <DataTableViewOptions table={table} />
               <Button
@@ -255,27 +202,29 @@ export function DataTable({
             </ButtonGroup>
           </div>
           <DataTableFacetedFilter
-            title={'Typ'}
+            title={'Type'}
             options={[
               {
                 value: 'member',
                 label: 'Member',
-                icon: UsersIcon,
+                icon: UserIcon,
               },
               {
                 value: 'trainer',
                 label: 'Trainer',
-                icon: UserStarIcon,
+                icon: GraduationCap,
               },
             ]}
             column={table.getColumn('type')}
-            facets={isTrainerCounts}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button
               variant="ghost"
               size={'icon'}
-              onClick={handleClearFilters}
+              onClick={() => {
+                table.resetColumnFilters()
+                table.setGlobalFilter('')
+              }}
               suppressHydrationWarning>
               <XIcon />
               <span className={'sr-only'}>Remove filters</span>
