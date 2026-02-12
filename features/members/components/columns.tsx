@@ -256,7 +256,7 @@ function ActionsCell({
                 onSelect={() =>
                   meta?.deleteMembers?.(selectedRows.map((r) => r.original.id))
                 }>
-                <TrashIcon className="mr-2 h-4 w-4" />
+                <TrashIcon />
                 Delete ({selectedRows.length})
               </DropdownMenuItem>
             </>

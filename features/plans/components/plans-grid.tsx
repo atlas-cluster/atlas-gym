@@ -278,7 +278,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                       variant="outline"
                       size="icon"
                       suppressHydrationWarning>
-                      <ArrowUpDown className="h-4 w-4" />
+                      <ArrowUpDown />
                       <span className="sr-only">Sort</span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -407,7 +407,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" suppressHydrationWarning>
-                  <ArrowUpDown className="h-4 w-4" />
+                  <ArrowUpDown />
                   <span className="sr-only">Sort</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -479,7 +479,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
             type="button"
             onClick={handleCreate}
             suppressHydrationWarning>
-            <PlusIcon className="md:mr-2" />
+            <PlusIcon />
             <span className="hidden md:inline">Create Plan</span>
           </Button>
         </div>
@@ -487,7 +487,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
 
       {/* Plans Grid */}
       {paginatedPlans.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {paginatedPlans.map((plan) => (
             <Card key={plan.id}>
               <CardHeader>
@@ -512,7 +512,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                       size="icon"
                       onClick={() => handleEdit(plan)}
                       suppressHydrationWarning>
-                      <PencilIcon className="w-4 h-4" />
+                      <PencilIcon />
                       <span className="sr-only">Edit plan</span>
                     </Button>
                     <Button
@@ -520,7 +520,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                       size="icon"
                       onClick={() => handleDeleteClick(plan)}
                       suppressHydrationWarning>
-                      <TrashIcon className="w-4 h-4" />
+                      <TrashIcon />
                       <span className="sr-only">Delete plan</span>
                     </Button>
                   </ButtonGroup>
