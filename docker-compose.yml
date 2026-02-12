@@ -15,8 +15,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - atlas-network
 
   flyway:
     image: flyway/flyway:11
@@ -32,12 +30,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - atlas-network
 
 volumes:
   postgres_data_dev:
-
-networks:
-  atlas-network:
-    driver: bridge
