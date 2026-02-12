@@ -30,10 +30,18 @@ export const getSession = cache(
         m.birthdate, 
         m.phone,
         m.created_at,
-        CASE WHEN t.id IS NOT NULL THEN true ELSE false END as is_trainer
+        CASE WHEN t.id IS NOT NULL THEN true ELSE false END as is_trainer,
+        pm.type as "paymentType"
       FROM gym_manager.sessions s
       JOIN gym_manager.members m ON s.member_id = m.id
       LEFT JOIN gym_manager.trainers t ON m.id = t.member_id
+      LEFT JOIN LATERAL (
+        SELECT type
+        FROM gym_manager.payment_methods pm
+        WHERE pm.member_id = m.id
+        ORDER BY pm.updated_at DESC
+        LIMIT 1
+      ) pm ON true
       WHERE s.id = $1 AND s.expires_at > NOW()
     `
 
@@ -56,6 +64,7 @@ export const getSession = cache(
         phone: row.phone || undefined,
         created_at: row.created_at,
         isTrainer: row.is_trainer,
+        paymentType: row.paymentType,
       }
 
       return { authenticated: true, member }
