@@ -21,5 +21,5 @@ export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
   )
 
   updateTag('plans')
-  updateTag('members') // Invalidate members cache for plan filter options
+  updateTag('members')
 }
