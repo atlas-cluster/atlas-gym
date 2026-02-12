@@ -41,7 +41,6 @@ export function PlanDetailsDialog({
   const isEditing = !!plan
 
   const form = useForm<z.infer<typeof planDetailsSchema>>({
-    // @ts-expect-error - zod default values cause type inference issues
     resolver: zodResolver(planDetailsSchema),
     defaultValues: {
       name: '',
@@ -69,7 +68,6 @@ export function PlanDetailsDialog({
     }
   }, [plan, form])
 
-  // @ts-expect-error - handleSubmit type inference issue with zod schemas
   const handleSubmit = form.handleSubmit(
     (data: z.infer<typeof planDetailsSchema>) => {
       onSubmit(data)
