@@ -37,7 +37,7 @@ const mainNavItems = [
 
 const trainerNavItems = [
   { title: 'Members', url: '/members', icon: UsersIcon },
-  { title: 'Contracts', url: '/contracts', icon: ReceiptTextIcon },
+  { title: 'Plans', url: '/plans', icon: ReceiptTextIcon },
   { title: 'Trainers', url: '/trainers', icon: UserStarIcon },
 ]
 

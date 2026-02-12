@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from '@/features/shared/components/ui/empty'
 
-export default function ContractsPage() {
+export default function PlansPage() {
   return (
     <Empty className={'h-full'}>
       <EmptyHeader>
