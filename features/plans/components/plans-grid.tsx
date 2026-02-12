@@ -227,7 +227,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   }, [searchQuery, durationRange, priceRange, sortBy, sortOrder])
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-3">
       <PlanDetailsDialog
         open={detailsOpen}
         onOpenChange={setDetailsOpen}

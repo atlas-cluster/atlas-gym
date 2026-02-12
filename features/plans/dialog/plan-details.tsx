@@ -18,6 +18,7 @@ import {
 import {
   Field,
   FieldContent,
+  FieldError,
   FieldLabel,
 } from '@/features/shared/components/ui/field'
 import { Input } from '@/features/shared/components/ui/input'
@@ -97,9 +98,7 @@ export function PlanDetailsDialog({
               <Input {...form.register('name')} placeholder="e.g., Premium" />
             </FieldContent>
             {form.formState.errors.name && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.name.message}
-              </p>
+              <FieldError>{form.formState.errors.name.message}</FieldError>
             )}
           </Field>
 
@@ -116,9 +115,7 @@ export function PlanDetailsDialog({
                 />
               </FieldContent>
               {form.formState.errors.price && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.price.message}
-                </p>
+                <FieldError>{form.formState.errors.price.message}</FieldError>
               )}
             </Field>
 
@@ -135,9 +132,9 @@ export function PlanDetailsDialog({
                 />
               </FieldContent>
               {form.formState.errors.minDurationMonths && (
-                <p className="text-sm text-red-500">
+                <FieldError>
                   {form.formState.errors.minDurationMonths.message}
-                </p>
+                </FieldError>
               )}
             </Field>
           </div>
@@ -152,9 +149,9 @@ export function PlanDetailsDialog({
               />
             </FieldContent>
             {form.formState.errors.description && (
-              <p className="text-sm text-red-500">
+              <FieldError>
                 {form.formState.errors.description.message}
-              </p>
+              </FieldError>
             )}
           </Field>
 
