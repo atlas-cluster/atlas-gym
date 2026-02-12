@@ -48,7 +48,6 @@ export function PlanDetailsDialog({
       price: 0,
       minDurationMonths: 1,
       description: '',
-      isDefault: false,
     },
   })
 
@@ -59,7 +58,6 @@ export function PlanDetailsDialog({
         price: plan.price,
         minDurationMonths: plan.minDurationMonths,
         description: plan.description || '',
-        isDefault: plan.isDefault,
       })
     } else {
       form.reset({
@@ -67,7 +65,6 @@ export function PlanDetailsDialog({
         price: 0,
         minDurationMonths: 1,
         description: '',
-        isDefault: false,
       })
     }
   }, [plan, form])
