@@ -4,7 +4,6 @@ import { memberBaseSchema } from '@/features/members'
 import { refinePaymentFields } from '@/features/shared/schemas/payment'
 
 export const registerSchema = memberBaseSchema
-  .omit({ isTrainer: true })
   .extend({
     password: z.string().min(4, 'Password must be at least 4 characters'),
     repeatPassword: z.string(),

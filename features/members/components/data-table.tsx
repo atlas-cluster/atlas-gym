@@ -12,10 +12,14 @@ import {
   deleteMember,
   deleteMembers,
   getMembers,
-  memberSchema,
+  memberDetailsSchema,
+  memberPaymentSchema,
   updateMember,
+  updateMemberPayment,
 } from '@/features/members'
 import { columns } from '@/features/members/components/columns'
+import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
+import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -51,6 +55,10 @@ import {
 export function DataTable({ initialData }: { initialData: Member[] }) {
   const [isPending, startTransition] = useTransition()
   const [tableData, setTableData] = useState<Member[]>(initialData)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [paymentOpen, setPaymentOpen] = useState(false)
+  const [detailsMember, setDetailsMember] = useState<Member | undefined>()
+  const [paymentMember, setPaymentMember] = useState<Member | undefined>()
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([])
@@ -67,14 +75,56 @@ export function DataTable({ initialData }: { initialData: Member[] }) {
     setTableData(initialData)
   }, [initialData])
 
-  const handleUpdate = (id: string, data: z.infer<typeof memberSchema>) => {
-    const promise = updateMember(id, data).then(() => fetchData())
+  const updateMemberInState = (id: string, update: Partial<Member>) => {
+    setTableData((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...update } : item))
+    )
+  }
+
+  const handleUpdate = (
+    id: string,
+    data: z.infer<typeof memberDetailsSchema>
+  ) => {
+    const promise = updateMember(id, data).then(() => {
+      updateMemberInState(id, {
+        firstname: data.firstname,
+        middlename: data.middlename || undefined,
+        lastname: data.lastname,
+        email: data.email,
+        phone: data.phone || undefined,
+        address: data.address || undefined,
+        birthdate: new Date(data.birthdate),
+      })
+    })
 
     toast.promise(promise, {
       loading: 'Updating member...',
       success: 'Member updated successfully',
       error: 'Error updating member',
     })
+  }
+
+  const handleUpdatePayment = (
+    id: string,
+    data: z.infer<typeof memberPaymentSchema>
+  ) => {
+    const promise = updateMemberPayment(id, data).then(() => {
+      updateMemberInState(id, { paymentType: data.paymentType })
+    })
+
+    toast.promise(promise, {
+      loading: 'Updating payment...',
+      success: 'Payment updated successfully',
+      error: 'Error updating payment',
+    })
+  }
+
+  const handleDetailsOpenChange = (nextOpen: boolean) => {
+    setDetailsOpen(nextOpen)
+  }
+
+  const handlePaymentOpenChange = (nextOpen: boolean) => {
+    setPaymentOpen(nextOpen)
   }
 
   const handleDelete = (id: string) => {
@@ -135,6 +185,15 @@ export function DataTable({ initialData }: { initialData: Member[] }) {
 
     meta: {
       updateMember: handleUpdate,
+      updateMemberPayment: handleUpdatePayment,
+      openMemberDetails: (member: Member) => {
+        setDetailsMember(member)
+        setDetailsOpen(true)
+      },
+      openMemberPayment: (member: Member) => {
+        setPaymentMember(member)
+        setPaymentOpen(true)
+      },
       deleteMember: handleDelete,
       deleteMembers: handleDeleteMany,
       convertToMember: handleConvertToMember,
@@ -171,6 +230,24 @@ export function DataTable({ initialData }: { initialData: Member[] }) {
 
   return (
     <div className="w-full space-y-3">
+      <MemberDetailsDialog
+        member={detailsMember}
+        open={detailsOpen}
+        onOpenChange={handleDetailsOpenChange}
+        onSubmit={(payload) =>
+          detailsMember ? handleUpdate(detailsMember.id, payload) : undefined
+        }
+      />
+      <MemberPaymentDialog
+        member={paymentMember}
+        open={paymentOpen}
+        onOpenChange={handlePaymentOpenChange}
+        onSubmit={(payload) =>
+          paymentMember
+            ? handleUpdatePayment(paymentMember.id, payload)
+            : undefined
+        }
+      />
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">
           <div className="flex w-full gap-2 md:w-64">

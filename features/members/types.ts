@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-import { memberSchema } from '@/features/members/schemas/member'
+import { memberDetailsSchema } from '@/features/members/schemas/member-details'
+import { memberPaymentSchema } from '@/features/members/schemas/member-payment'
 
 export type PaymentType = 'credit_card' | 'iban'
 
@@ -18,21 +19,14 @@ export interface Member {
   isTrainer?: boolean
 }
 
-export type PaymentMethod = CreditCardDetails | BankAccountDetails
-
-export interface CreditCardDetails {
-  card_number: string
-  cardholder_name: string
-  card_expiry: string
-  card_cvc: string
-}
-
-export interface BankAccountDetails {
-  iban: string
-}
-
 export interface MembersTableMeta {
-  updateMember: (id: string, data: z.infer<typeof memberSchema>) => void
+  updateMember: (id: string, data: z.infer<typeof memberDetailsSchema>) => void
+  updateMemberPayment: (
+    id: string,
+    data: z.infer<typeof memberPaymentSchema>
+  ) => void
+  openMemberDetails: (member: Member) => void
+  openMemberPayment: (member: Member) => void
   deleteMember: (id: string) => void
   deleteMembers: (ids: string[]) => void
   convertToMember: (id: string) => void

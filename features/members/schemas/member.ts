@@ -18,7 +18,6 @@ export const memberBaseSchema = z.object({
   address: addressSchema,
   birthdate: pastDateSchema('Birthdate'),
   phone: phoneSchema,
-  isTrainer: z.boolean(),
   paymentType: z.enum(['credit_card', 'iban']),
   cardHolder: z.string().optional(),
   cardNumber: z.string().optional(),

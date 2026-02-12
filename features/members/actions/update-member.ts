@@ -3,23 +3,15 @@
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
-import { memberSchema } from '@/features/members/schemas/member'
+import { memberDetailsSchema } from '@/features/members/schemas/member-details'
 import { pool } from '@/features/shared/lib/db'
 
 export async function updateMember(
   id: string,
-  data: z.infer<typeof memberSchema>
+  data: z.infer<typeof memberDetailsSchema>
 ) {
-  const {
-    firstname,
-    lastname,
-    middlename,
-    email,
-    phone,
-    address,
-    birthdate,
-    isTrainer,
-  } = data
+  const { firstname, lastname, middlename, email, phone, address, birthdate } =
+    data
 
   const client = await pool.connect()
 
@@ -33,21 +25,6 @@ export async function updateMember(
        WHERE id = $8`,
       [firstname, lastname, middlename, email, phone, address, birthdate, id]
     )
-
-    // Handle Trainer status
-    if (isTrainer) {
-      // Insert into trainers if not exists
-      await client.query(
-        `INSERT INTO gym_manager.trainers (member_id) VALUES ($1) ON CONFLICT (member_id) DO NOTHING`,
-        [id]
-      )
-    } else {
-      // Remove from trainers if exists
-      await client.query(
-        `DELETE FROM gym_manager.trainers WHERE member_id = $1`,
-        [id]
-      )
-    }
 
     await client.query('COMMIT')
     updateTag('members')

@@ -10,12 +10,10 @@ import {
   TrashIcon,
   User,
 } from 'lucide-react'
-import { useState } from 'react'
 
 import { Member, MembersTableMeta } from '@/features/members'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
-import { Card } from '@/features/shared/components/ui/card'
 import { Checkbox } from '@/features/shared/components/ui/checkbox'
 import {
   DropdownMenu,
@@ -189,17 +187,10 @@ function ActionsCell({
 }) {
   const meta = table.options.meta as MembersTableMeta | undefined
   const course = row.original
-  const [open, setOpen] = useState(false)
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
   return (
     <div className="flex justify-end">
-      {/*<CourseDialog*/}
-      {/*  course={course}*/}
-      {/*  open={open}*/}
-      {/*  onOpenChange={setOpen}*/}
-      {/*  onSubmit={(payload) => meta?.updateCourse?.(course.id, payload)}*/}
-      {/*/>*/}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size={'icon-sm'} suppressHydrationWarning>
@@ -211,11 +202,13 @@ function ActionsCell({
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           {selectedRows.length <= 1 || !row.getIsSelected() ? (
             <>
-              <DropdownMenuItem onSelect={() => setOpen(true)}>
+              <DropdownMenuItem
+                onSelect={() => meta?.openMemberDetails?.(course)}>
                 <PencilIcon />
                 Edit Details
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setOpen(true)}>
+              <DropdownMenuItem
+                onSelect={() => meta?.openMemberPayment?.(course)}>
                 <CreditCard />
                 Edit Payment
               </DropdownMenuItem>
