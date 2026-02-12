@@ -3,7 +3,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useHookFormMask } from 'use-mask-input'
 import { z } from 'zod'
 
-import { Member, memberPaymentSchema } from '@/features/members'
+import { MemberDisplay, memberPaymentSchema } from '@/features/members'
 import { Button } from '@/features/shared/components/ui/button'
 import { CreditCardInput } from '@/features/shared/components/ui/credit-card-input'
 import {
@@ -33,7 +33,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface MemberPaymentDialogProps {
-  member?: Member
+  member?: MemberDisplay
   trigger?: ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void

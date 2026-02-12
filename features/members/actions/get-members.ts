@@ -2,11 +2,11 @@
 
 import { unstable_cache } from 'next/cache'
 
-import { Member } from '@/features/members/types'
+import { MemberDisplay } from '@/features/members/types'
 import { pool } from '@/features/shared/lib/db'
 
 const getMembersCached = unstable_cache(
-  async (): Promise<Member[]> => {
+  async (): Promise<MemberDisplay[]> => {
     const query = `
     SELECT
       m.id,
@@ -39,6 +39,6 @@ const getMembersCached = unstable_cache(
   { revalidate: 3600, tags: ['members'] }
 )
 
-export async function getMembers(): Promise<Member[]> {
+export async function getMembers(): Promise<MemberDisplay[]> {
   return getMembersCached()
 }

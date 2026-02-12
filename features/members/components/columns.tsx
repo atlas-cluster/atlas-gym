@@ -11,7 +11,7 @@ import {
   User,
 } from 'lucide-react'
 
-import { Member, MembersTableMeta } from '@/features/members'
+import { MemberDisplay, MembersTableMeta } from '@/features/members'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
 import { Checkbox } from '@/features/shared/components/ui/checkbox'
@@ -36,7 +36,7 @@ const paymentTypeConfig = {
   },
 }
 
-export const columns: ColumnDef<Member>[] = [
+export const columns: ColumnDef<MemberDisplay>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -182,8 +182,8 @@ function ActionsCell({
   row,
   table,
 }: {
-  row: Row<Member>
-  table: Table<Member>
+  row: Row<MemberDisplay>
+  table: Table<MemberDisplay>
 }) {
   const meta = table.options.meta as MembersTableMeta | undefined
   const course = row.original

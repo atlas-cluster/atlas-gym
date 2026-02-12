@@ -15,8 +15,11 @@ export interface Member {
   address?: string
   birthdate: Date
   phone?: string
-  paymentType: PaymentType
   isTrainer?: boolean
+}
+
+export interface MemberDisplay extends Member {
+  paymentType: PaymentType
 }
 
 export interface MembersTableMeta {
@@ -25,8 +28,8 @@ export interface MembersTableMeta {
     id: string,
     data: z.infer<typeof memberPaymentSchema>
   ) => void
-  openMemberDetails: (member: Member) => void
-  openMemberPayment: (member: Member) => void
+  openMemberDetails: (member: MemberDisplay) => void
+  openMemberPayment: (member: MemberDisplay) => void
   deleteMember: (id: string) => void
   deleteMembers: (ids: string[]) => void
   convertToMember: (id: string) => void

@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import {
-  Member,
+  MemberDisplay,
   convertToMember,
   convertToTrainer,
   deleteMember,
@@ -52,13 +52,17 @@ import {
   getCoreRowModel,
 } from '@tanstack/table-core'
 
-export function DataTable({ initialData }: { initialData: Member[] }) {
+export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [isPending, startTransition] = useTransition()
-  const [tableData, setTableData] = useState<Member[]>(initialData)
+  const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
-  const [detailsMember, setDetailsMember] = useState<Member | undefined>()
-  const [paymentMember, setPaymentMember] = useState<Member | undefined>()
+  const [detailsMember, setDetailsMember] = useState<
+    MemberDisplay | undefined
+  >()
+  const [paymentMember, setPaymentMember] = useState<
+    MemberDisplay | undefined
+  >()
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([])
@@ -75,7 +79,7 @@ export function DataTable({ initialData }: { initialData: Member[] }) {
     setTableData(initialData)
   }, [initialData])
 
-  const updateMemberInState = (id: string, update: Partial<Member>) => {
+  const updateMemberInState = (id: string, update: Partial<MemberDisplay>) => {
     setTableData((prev) =>
       prev.map((item) => (item.id === id ? { ...item, ...update } : item))
     )
@@ -186,11 +190,11 @@ export function DataTable({ initialData }: { initialData: Member[] }) {
     meta: {
       updateMember: handleUpdate,
       updateMemberPayment: handleUpdatePayment,
-      openMemberDetails: (member: Member) => {
+      openMemberDetails: (member: MemberDisplay) => {
         setDetailsMember(member)
         setDetailsOpen(true)
       },
-      openMemberPayment: (member: Member) => {
+      openMemberPayment: (member: MemberDisplay) => {
         setPaymentMember(member)
         setPaymentOpen(true)
       },
