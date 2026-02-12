@@ -345,6 +345,22 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
             ]}
             column={table.getColumn('type')}
           />
+          <DataTableFacetedFilter
+            title={'Plan'}
+            options={Array.from(
+              new Set(
+                tableData
+                  .map((m) => m.planName)
+                  .filter((name): name is string => !!name)
+              )
+            )
+              .sort()
+              .map((name) => ({
+                value: name,
+                label: name,
+              }))}
+            column={table.getColumn('plan')}
+          />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button
               variant="ghost"

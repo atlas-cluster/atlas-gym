@@ -51,14 +51,9 @@ CREATE TABLE plans (
   price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
   min_duration_months INTEGER NOT NULL DEFAULT 1 CHECK (min_duration_months >= 0),
   description TEXT,
-  is_default BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE UNIQUE INDEX unique_default_plan ON plans (is_default)
-WHERE
-  is_default = true;
 
 CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
