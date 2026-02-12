@@ -73,7 +73,7 @@ jobs:
           proxy_username: ${{ secrets.JUMP_USER }}
           proxy_key: ${{ secrets.JUMP_SSH_KEY }}
           proxy_port: ${{ secrets.JUMP_PORT || 22 }}
-          source: 'db/migrations'
+          source: 'db'
           target: 'deploy/atlas-gym'
 
       - name: Run Flyway
@@ -97,12 +97,14 @@ jobs:
             docker pull flyway/flyway:latest
             docker run --rm \
               --network host \
-              -v $HOME/deploy/atlas-gym/db/migrations:/flyway/sql \
+              -v $HOME/deploy/atlas-gym/db/migrations:/flyway/sql/migrations \
+              -v $HOME/deploy/atlas-gym/db/seeds:/flyway/sql/seeds \
               flyway/flyway:latest \
               -url=jdbc:postgresql://$DB_HOST:5432/$DB_NAME \
               -user=$DB_USER \
               -password=$DB_PASSWORD \
-              -schemas=gym_manager \
+              -schemas=flyway \
+              -locations=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/seeds \
               migrate
 
   deploy:
