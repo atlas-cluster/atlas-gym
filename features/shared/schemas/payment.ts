@@ -77,3 +77,54 @@ export const paymentMethodSchema = z.discriminatedUnion('type', [
   creditCardSchema,
   ibanSchema,
 ])
+
+type PaymentRefinementInput = {
+  paymentType: 'credit_card' | 'iban'
+  cardNumber?: string
+  cardHolder?: string
+  cardExpiry?: string
+  cardCvc?: string
+  iban?: string
+}
+
+export function refinePaymentFields(
+  data: PaymentRefinementInput,
+  ctx: z.RefinementCtx
+) {
+  if (data.paymentType === 'credit_card') {
+    const result = creditCardSchema.safeParse({
+      type: 'credit_card',
+      cardNumber: data.cardNumber,
+      cardHolder: data.cardHolder,
+      cardExpiry: data.cardExpiry,
+      cardCvc: data.cardCvc,
+    })
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0] !== 'type') {
+          ctx.addIssue({
+            ...issue,
+            path: [issue.path[0]],
+          })
+        }
+      })
+    }
+  } else if (data.paymentType === 'iban') {
+    const result = ibanSchema.safeParse({
+      type: 'iban',
+      iban: data.iban,
+    })
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0] !== 'type') {
+          ctx.addIssue({
+            ...issue,
+            path: [issue.path[0]],
+          })
+        }
+      })
+    }
+  }
+}

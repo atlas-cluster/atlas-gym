@@ -23,11 +23,11 @@ export function DataTableViewOptions<TData>({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size={'icon'} suppressHydrationWarning>
           <Settings2 />
-          <span className={'sr-only'}>Spalten ausblenden</span>
+          <span className={'sr-only'}>Hide columns</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Spalten anzeigen</DropdownMenuLabel>
+        <DropdownMenuLabel>Hide columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table
           .getAllColumns()
