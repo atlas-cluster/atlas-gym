@@ -152,4 +152,4 @@ jobs:
               -e DB_NAME="$DB_NAME" \
               -e NODE_ENV=production \
               $FULL_IMAGE_NAME:$IMAGE_TAG
-            docker image prune -a -f --filter "until=24h"
+            docker image prune -a -f
