@@ -19,8 +19,7 @@ const getMembersCached = unstable_cache(
              m.phone,
              m.payment_type as "paymentType",
              CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
-             p.name as "planName",
-             s.id as "subscriptionId"
+             p.name as "planName"
       FROM members m
              LEFT JOIN trainers t ON m.id = t.member_id
              LEFT JOIN subscriptions s ON m.id = s.member_id AND s.end_date IS NULL

@@ -18,7 +18,6 @@ export interface Member {
   isTrainer?: boolean
   paymentType?: PaymentType
   planName?: string
-  subscriptionId?: string
 }
 
 export type MemberDisplay = Member
