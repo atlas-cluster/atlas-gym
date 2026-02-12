@@ -6,7 +6,8 @@
   "bracketSameLine": true,
   "plugins": [
     "prettier-plugin-tailwindcss",
-    "@trivago/prettier-plugin-sort-imports"
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-sql"
   ],
   "importOrder": ["^[A-Za-z]$", "^[@/]"],
   "importOrderSeparation": true,

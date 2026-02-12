@@ -22,7 +22,7 @@ export async function login(
   try {
     // 1. Find member
     const result = await pool.query(
-      `SELECT id, password_hash FROM gym_manager.members WHERE email = $1`,
+      `SELECT id, password_hash FROM members WHERE email = $1`,
       [email]
     )
 
@@ -41,7 +41,7 @@ export async function login(
     // 3. Create session (valid for 7 days)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     const sessionResult = await pool.query<{ id: string }>(
-      `INSERT INTO gym_manager.sessions (member_id, expires_at) 
+      `INSERT INTO sessions (member_id, expires_at) 
        VALUES ($1, $2) 
        RETURNING id`,
       [member.id, expiresAt]

@@ -20,7 +20,7 @@ export async function updateMember(
 
     // Update Member details
     await client.query(
-      `UPDATE gym_manager.members
+      `UPDATE members
        SET firstname = $1, lastname = $2, middlename = $3, email = $4, phone = $5, address = $6, birthdate = $7
        WHERE id = $8`,
       [firstname, lastname, middlename, email, phone, address, birthdate, id]

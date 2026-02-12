@@ -25,7 +25,7 @@ export async function updateMemberPayment(
     await client.query('BEGIN')
 
     const existing = await client.query<{ id: string }>(
-      `SELECT id FROM gym_manager.payment_methods WHERE member_id = $1`,
+      `SELECT id FROM payment_methods WHERE member_id = $1`,
       [id]
     )
 
@@ -33,21 +33,20 @@ export async function updateMemberPayment(
 
     if (existingIds.length > 0) {
       await client.query(
-        `DELETE FROM gym_manager.credit_cards WHERE payment_method_id = ANY($1::uuid[])`,
+        `DELETE FROM credit_cards WHERE payment_method_id = ANY($1::uuid[])`,
         [existingIds]
       )
       await client.query(
-        `DELETE FROM gym_manager.bank_accounts WHERE payment_method_id = ANY($1::uuid[])`,
+        `DELETE FROM bank_accounts WHERE payment_method_id = ANY($1::uuid[])`,
         [existingIds]
       )
-      await client.query(
-        `DELETE FROM gym_manager.payment_methods WHERE member_id = $1`,
-        [id]
-      )
+      await client.query(`DELETE FROM payment_methods WHERE member_id = $1`, [
+        id,
+      ])
     }
 
     const paymentMethodResult = await client.query<{ id: string }>(
-      `INSERT INTO gym_manager.payment_methods (member_id, type)
+      `INSERT INTO payment_methods (member_id, type)
        VALUES ($1, $2)
        RETURNING id`,
       [id, paymentType]
@@ -59,7 +58,7 @@ export async function updateMemberPayment(
       const cleanExpiry = (cardExpiry || '').replace(/\D/g, '')
 
       await client.query(
-        `INSERT INTO gym_manager.credit_cards (
+        `INSERT INTO credit_cards (
            payment_method_id,
            card_number,
            card_expiry,
@@ -72,7 +71,7 @@ export async function updateMemberPayment(
       const cleanIban = (iban || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
 
       await client.query(
-        `INSERT INTO gym_manager.bank_accounts (
+        `INSERT INTO bank_accounts (
            payment_method_id,
            iban
          ) VALUES ($1, $2)`,

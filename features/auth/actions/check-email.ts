@@ -17,7 +17,7 @@ export async function checkEmail(
 
   try {
     const { rows } = await pool.query(
-      'SELECT 1 FROM gym_manager.members WHERE email = $1',
+      'SELECT 1 FROM members WHERE email = $1',
       [email]
     )
 

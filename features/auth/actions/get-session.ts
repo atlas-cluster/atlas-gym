@@ -31,9 +31,9 @@ export const getSession = cache(
          m.phone,
          m.created_at,
         CASE WHEN t.id IS NOT NULL THEN true ELSE false END as is_trainer
-       FROM gym_manager.sessions s
-       JOIN gym_manager.members m ON s.member_id = m.id
-       LEFT JOIN gym_manager.trainers t ON m.id = t.member_id
+       FROM sessions s
+       JOIN members m ON s.member_id = m.id
+       LEFT JOIN trainers t ON m.id = t.member_id
        WHERE s.id = $1 AND s.expires_at > NOW()
      `
 

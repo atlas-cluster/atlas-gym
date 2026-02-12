@@ -10,9 +10,7 @@ export async function logout() {
 
   if (sessionId) {
     try {
-      await pool.query('DELETE FROM gym_manager.sessions WHERE id = $1', [
-        sessionId,
-      ])
+      await pool.query('DELETE FROM sessions WHERE id = $1', [sessionId])
     } catch (error) {
       console.error('Error removing session:', error)
     }
