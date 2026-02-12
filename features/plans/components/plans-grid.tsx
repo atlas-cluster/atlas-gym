@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -25,6 +26,7 @@ import {
   updatePlan,
 } from '@/features/plans'
 import { PlanDetailsDialog } from '@/features/plans/dialog/plan-details'
+import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +48,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/features/shared/components/ui/dropdown-menu'
 import { Input } from '@/features/shared/components/ui/input'
 import {
   Select,
@@ -67,6 +76,11 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(12)
+  const [sortBy, setSortBy] = useState<
+    'name' | 'price' | 'minDuration' | 'subscriptionCount'
+  >('name')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [minDurationFilter, setMinDurationFilter] = useState<number[]>([])
 
   useEffect(() => {
     setPlansData(initialData)
@@ -146,27 +160,59 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
     }
   }
 
-  // Filter plans based on search query
-  const filteredPlans = plansData.filter((plan) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return (
-      plan.name.toLowerCase().includes(query) ||
-      plan.description?.toLowerCase().includes(query)
-    )
-  })
+  // Filter and sort plans
+  const filteredAndSortedPlans = plansData
+    .filter((plan) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesSearch =
+          plan.name.toLowerCase().includes(query) ||
+          plan.description?.toLowerCase().includes(query)
+        if (!matchesSearch) return false
+      }
+
+      // Min duration filter
+      if (minDurationFilter.length > 0) {
+        if (!minDurationFilter.includes(plan.minDurationMonths)) {
+          return false
+        }
+      }
+
+      return true
+    })
+    .sort((a, b) => {
+      let comparison = 0
+
+      switch (sortBy) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name)
+          break
+        case 'price':
+          comparison = a.price - b.price
+          break
+        case 'minDuration':
+          comparison = a.minDurationMonths - b.minDurationMonths
+          break
+        case 'subscriptionCount':
+          comparison = (a.subscriptionCount || 0) - (b.subscriptionCount || 0)
+          break
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison
+    })
 
   // Paginate filtered plans
-  const totalPages = Math.ceil(filteredPlans.length / pageSize)
-  const paginatedPlans = filteredPlans.slice(
+  const totalPages = Math.ceil(filteredAndSortedPlans.length / pageSize)
+  const paginatedPlans = filteredAndSortedPlans.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   )
 
-  // Reset to first page when search changes
+  // Reset to first page when search or filters change
   useEffect(() => {
     setCurrentPage(0)
-  }, [searchQuery])
+  }, [searchQuery, minDurationFilter, sortBy, sortOrder])
 
   return (
     <div className="w-full space-y-4">
@@ -207,8 +253,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {/* Mobile: Show input and refresh button */}
-            <ButtonGroup className={'w-full flex-1 md:hidden'}>
+            <div className={'flex w-full gap-2 md:hidden'}>
               <Input
+                className="flex-1"
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -223,55 +270,202 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                 <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
                 <span className={'sr-only'}>Refresh Data</span>
               </Button>
-            </ButtonGroup>
+            </div>
           </div>
-          {searchQuery && (
+
+          {/* Min Duration Filter */}
+          <DataTableFacetedFilter
+            title={'Duration'}
+            options={Array.from(
+              new Set(plansData.map((p) => p.minDurationMonths))
+            )
+              .sort((a, b) => a - b)
+              .map((months) => ({
+                value: String(months),
+                label: `${months} ${months === 1 ? 'month' : 'months'}`,
+              }))}
+            column={{
+              getFilterValue: () =>
+                minDurationFilter.length > 0
+                  ? minDurationFilter.map(String)
+                  : undefined,
+              setFilterValue: (value: string[] | undefined) => {
+                setMinDurationFilter(value ? value.map((v) => parseInt(v)) : [])
+              },
+              getFacetedUniqueValues: () => {
+                const map = new Map()
+                plansData.forEach((plan) => {
+                  const count = map.get(String(plan.minDurationMonths)) || 0
+                  map.set(String(plan.minDurationMonths), count + 1)
+                })
+                return map
+              },
+            }}
+          />
+
+          {(searchQuery || minDurationFilter.length > 0) && (
             <Button
               variant="ghost"
               size={'icon'}
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('')
+                setMinDurationFilter([])
+              }}
               suppressHydrationWarning>
               <XIcon />
-              <span className={'sr-only'}>Clear search</span>
+              <span className={'sr-only'}>Clear filters</span>
             </Button>
           )}
         </div>
-        {/* Desktop: Show refresh and create buttons on the right */}
+
+        {/* Desktop: Show sorting and action buttons on the right */}
         <div className={'hidden md:flex gap-2'}>
-          <ButtonGroup>
-            <Button
-              variant="outline"
-              size="icon"
-              type="button"
-              disabled={isPending}
-              suppressHydrationWarning
-              onClick={handleRefresh}>
-              <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
-              <span className={'sr-only'}>Refresh Data</span>
-            </Button>
-            <Button
-              variant="default"
-              size="default"
-              type="button"
-              onClick={handleCreate}
-              suppressHydrationWarning>
-              <PlusIcon />
-              Create Plan
-            </Button>
-          </ButtonGroup>
+          {/* Sort Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="default" suppressHydrationWarning>
+                <ArrowUpDown className="h-4 w-4" />
+                <span className="ml-2">Sort</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortBy('name')
+                  setSortOrder(
+                    sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc'
+                  )
+                }}>
+                Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortBy('price')
+                  setSortOrder(
+                    sortBy === 'price' && sortOrder === 'asc' ? 'desc' : 'asc'
+                  )
+                }}>
+                Price {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortBy('minDuration')
+                  setSortOrder(
+                    sortBy === 'minDuration' && sortOrder === 'asc'
+                      ? 'desc'
+                      : 'asc'
+                  )
+                }}>
+                Min Duration{' '}
+                {sortBy === 'minDuration' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setSortBy('subscriptionCount')
+                  setSortOrder(
+                    sortBy === 'subscriptionCount' && sortOrder === 'asc'
+                      ? 'desc'
+                      : 'asc'
+                  )
+                }}>
+                Subscriptions{' '}
+                {sortBy === 'subscriptionCount' &&
+                  (sortOrder === 'asc' ? '↑' : '↓')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            variant="outline"
+            size="icon"
+            type="button"
+            disabled={isPending}
+            suppressHydrationWarning
+            onClick={handleRefresh}>
+            <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+            <span className={'sr-only'}>Refresh Data</span>
+          </Button>
+          <Button
+            variant="default"
+            size="default"
+            type="button"
+            onClick={handleCreate}
+            suppressHydrationWarning>
+            <PlusIcon className="md:mr-2" />
+            <span className="hidden md:inline">Create Plan</span>
+          </Button>
         </div>
       </div>
 
-      {/* Mobile: Create button */}
-      <div className="md:hidden">
+      {/* Mobile: Sort and Create buttons */}
+      <div className="md:hidden flex gap-2">
+        {/* Sort Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex-1"
+              suppressHydrationWarning>
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              Sort
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => {
+                setSortBy('name')
+                setSortOrder(
+                  sortBy === 'name' && sortOrder === 'asc' ? 'desc' : 'asc'
+                )
+              }}>
+              Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setSortBy('price')
+                setSortOrder(
+                  sortBy === 'price' && sortOrder === 'asc' ? 'desc' : 'asc'
+                )
+              }}>
+              Price {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setSortBy('minDuration')
+                setSortOrder(
+                  sortBy === 'minDuration' && sortOrder === 'asc'
+                    ? 'desc'
+                    : 'asc'
+                )
+              }}>
+              Min Duration{' '}
+              {sortBy === 'minDuration' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setSortBy('subscriptionCount')
+                setSortOrder(
+                  sortBy === 'subscriptionCount' && sortOrder === 'asc'
+                    ? 'desc'
+                    : 'asc'
+                )
+              }}>
+              Subscriptions{' '}
+              {sortBy === 'subscriptionCount' &&
+                (sortOrder === 'asc' ? '↑' : '↓')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Button
           variant="default"
-          size="default"
+          className="flex-1"
           type="button"
-          className="w-full"
           onClick={handleCreate}
           suppressHydrationWarning>
-          <PlusIcon />
+          <PlusIcon className="h-4 w-4 mr-2" />
           Create Plan
         </Button>
       </div>
@@ -344,12 +538,15 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       )}
 
       {/* Pagination */}
-      {filteredPlans.length > 0 && (
+      {filteredAndSortedPlans.length > 0 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-muted-foreground flex-1 text-sm">
             Showing {currentPage * pageSize + 1} to{' '}
-            {Math.min((currentPage + 1) * pageSize, filteredPlans.length)} of{' '}
-            {filteredPlans.length} plan(s)
+            {Math.min(
+              (currentPage + 1) * pageSize,
+              filteredAndSortedPlans.length
+            )}{' '}
+            of {filteredAndSortedPlans.length} plan(s)
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">

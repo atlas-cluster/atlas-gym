@@ -117,8 +117,8 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     enableGlobalFilter: false,
   },
   {
-    id: 'subscription',
-    header: 'Subscription',
+    id: 'plan',
+    header: 'Plan',
     accessorKey: 'planName',
     cell: ({ row }) => {
       return row.original.planName ? (
