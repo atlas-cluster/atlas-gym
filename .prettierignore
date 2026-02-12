@@ -5,3 +5,4 @@ build
 .out
 public
 package-lock.json
+*.drawio.dtmp
