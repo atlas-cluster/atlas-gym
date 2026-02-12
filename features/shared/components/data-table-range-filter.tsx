@@ -70,9 +70,7 @@ export function DataTableRangeFilter({
           {isFiltered && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1 font-normal">
+              <Badge variant="default" className="rounded-sm px-1 font-normal">
                 {formatValue(value[0])} - {formatValue(value[1])}
               </Badge>
             </>

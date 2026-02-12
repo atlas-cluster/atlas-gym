@@ -53,6 +53,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/features/shared/components/ui/dropdown-menu'
 import { Input } from '@/features/shared/components/ui/input'
@@ -284,6 +285,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
                         setSortBy('name')
@@ -403,6 +405,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
                     setSortBy('name')
