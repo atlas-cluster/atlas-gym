@@ -117,6 +117,21 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     enableGlobalFilter: false,
   },
   {
+    id: 'subscription',
+    header: 'Subscription',
+    accessorKey: 'planName',
+    cell: ({ row }) => {
+      return row.original.planName ? (
+        <Badge variant="secondary">{row.original.planName}</Badge>
+      ) : (
+        <span className="text-muted-foreground text-sm">No active plan</span>
+      )
+    },
+    enableSorting: true,
+    enableHiding: true,
+    enableGlobalFilter: true,
+  },
+  {
     accessorKey: 'email',
     header: 'E-Mail',
     enableSorting: false,
