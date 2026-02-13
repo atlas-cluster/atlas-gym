@@ -169,8 +169,13 @@ export function SubscriptionGrid({
     (s) => s.status === 'cancelled'
   )
   const futureSubscription = subscriptions.find((s) => s.status === 'future')
+
+  // User can choose a new plan if:
+  // 1. They have no subscription at all, OR
+  // 2. They have a cancelled subscription (ending in future) and no future subscription yet
   const canChooseNewPlan =
-    !activeSubscription && !futureSubscription && !cancelledSubscription
+    (!activeSubscription && !cancelledSubscription && !futureSubscription) ||
+    (cancelledSubscription && !futureSubscription && !activeSubscription)
   const allPlansToDisplay: (PlanDisplay & {
     isCurrentPlan?: boolean
     subscription?: MemberSubscriptionDisplay
