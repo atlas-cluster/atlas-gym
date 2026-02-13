@@ -1,15 +1,21 @@
 'use server'
 
 import { addMonths, endOfMonth, isAfter, isPast } from 'date-fns'
-import { unstable_cache } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 import { MemberSubscriptionDisplay } from '@/features/subscriptions/types'
 
-async function fetchMemberSubscriptions(
-  memberId: string
-): Promise<MemberSubscriptionDisplay[]> {
+export async function getMemberSubscriptions(): Promise<
+  MemberSubscriptionDisplay[]
+> {
+  const session = await getSession()
+  if (!session.authenticated || !session.member) {
+    throw new Error('Unauthorized')
+  }
+
+  const memberId = session.member.id
+
   const query = `
     SELECT 
       s.id,
@@ -94,23 +100,4 @@ async function fetchMemberSubscriptions(
       canChooseNew,
     }
   })
-}
-
-export async function getMemberSubscriptions(): Promise<
-  MemberSubscriptionDisplay[]
-> {
-  const session = await getSession()
-  if (!session.authenticated || !session.member) {
-    throw new Error('Unauthorized')
-  }
-
-  const memberId = session.member.id
-
-  const getMemberSubscriptionsCached = unstable_cache(
-    async () => fetchMemberSubscriptions(memberId),
-    [`member-subscriptions-${memberId}`],
-    { revalidate: 3600, tags: ['subscriptions', 'members'] }
-  )
-
-  return getMemberSubscriptionsCached()
 }
