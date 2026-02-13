@@ -17,13 +17,18 @@ export interface Member {
   phone?: string
   isTrainer?: boolean
   paymentType?: PaymentType
-  planName?: string
-  subscriptionEndDate?: Date | null
-  futureSubscriptionName?: string | null
-  futureSubscriptionStartDate?: Date | null
 }
 
-export type MemberDisplay = Member
+export type SessionMember = Omit<
+  Member,
+  'created_at' | 'address' | 'birthdate' | 'phone' | 'paymentType'
+>
+
+export type MemberDisplay = Omit<Member, 'created_at'> & {
+  planName?: string
+  isCancelled?: boolean
+  futureSubscriptionName?: string
+}
 
 export interface MembersTableMeta {
   updateMember: (id: string, data: z.infer<typeof memberDetailsSchema>) => void
