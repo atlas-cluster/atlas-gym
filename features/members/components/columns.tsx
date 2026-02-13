@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
+  CalendarPlus,
   Check,
   CreditCard,
   GraduationCap,
@@ -11,10 +12,11 @@ import {
   Landmark,
   MoreHorizontalIcon,
   PencilIcon,
-  Settings,
+  RotateCcw,
   TrashIcon,
   User,
   X,
+  XCircle,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -283,12 +285,41 @@ function ActionsCell({
                 </DropdownMenuItem>
               )}
 
-              {/* Subscription Management */}
-              <DropdownMenuItem
-                onSelect={() => meta?.manageSubscription?.(member.id)}>
-                <Settings />
-                Manage Subscription
-              </DropdownMenuItem>
+              {/* Subscription Management - Individual Actions Based on Status */}
+              {member.planName && !member.isCancelled && (
+                <DropdownMenuItem
+                  onSelect={() => meta?.cancelSubscription?.(member)}>
+                  <XCircle />
+                  Cancel Subscription
+                </DropdownMenuItem>
+              )}
+              
+              {member.planName && member.isCancelled && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={() => meta?.revertCancellation?.(member)}>
+                    <RotateCcw />
+                    Revert Cancellation
+                  </DropdownMenuItem>
+                  
+                  {!member.futureSubscriptionName && (
+                    <DropdownMenuItem
+                      onSelect={() => meta?.changeSubscription?.(member)}>
+                      <CalendarPlus />
+                      Change Subscription
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {member.futureSubscriptionName && (
+                    <DropdownMenuItem
+                      variant={'destructive'}
+                      onSelect={() => meta?.cancelFutureSubscription?.(member)}>
+                      <XCircle />
+                      Cancel Future Subscription
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
 
               <DropdownMenuItem
                 variant={'destructive'}

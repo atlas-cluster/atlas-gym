@@ -25,7 +25,11 @@ import { columns } from '@/features/members/components/columns'
 import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
-import { MemberSubscriptionDialog } from '@/features/members/dialog/member-subscription'
+import {
+  cancelSubscription,
+  createSubscription,
+  revertCancellation,
+} from '@/features/subscriptions'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -65,7 +69,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
-  const [subscriptionOpen, setSubscriptionOpen] = useState(false)
   const [detailsMember, setDetailsMember] = useState<
     MemberDisplay | undefined
   >()
@@ -73,9 +76,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     MemberDisplay | undefined
   >()
   const [passwordMember, setPasswordMember] = useState<
-    MemberDisplay | undefined
-  >()
-  const [subscriptionMember, setSubscriptionMember] = useState<
     MemberDisplay | undefined
   >()
 
@@ -204,12 +204,94 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     fetchData()
   }
 
-  const handleManageSubscription = (memberId: string) => {
-    const member = tableData.find((m) => m.id === memberId)
-    if (member) {
-      setSubscriptionMember(member)
-      setSubscriptionOpen(true)
+  const handleCancelSubscription = (member: MemberDisplay) => {
+    // TODO: Add confirmation dialog
+    if (!confirm(`Cancel subscription for ${member.firstname} ${member.lastname}?`)) {
+      return
     }
+    
+    startTransition(async () => {
+      try {
+        // Get member's subscriptions to find the active one
+        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
+        const subscriptions = await response.json()
+        const activeSubscription = subscriptions.find((s: any) => 
+          s.status === 'active' || s.status === 'cancelled'
+        )
+        
+        if (activeSubscription) {
+          await cancelSubscription(activeSubscription.id)
+          toast.success('Subscription cancelled successfully')
+          fetchData()
+        }
+      } catch (error) {
+        toast.error('Failed to cancel subscription')
+        console.error(error)
+      }
+    })
+  }
+
+  const handleRevertCancellation = (member: MemberDisplay) => {
+    if (!confirm(`Revert cancellation for ${member.firstname} ${member.lastname}?`)) {
+      return
+    }
+    
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
+        const subscriptions = await response.json()
+        const cancelledSubscription = subscriptions.find((s: any) => s.status === 'cancelled')
+        
+        if (cancelledSubscription) {
+          await revertCancellation(cancelledSubscription.id)
+          toast.success('Cancellation reverted successfully')
+          fetchData()
+        }
+      } catch (error) {
+        toast.error('Failed to revert cancellation')
+        console.error(error)
+      }
+    })
+  }
+
+  const handleChangeSubscription = (member: MemberDisplay) => {
+    // TODO: Show plan selection dialog
+    const planId = prompt('Enter plan ID for new subscription:')
+    if (!planId) return
+    
+    startTransition(async () => {
+      try {
+        await createSubscription(Number(planId))
+        toast.success('Future subscription created successfully')
+        fetchData()
+      } catch (error) {
+        toast.error('Failed to create future subscription')
+        console.error(error)
+      }
+    })
+  }
+
+  const handleCancelFutureSubscription = (member: MemberDisplay) => {
+    if (!confirm(`Cancel future subscription for ${member.firstname} ${member.lastname}?`)) {
+      return
+    }
+    
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
+        const subscriptions = await response.json()
+        const futureSubscription = subscriptions.find((s: any) => s.status === 'future')
+        
+        if (futureSubscription) {
+          await cancelSubscription(futureSubscription.id)
+          toast.success('Future subscription cancelled successfully')
+          fetchData()
+        }
+      } catch (error) {
+        toast.error('Failed to cancel future subscription')
+        console.error(error)
+      }
+    })
   }
 
   const fetchData = () => {
@@ -260,7 +342,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       convertToMember: handleConvertToMember,
       convertToTrainer: handleConvertToTrainer,
       refreshMembers: handleRefresh,
-      manageSubscription: handleManageSubscription,
+      cancelSubscription: handleCancelSubscription,
+      revertCancellation: handleRevertCancellation,
+      changeSubscription: handleChangeSubscription,
+      cancelFutureSubscription: handleCancelFutureSubscription,
     },
 
     enableRowSelection: true,
@@ -313,12 +398,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         onOpenChange={setPasswordOpen}
         member={passwordMember}
         onSubmit={handlePasswordChange}
-      />
-      <MemberSubscriptionDialog
-        open={subscriptionOpen}
-        onOpenChange={setSubscriptionOpen}
-        member={subscriptionMember}
-        onSuccess={fetchData}
       />
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">
