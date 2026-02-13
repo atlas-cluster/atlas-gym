@@ -9,6 +9,6 @@ export const planDetailsSchema = z.object({
   minDurationMonths: z
     .number()
     .int()
-    .min(0, 'Minimum duration must be non-negative'),
+    .min(1, 'Minimum duration must be at least 1 month'),
   description: z.string().optional(),
 })

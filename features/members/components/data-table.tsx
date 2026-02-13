@@ -24,6 +24,7 @@ import { columns } from '@/features/members/components/columns'
 import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
+import { PlanDisplay } from '@/features/plans/types'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -56,7 +57,13 @@ import {
   getCoreRowModel,
 } from '@tanstack/table-core'
 
-export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
+export function DataTable({
+  initialData,
+  allPlans,
+}: {
+  initialData: MemberDisplay[]
+  allPlans: PlanDisplay[]
+}) {
   const { member: currentMember, refreshMember } = useAuth()
   const [isPending, startTransition] = useTransition()
   const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
@@ -347,18 +354,12 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           />
           <DataTableFacetedFilter
             title={'Subscription'}
-            options={Array.from(
-              new Set(
-                tableData
-                  .map((m) => m.planName)
-                  .filter((name): name is string => !!name)
-              )
-            )
-              .sort()
-              .map((name) => ({
-                value: name,
-                label: name,
-              }))}
+            options={allPlans
+              .map((plan) => ({
+                value: plan.name,
+                label: plan.name,
+              }))
+              .sort((a, b) => a.label.localeCompare(b.label))}
             column={table.getColumn('subscription')}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (

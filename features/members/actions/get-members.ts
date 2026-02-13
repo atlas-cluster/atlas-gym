@@ -22,6 +22,7 @@ const getMembersCached = unstable_cache(
              -- Current/cancelled subscription
              current_p.name as "planName",
              current_s.end_date as "subscriptionEndDate",
+             CASE WHEN current_s.end_date IS NOT NULL THEN true ELSE false END as "isCancelled",
              -- Future subscription
              future_p.name as "futureSubscriptionName",
              future_s.start_date as "futureSubscriptionStartDate"
