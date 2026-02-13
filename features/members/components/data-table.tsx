@@ -566,7 +566,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
             column={table.getColumn('type')}
           />
           <DataTableFacetedFilter
-            title={'Plan'}
+            title={'Subscription'}
             options={Array.from(
               new Set(
                 tableData
