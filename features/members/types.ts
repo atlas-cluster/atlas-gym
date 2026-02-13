@@ -48,4 +48,5 @@ export interface MembersTableMeta {
   revertCancellation?: (member: MemberDisplay) => void
   changeSubscription?: (member: MemberDisplay) => void
   cancelFutureSubscription?: (member: MemberDisplay) => void
+  choosePlan?: (member: MemberDisplay) => void
 }

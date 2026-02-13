@@ -25,11 +25,6 @@ import { columns } from '@/features/members/components/columns'
 import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
-import {
-  cancelSubscription,
-  createSubscription,
-  revertCancellation,
-} from '@/features/subscriptions'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -44,6 +39,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/features/shared/components/ui/table'
+import {
+  cancelSubscription,
+  createSubscription,
+  getAvailablePlans,
+  revertCancellation,
+} from '@/features/subscriptions'
 import {
   flexRender,
   getFacetedRowModel,
@@ -206,19 +207,24 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
   const handleCancelSubscription = (member: MemberDisplay) => {
     // TODO: Add confirmation dialog
-    if (!confirm(`Cancel subscription for ${member.firstname} ${member.lastname}?`)) {
+    if (
+      !confirm(
+        `Cancel subscription for ${member.firstname} ${member.lastname}?`
+      )
+    ) {
       return
     }
-    
+
     startTransition(async () => {
       try {
         // Get member's subscriptions to find the active one
         const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions = await response.json()
-        const activeSubscription = subscriptions.find((s: any) => 
-          s.status === 'active' || s.status === 'cancelled'
+        const subscriptions: { status: string; id: string }[] =
+          await response.json()
+        const activeSubscription = subscriptions.find(
+          (s) => s.status === 'active' || s.status === 'cancelled'
         )
-        
+
         if (activeSubscription) {
           await cancelSubscription(activeSubscription.id)
           toast.success('Subscription cancelled successfully')
@@ -232,16 +238,23 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleRevertCancellation = (member: MemberDisplay) => {
-    if (!confirm(`Revert cancellation for ${member.firstname} ${member.lastname}?`)) {
+    if (
+      !confirm(
+        `Revert cancellation for ${member.firstname} ${member.lastname}?`
+      )
+    ) {
       return
     }
-    
+
     startTransition(async () => {
       try {
         const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions = await response.json()
-        const cancelledSubscription = subscriptions.find((s: any) => s.status === 'cancelled')
-        
+        const subscriptions: { status: string; id: string }[] =
+          await response.json()
+        const cancelledSubscription = subscriptions.find(
+          (s) => s.status === 'cancelled'
+        )
+
         if (cancelledSubscription) {
           await revertCancellation(cancelledSubscription.id)
           toast.success('Cancellation reverted successfully')
@@ -255,13 +268,37 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleChangeSubscription = (member: MemberDisplay) => {
-    // TODO: Show plan selection dialog
-    const planId = prompt('Enter plan ID for new subscription:')
-    if (!planId) return
-    
     startTransition(async () => {
       try {
-        await createSubscription(Number(planId))
+        // Get available plans
+        const plans = await getAvailablePlans()
+
+        if (plans.length === 0) {
+          toast.error('No plans available')
+          return
+        }
+
+        // Create a simple plan selection dialog
+        const planOptions = plans
+          .map(
+            (p, i) =>
+              `${i + 1}. ${p.name} - €${p.price}/month (${p.minDurationMonths} months min)`
+          )
+          .join('\n')
+
+        const selection = prompt(
+          `Choose a new plan for ${member.firstname} ${member.lastname}:\n\n${planOptions}\n\nEnter the plan number:`
+        )
+
+        if (!selection) return
+
+        const planIndex = parseInt(selection) - 1
+        if (planIndex < 0 || planIndex >= plans.length) {
+          toast.error('Invalid plan selection')
+          return
+        }
+
+        await createSubscription(plans[planIndex].id)
         toast.success('Future subscription created successfully')
         fetchData()
       } catch (error) {
@@ -272,16 +309,23 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleCancelFutureSubscription = (member: MemberDisplay) => {
-    if (!confirm(`Cancel future subscription for ${member.firstname} ${member.lastname}?`)) {
+    if (
+      !confirm(
+        `Cancel future subscription for ${member.firstname} ${member.lastname}?`
+      )
+    ) {
       return
     }
-    
+
     startTransition(async () => {
       try {
         const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions = await response.json()
-        const futureSubscription = subscriptions.find((s: any) => s.status === 'future')
-        
+        const subscriptions: { status: string; id: string }[] =
+          await response.json()
+        const futureSubscription = subscriptions.find(
+          (s) => s.status === 'future'
+        )
+
         if (futureSubscription) {
           await cancelSubscription(futureSubscription.id)
           toast.success('Future subscription cancelled successfully')
@@ -289,6 +333,47 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         }
       } catch (error) {
         toast.error('Failed to cancel future subscription')
+        console.error(error)
+      }
+    })
+  }
+
+  const handleChoosePlan = (member: MemberDisplay) => {
+    startTransition(async () => {
+      try {
+        // Get available plans
+        const plans = await getAvailablePlans()
+
+        if (plans.length === 0) {
+          toast.error('No plans available')
+          return
+        }
+
+        // Create a simple plan selection dialog
+        const planOptions = plans
+          .map(
+            (p, i) =>
+              `${i + 1}. ${p.name} - €${p.price}/month (${p.minDurationMonths} months min)`
+          )
+          .join('\n')
+
+        const selection = prompt(
+          `Choose a plan for ${member.firstname} ${member.lastname}:\n\n${planOptions}\n\nEnter the plan number:`
+        )
+
+        if (!selection) return
+
+        const planIndex = parseInt(selection) - 1
+        if (planIndex < 0 || planIndex >= plans.length) {
+          toast.error('Invalid plan selection')
+          return
+        }
+
+        await createSubscription(plans[planIndex].id)
+        toast.success('Subscription created successfully')
+        fetchData()
+      } catch (error) {
+        toast.error('Failed to create subscription')
         console.error(error)
       }
     })
@@ -346,6 +431,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       revertCancellation: handleRevertCancellation,
       changeSubscription: handleChangeSubscription,
       cancelFutureSubscription: handleCancelFutureSubscription,
+      choosePlan: handleChoosePlan,
     },
 
     enableRowSelection: true,

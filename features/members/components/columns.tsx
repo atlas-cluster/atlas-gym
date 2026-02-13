@@ -286,6 +286,7 @@ function ActionsCell({
               )}
 
               {/* Subscription Management - Individual Actions Based on Status */}
+              {/* Active subscription - show cancel option */}
               {member.planName && !member.isCancelled && (
                 <DropdownMenuItem
                   onSelect={() => meta?.cancelSubscription?.(member)}>
@@ -293,7 +294,8 @@ function ActionsCell({
                   Cancel Subscription
                 </DropdownMenuItem>
               )}
-              
+
+              {/* Cancelled subscription - show revert and change options */}
               {member.planName && member.isCancelled && (
                 <>
                   <DropdownMenuItem
@@ -301,7 +303,7 @@ function ActionsCell({
                     <RotateCcw />
                     Revert Cancellation
                   </DropdownMenuItem>
-                  
+
                   {!member.futureSubscriptionName && (
                     <DropdownMenuItem
                       onSelect={() => meta?.changeSubscription?.(member)}>
@@ -309,7 +311,7 @@ function ActionsCell({
                       Change Subscription
                     </DropdownMenuItem>
                   )}
-                  
+
                   {member.futureSubscriptionName && (
                     <DropdownMenuItem
                       variant={'destructive'}
@@ -319,6 +321,14 @@ function ActionsCell({
                     </DropdownMenuItem>
                   )}
                 </>
+              )}
+
+              {/* No subscription - show choose plan option */}
+              {!member.planName && (
+                <DropdownMenuItem onSelect={() => meta?.choosePlan?.(member)}>
+                  <CalendarPlus />
+                  Choose Plan
+                </DropdownMenuItem>
               )}
 
               <DropdownMenuItem
