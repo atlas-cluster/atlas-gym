@@ -93,9 +93,13 @@ export function SubscriptionGrid({
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
 
+  // Default price range constants
+  const DEFAULT_MIN_PRICE = 0
+  const DEFAULT_MAX_PRICE = 200
+
   // Calculate min/max values from data
-  const minPrice = Math.min(...plans.map((p) => p.price), 0)
-  const maxPrice = Math.max(...plans.map((p) => p.price), 200)
+  const minPrice = Math.min(...plans.map((p) => p.price), DEFAULT_MIN_PRICE)
+  const maxPrice = Math.max(...plans.map((p) => p.price), DEFAULT_MAX_PRICE)
 
   useEffect(() => {
     setSubscriptions(initialSubscriptions)
@@ -273,7 +277,7 @@ export function SubscriptionGrid({
             <AlertDialogDescription>
               {subscriptionToCancel?.status === 'future'
                 ? `This will immediately cancel your future subscription to "${subscriptionToCancel?.planName}".`
-                : `This will cancel your subscription to "${subscriptionToCancel?.planName}" at the end of the current month (${subscriptionToCancel?.endDate ? format(new Date(), 'MMMM yyyy') : ''}).`}
+                : `This will cancel your subscription to "${subscriptionToCancel?.planName}" at the end of the current month${subscriptionToCancel?.endDate ? ` (${format(endOfMonth(new Date()), 'MMMM yyyy')})` : ''}.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -657,9 +661,9 @@ export function SubscriptionGrid({
                   <SelectValue placeholder={pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
-                  {[6, 12, 24, 48, 999999999].map((size) => (
+                  {[6, 12, 24, 48, Number.MAX_SAFE_INTEGER].map((size) => (
                     <SelectItem key={size} value={`${size}`}>
-                      {size === 999999999 ? 'All' : size}
+                      {size === Number.MAX_SAFE_INTEGER ? 'All' : size}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -69,7 +69,7 @@ export async function getMemberSubscriptions(): Promise<
     } else if (!endDate) {
       // Active subscription (no end date)
       status = 'active'
-      canCancel = !isPast(minEndDate)
+      canCancel = isPast(minEndDate)
       canChooseNew = false
     } else if (isPast(endDate)) {
       // Ended subscription
