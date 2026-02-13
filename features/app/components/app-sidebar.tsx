@@ -33,6 +33,7 @@ const mainNavItems = [
   { title: 'Reservations', url: '/reservations', icon: BookCheckIcon },
   { title: 'Equipment', url: '/equipment', icon: DumbbellIcon },
   { title: 'Rooms', url: '/rooms', icon: MapPinIcon },
+  { title: 'Subscription', url: '/subscription', icon: ReceiptTextIcon },
 ]
 
 const trainerNavItems = [
