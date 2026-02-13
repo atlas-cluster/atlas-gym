@@ -24,6 +24,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/features/shared/components/ui/dropdown-menu'
 import { Table } from '@tanstack/react-table'
@@ -256,6 +257,10 @@ function ActionsCell({
               )}
 
               {/* Subscription Actions */}
+              {(hasActiveSubscription ||
+                hasCancelledSubscription ||
+                hasNoSubscription) && <DropdownMenuSeparator />}
+
               {hasActiveSubscription && (
                 <DropdownMenuItem
                   variant={'destructive'}

@@ -9,15 +9,28 @@ export async function createSubscription(
   planId: number,
   isFuture: boolean = false
 ): Promise<void> {
-  const startDate = isFuture
-    ? `(SELECT COALESCE(end_date, CURRENT_DATE) FROM subscriptions WHERE member_id = $1 AND start_date <= CURRENT_DATE ORDER BY start_date DESC LIMIT 1)`
-    : 'CURRENT_DATE'
+  let query: string
+  let params: (string | number)[]
 
-  const query = `
-    INSERT INTO subscriptions (member_id, plan_id, start_date, end_date)
-    VALUES ($1, $2, ${startDate}, NULL)
-  `
+  if (isFuture) {
+    // For future subscriptions, start date is based on when current subscription ends
+    query = `
+      INSERT INTO subscriptions (member_id, plan_id, start_date, end_date)
+      SELECT $1, $2, COALESCE(
+        (SELECT end_date FROM subscriptions WHERE member_id = $1 AND start_date <= CURRENT_DATE ORDER BY start_date DESC LIMIT 1),
+        CURRENT_DATE
+      ), NULL
+    `
+    params = [memberId, planId]
+  } else {
+    // For immediate subscriptions, start today
+    query = `
+      INSERT INTO subscriptions (member_id, plan_id, start_date, end_date)
+      VALUES ($1, $2, CURRENT_DATE, NULL)
+    `
+    params = [memberId, planId]
+  }
 
-  await pool.query(query, [memberId, planId])
+  await pool.query(query, params)
   revalidateTag('members')
 }
