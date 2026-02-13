@@ -28,6 +28,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/features/shared/components/ui/dropdown-menu'
 import { Table } from '@tanstack/react-table'
@@ -304,12 +307,34 @@ function ActionsCell({
                     Revert Cancellation
                   </DropdownMenuItem>
 
-                  {!member.futureSubscriptionName && (
-                    <DropdownMenuItem
-                      onSelect={() => meta?.changeSubscription?.(member)}>
-                      <CalendarPlus />
-                      Change Subscription
-                    </DropdownMenuItem>
+                  {!member.futureSubscriptionName && meta?.availablePlans && (
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <CalendarPlus />
+                        Change Subscription
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        {meta.availablePlans.map((plan) => (
+                          <DropdownMenuItem
+                            key={plan.id}
+                            onSelect={() =>
+                              meta?.changeSubscription?.(member, plan.id)
+                            }>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{plan.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                €{plan.price.toFixed(2)}/month •{' '}
+                                {plan.minDurationMonths}{' '}
+                                {plan.minDurationMonths === 1
+                                  ? 'month'
+                                  : 'months'}{' '}
+                                min
+                              </span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
                   )}
 
                   {member.futureSubscriptionName && (
@@ -324,11 +349,30 @@ function ActionsCell({
               )}
 
               {/* No subscription - show choose plan option */}
-              {!member.planName && (
-                <DropdownMenuItem onSelect={() => meta?.choosePlan?.(member)}>
-                  <CalendarPlus />
-                  Choose Plan
-                </DropdownMenuItem>
+              {!member.planName && meta?.availablePlans && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <CalendarPlus />
+                    Choose Plan
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {meta.availablePlans.map((plan) => (
+                      <DropdownMenuItem
+                        key={plan.id}
+                        onSelect={() => meta?.choosePlan?.(member, plan.id)}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{plan.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            €{plan.price.toFixed(2)}/month •{' '}
+                            {plan.minDurationMonths}{' '}
+                            {plan.minDurationMonths === 1 ? 'month' : 'months'}{' '}
+                            min
+                          </span>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
               )}
 
               <DropdownMenuItem

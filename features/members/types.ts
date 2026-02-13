@@ -46,7 +46,13 @@ export interface MembersTableMeta {
   refreshMembers: () => void
   cancelSubscription?: (member: MemberDisplay) => void
   revertCancellation?: (member: MemberDisplay) => void
-  changeSubscription?: (member: MemberDisplay) => void
+  changeSubscription?: (member: MemberDisplay, planId: number) => void
   cancelFutureSubscription?: (member: MemberDisplay) => void
-  choosePlan?: (member: MemberDisplay) => void
+  choosePlan?: (member: MemberDisplay, planId: number) => void
+  availablePlans?: {
+    id: number
+    name: string
+    price: number
+    minDurationMonths: number
+  }[]
 }

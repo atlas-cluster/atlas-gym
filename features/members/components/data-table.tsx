@@ -92,17 +92,14 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     MemberDisplay | undefined
   >()
 
-  // Subscription Dialog State
+  // Subscription Dialog State - only for confirmations, not plan selection
   const [cancelSubDialogOpen, setCancelSubDialogOpen] = useState(false)
   const [revertCancelDialogOpen, setRevertCancelDialogOpen] = useState(false)
   const [cancelFutureDialogOpen, setCancelFutureDialogOpen] = useState(false)
-  const [choosePlanDialogOpen, setChoosePlanDialogOpen] = useState(false)
-  const [changePlanDialogOpen, setChangePlanDialogOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<MemberDisplay | null>(
     null
   )
   const [availablePlans, setAvailablePlans] = useState<PlanDisplay[]>([])
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('')
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([])
@@ -118,6 +115,19 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   useEffect(() => {
     setTableData(initialData)
   }, [initialData])
+
+  // Fetch available plans once on mount
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const plans = await getAvailablePlans()
+        setAvailablePlans(plans)
+      } catch (error) {
+        console.error('Failed to fetch plans:', error)
+      }
+    }
+    fetchPlans()
+  }, [])
 
   const updateMemberInState = (id: string, update: Partial<MemberDisplay>) => {
     setTableData((prev) =>
@@ -291,24 +301,11 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     })
   }
 
-  const handleChangeSubscription = async (member: MemberDisplay) => {
-    setSelectedMember(member)
-    const plans = await getAvailablePlans()
-    setAvailablePlans(plans)
-    setSelectedPlanId(plans.length > 0 ? String(plans[0].id) : '')
-    setChangePlanDialogOpen(true)
-  }
-
-  const handleChangeSubscriptionConfirm = async () => {
-    if (!selectedMember || !selectedPlanId) return
-
-    const promise = createSubscription(
-      parseInt(selectedPlanId),
-      selectedMember.id
-    ).then(() => {
-      setChangePlanDialogOpen(false)
-      setSelectedMember(null)
-      setSelectedPlanId('')
+  const handleChangeSubscription = async (
+    member: MemberDisplay,
+    planId: number
+  ) => {
+    const promise = createSubscription(planId, member.id).then(() => {
       fetchData()
     })
 
@@ -350,24 +347,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     })
   }
 
-  const handleChoosePlan = async (member: MemberDisplay) => {
-    setSelectedMember(member)
-    const plans = await getAvailablePlans()
-    setAvailablePlans(plans)
-    setSelectedPlanId(plans.length > 0 ? String(plans[0].id) : '')
-    setChoosePlanDialogOpen(true)
-  }
-
-  const handleChoosePlanConfirm = async () => {
-    if (!selectedMember || !selectedPlanId) return
-
-    const promise = createSubscription(
-      parseInt(selectedPlanId),
-      selectedMember.id
-    ).then(() => {
-      setChoosePlanDialogOpen(false)
-      setSelectedMember(null)
-      setSelectedPlanId('')
+  const handleChoosePlan = async (member: MemberDisplay, planId: number) => {
+    const promise = createSubscription(planId, member.id).then(() => {
       fetchData()
     })
 
@@ -431,6 +412,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       changeSubscription: handleChangeSubscription,
       cancelFutureSubscription: handleCancelFutureSubscription,
       choosePlan: handleChoosePlan,
+      availablePlans,
     },
 
     enableRowSelection: true,
@@ -547,91 +529,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
             <AlertDialogCancel>Keep Future Subscription</AlertDialogCancel>
             <AlertDialogAction onClick={handleCancelFutureSubscriptionConfirm}>
               Cancel Future Subscription
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Choose Plan Dialog */}
-      <AlertDialog
-        open={choosePlanDialogOpen}
-        onOpenChange={setChoosePlanDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Choose Plan</AlertDialogTitle>
-            <AlertDialogDescription>
-              Select a plan for {selectedMember?.firstname}{' '}
-              {selectedMember?.lastname}:
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4 space-y-2">
-            {availablePlans.map((plan) => (
-              <Button
-                key={plan.id}
-                variant={
-                  selectedPlanId === String(plan.id) ? 'default' : 'outline'
-                }
-                className="w-full justify-start"
-                onClick={() => setSelectedPlanId(String(plan.id))}>
-                <div className="flex flex-col items-start">
-                  <div className="font-medium">{plan.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
-                    {plan.minDurationMonths === 1 ? 'month' : 'months'} min
-                  </div>
-                </div>
-              </Button>
-            ))}
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleChoosePlanConfirm}
-              disabled={!selectedPlanId}>
-              Choose Plan
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Change Subscription (Future) Dialog */}
-      <AlertDialog
-        open={changePlanDialogOpen}
-        onOpenChange={setChangePlanDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Change Subscription</AlertDialogTitle>
-            <AlertDialogDescription>
-              Select a new plan for {selectedMember?.firstname}{' '}
-              {selectedMember?.lastname}. This will create a future
-              subscription that starts when the current one ends.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4 space-y-2">
-            {availablePlans.map((plan) => (
-              <Button
-                key={plan.id}
-                variant={
-                  selectedPlanId === String(plan.id) ? 'default' : 'outline'
-                }
-                className="w-full justify-start"
-                onClick={() => setSelectedPlanId(String(plan.id))}>
-                <div className="flex flex-col items-start">
-                  <div className="font-medium">{plan.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
-                    {plan.minDurationMonths === 1 ? 'month' : 'months'} min
-                  </div>
-                </div>
-              </Button>
-            ))}
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleChangeSubscriptionConfirm}
-              disabled={!selectedPlanId}>
-              Change Subscription
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
