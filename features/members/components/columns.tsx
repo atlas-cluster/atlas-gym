@@ -127,8 +127,8 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     enableGlobalFilter: false,
   },
   {
-    id: 'plan',
-    header: 'Plan',
+    id: 'subscription',
+    header: 'Subscription',
     accessorKey: 'planName',
     cell: ({ row }) => {
       const { planName, isCancelled, futureSubscriptionName } = row.original

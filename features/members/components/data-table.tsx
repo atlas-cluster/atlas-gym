@@ -594,7 +594,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
                 value: name,
                 label: name,
               }))}
-            column={table.getColumn('plan')}
+            column={table.getColumn('subscription')}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button
