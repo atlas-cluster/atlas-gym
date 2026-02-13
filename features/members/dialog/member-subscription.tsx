@@ -201,7 +201,7 @@ export function MemberSubscriptionDialog({
       return
     }
 
-    const selectedPlan = availablePlans.find((p) => p.id === selectedPlanId)
+    const selectedPlan = availablePlans.find((p) => p.id === Number(selectedPlanId))
     if (!selectedPlan) return
 
     startTransition(async () => {
@@ -364,7 +364,7 @@ export function MemberSubscriptionDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {availablePlans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
+                        <SelectItem key={plan.id} value={String(plan.id)}>
                           {plan.name} - ${plan.price}/month ({plan.minDurationMonths} months min)
                         </SelectItem>
                       ))}
