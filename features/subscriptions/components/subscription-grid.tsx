@@ -5,7 +5,6 @@ import { format } from 'date-fns'
 import {
   ArrowUpDown,
   CalendarIcon,
-  CheckCircle2Icon,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
