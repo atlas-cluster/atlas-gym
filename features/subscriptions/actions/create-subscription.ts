@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
@@ -74,5 +74,5 @@ export async function createSubscription(planId: number): Promise<void> {
 
   await pool.query(insertQuery, [memberId, planId, startDate])
 
-  revalidateTag('members')
+  cacheTag('subscriptions')
 }

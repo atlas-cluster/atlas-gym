@@ -11,6 +11,7 @@ import {
   ChevronsRight,
   PlusIcon,
   RefreshCwIcon,
+  RotateCcwIcon,
   Trash2Icon,
   UsersIcon,
   XCircleIcon,
@@ -64,6 +65,7 @@ import {
   createSubscription,
   getAvailablePlans,
   getMemberSubscriptions,
+  revertCancellation,
 } from '@/features/subscriptions'
 
 export function SubscriptionGrid({
@@ -79,6 +81,9 @@ export function SubscriptionGrid({
   const [plans, setPlans] = useState<PlanDisplay[]>(initialPlans)
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [subscriptionToCancel, setSubscriptionToCancel] =
+    useState<MemberSubscriptionDisplay | null>(null)
+  const [revertDialogOpen, setRevertDialogOpen] = useState(false)
+  const [subscriptionToRevert, setSubscriptionToRevert] =
     useState<MemberSubscriptionDisplay | null>(null)
   const [chooseDialogOpen, setChooseDialogOpen] = useState(false)
   const [planToChoose, setPlanToChoose] = useState<PlanDisplay | null>(null)
@@ -131,7 +136,6 @@ export function SubscriptionGrid({
     if (!subscriptionToCancel) return
 
     const promise = cancelSubscription(subscriptionToCancel.id).then(() => {
-      fetchData()
       setCancelDialogOpen(false)
       setSubscriptionToCancel(null)
     })
@@ -152,7 +156,6 @@ export function SubscriptionGrid({
     if (!planToChoose) return
 
     const promise = createSubscription(planToChoose.id).then(() => {
-      fetchData()
       setChooseDialogOpen(false)
       setPlanToChoose(null)
     })
@@ -161,6 +164,26 @@ export function SubscriptionGrid({
       loading: 'Creating subscription...',
       success: 'Subscription created successfully',
       error: (err) => err?.message || 'Error creating subscription',
+    })
+  }
+
+  const handleRevertClick = (subscription: MemberSubscriptionDisplay) => {
+    setSubscriptionToRevert(subscription)
+    setRevertDialogOpen(true)
+  }
+
+  const handleRevertConfirm = async () => {
+    if (!subscriptionToRevert) return
+
+    const promise = revertCancellation(subscriptionToRevert.id).then(() => {
+      setRevertDialogOpen(false)
+      setSubscriptionToRevert(null)
+    })
+
+    toast.promise(promise, {
+      loading: 'Reverting cancellation...',
+      success: 'Cancellation reverted successfully',
+      error: (err) => err?.message || 'Error reverting cancellation',
     })
   }
 
@@ -321,6 +344,33 @@ export function SubscriptionGrid({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleChooseConfirm}>
               Choose Plan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Revert Cancellation Dialog */}
+      <AlertDialog open={revertDialogOpen} onOpenChange={setRevertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revert Cancellation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reactivate your "{subscriptionToRevert?.planName}"
+              subscription.
+              {futureSubscription && (
+                <>
+                  <br />
+                  <br />
+                  <strong>Warning:</strong> This will also cancel your scheduled
+                  future subscription to "{futureSubscription.planName}".
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRevertConfirm}>
+              Revert Cancellation
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -603,6 +653,16 @@ export function SubscriptionGrid({
                         suppressHydrationWarning
                         aria-label="Cancel subscription">
                         <Trash2Icon className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {plan.subscription.status === 'cancelled' && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleRevertClick(plan.subscription!)}
+                        suppressHydrationWarning
+                        aria-label="Revert cancellation">
+                        <RotateCcwIcon className="w-4 h-4" />
                       </Button>
                     )}
                   </CardAction>
