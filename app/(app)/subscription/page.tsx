@@ -1,7 +1,7 @@
 import {
   SubscriptionGrid,
-  getMemberSubscriptions,
   getAvailablePlans,
+  getMemberSubscriptions,
 } from '@/features/subscriptions'
 
 export const dynamic = 'force-dynamic'
@@ -13,6 +13,9 @@ export default async function SubscriptionPage() {
   ])
 
   return (
-    <SubscriptionGrid initialSubscriptions={subscriptions} initialPlans={plans} />
+    <SubscriptionGrid
+      initialSubscriptions={subscriptions}
+      initialPlans={plans}
+    />
   )
 }

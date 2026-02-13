@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable react-hooks/set-state-in-effect */
+import { format } from 'date-fns'
 import {
   ArrowUpDown,
   CalendarIcon,
@@ -13,17 +15,9 @@ import {
   XCircleIcon,
   XIcon,
 } from 'lucide-react'
-import { format } from 'date-fns'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
-import {
-  MemberSubscriptionDisplay,
-  cancelSubscription,
-  createSubscription,
-  getAvailablePlans,
-  getMemberSubscriptions,
-} from '@/features/subscriptions'
 import { PlanDisplay } from '@/features/plans'
 import { DataTableRangeFilter } from '@/features/shared/components/data-table-range-filter'
 import {
@@ -63,6 +57,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/features/shared/components/ui/select'
+import {
+  MemberSubscriptionDisplay,
+  cancelSubscription,
+  createSubscription,
+  getAvailablePlans,
+  getMemberSubscriptions,
+} from '@/features/subscriptions'
 
 export function SubscriptionGrid({
   initialSubscriptions,
@@ -72,9 +73,8 @@ export function SubscriptionGrid({
   initialPlans: PlanDisplay[]
 }) {
   const [isPending, startTransition] = useTransition()
-  const [subscriptions, setSubscriptions] = useState<
-    MemberSubscriptionDisplay[]
-  >(initialSubscriptions)
+  const [subscriptions, setSubscriptions] =
+    useState<MemberSubscriptionDisplay[]>(initialSubscriptions)
   const [plans, setPlans] = useState<PlanDisplay[]>(initialPlans)
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [subscriptionToCancel, setSubscriptionToCancel] =
@@ -167,9 +167,6 @@ export function SubscriptionGrid({
   const futureSubscription = subscriptions.find((s) => s.status === 'future')
   const canChooseNewPlan =
     !activeSubscription && !futureSubscription && !cancelledSubscription
-
-  // Combine active/cancelled/future subscriptions with available plans
-  const currentActivePlan = activeSubscription || cancelledSubscription
   const allPlansToDisplay: (PlanDisplay & {
     isCurrentPlan?: boolean
     subscription?: MemberSubscriptionDisplay

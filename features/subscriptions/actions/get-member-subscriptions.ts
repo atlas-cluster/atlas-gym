@@ -1,13 +1,10 @@
 'use server'
 
-import { addMonths, isPast, startOfMonth, endOfMonth, isAfter } from 'date-fns'
+import { addMonths, endOfMonth, isAfter, isPast } from 'date-fns'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
-import {
-  MemberSubscriptionDisplay,
-  Subscription,
-} from '@/features/subscriptions/types'
+import { MemberSubscriptionDisplay } from '@/features/subscriptions/types'
 
 export async function getMemberSubscriptions(): Promise<
   MemberSubscriptionDisplay[]
