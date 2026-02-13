@@ -346,7 +346,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
             column={table.getColumn('type')}
           />
           <DataTableFacetedFilter
-            title={'Plan'}
+            title={'Subscription'}
             options={Array.from(
               new Set(
                 tableData
@@ -359,7 +359,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
                 value: name,
                 label: name,
               }))}
-            column={table.getColumn('plan')}
+            column={table.getColumn('subscription')}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button

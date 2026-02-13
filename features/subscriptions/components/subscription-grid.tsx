@@ -355,14 +355,15 @@ export function SubscriptionGrid({
           <AlertDialogHeader>
             <AlertDialogTitle>Revert Cancellation?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will reactivate your "{subscriptionToRevert?.planName}"
-              subscription.
+              This will reactivate your &quot;{subscriptionToRevert?.planName}
+              &quot; subscription.
               {futureSubscription && (
                 <>
                   <br />
                   <br />
                   <strong>Warning:</strong> This will also cancel your scheduled
-                  future subscription to "{futureSubscription.planName}".
+                  future subscription to &quot;{futureSubscription.planName}
+                  &quot;.
                 </>
               )}
             </AlertDialogDescription>
