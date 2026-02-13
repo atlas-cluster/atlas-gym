@@ -206,7 +206,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
   const handleConvertToMember = (id: string) => {
     const promise = convertToMember(id).then(async () => {
-      fetchData()
+      // fetchData() removed - server action updateTag('members') will auto-refresh
       if (currentMember?.id === id) {
         await refreshMember()
       }
@@ -221,7 +221,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
   const handleConvertToTrainer = (id: string) => {
     const promise = convertToTrainer(id).then(async () => {
-      fetchData()
+      // fetchData() removed - server action updateTag('members') will auto-refresh
       if (currentMember?.id === id) {
         await refreshMember()
       }
