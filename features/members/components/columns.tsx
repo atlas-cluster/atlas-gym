@@ -3,7 +3,6 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
-  CalendarClock,
   CreditCard,
   GraduationCap,
   KeyRound,
@@ -13,7 +12,6 @@ import {
   TrashIcon,
   User,
   X,
-  XCircle,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -127,53 +125,37 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     cell: ({ row }) => {
       const { planName, isCancelled, futureSubscriptionName } = row.original
 
-      if (!planName && !futureSubscriptionName) {
+      // Active subscription
+      if (planName && !isCancelled && !futureSubscriptionName) {
+        return <Badge>{planName}</Badge>
+      }
+
+      // Cancelled subscription without future subscription
+      if (planName && isCancelled && !futureSubscriptionName) {
         return (
-          <span className="text-muted-foreground text-sm">No subscription</span>
+          <Badge variant={'destructive'}>
+            <X />
+          </Badge>
         )
       }
 
-      return (
-        <div className="flex flex-col gap-1">
-          {/* Current/Cancelled Subscription */}
-          {planName && (
-            <Badge
-              variant={isCancelled ? 'destructive' : 'default'}
-              className="h-6 w-fit gap-1">
-              {isCancelled && <XCircle className="h-3 w-3" />}
-              <span>{planName}</span>
-            </Badge>
-          )}
+      // Cancelled subscription with future subscription
+      if (futureSubscriptionName) {
+        return (
+          <Badge>
+            {planName} <ArrowRight /> {futureSubscriptionName}
+          </Badge>
+        )
+      }
 
-          {/* Future Subscription */}
-          {futureSubscriptionName && (
-            <Badge variant="secondary" className="h-6 w-fit gap-1">
-              <CalendarClock className="h-3 w-3" />
-              <span>{futureSubscriptionName}</span>
-            </Badge>
-          )}
-        </div>
-      )
-    },
-            </Badge>
-          )}
-        </div>
+      // No subscription at all
+      return (
+        <span className="text-muted-foreground text-sm">No subscription</span>
       )
     },
     enableSorting: true,
     enableHiding: true,
     enableGlobalFilter: true,
-    filterFn: (row, columnId, filterValue: string[]) => {
-      // OR logic: return true if row matches ANY of the selected filter values
-      if (!filterValue || filterValue.length === 0) return true
-      
-      const planName = row.original.planName
-      const futureSubscriptionName = row.original.futureSubscriptionName
-      
-      return filterValue.some(
-        (value) => value === planName || value === futureSubscriptionName
-      )
-    },
   },
   {
     accessorKey: 'email',
