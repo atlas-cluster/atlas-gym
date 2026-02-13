@@ -1,7 +1,7 @@
 'use client'
 
 import { addMonths, endOfMonth, format } from 'date-fns'
-import { CalendarIcon, PlusIcon, RotateCcwIcon, XCircleIcon } from 'lucide-react'
+import { PlusIcon, RotateCcwIcon, XCircleIcon } from 'lucide-react'
 import { ReactNode, useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
@@ -33,6 +33,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/features/shared/components/ui/dialog'
 import {
   Select,
@@ -42,11 +43,11 @@ import {
   SelectValue,
 } from '@/features/shared/components/ui/select'
 import {
+  MemberSubscriptionDisplay,
   cancelSubscription,
   createSubscription,
   getAvailablePlans,
   getMemberSubscriptions,
-  MemberSubscriptionDisplay,
   revertCancellation,
 } from '@/features/subscriptions'
 
@@ -201,7 +202,9 @@ export function MemberSubscriptionDialog({
       return
     }
 
-    const selectedPlan = availablePlans.find((p) => p.id === Number(selectedPlanId))
+    const selectedPlan = availablePlans.find(
+      (p) => p.id === Number(selectedPlanId)
+    )
     if (!selectedPlan) return
 
     startTransition(async () => {
@@ -267,12 +270,17 @@ export function MemberSubscriptionDialog({
                 <CardContent className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={hasCancelledPlan ? 'destructive' : 'default'}>
+                      <Badge
+                        variant={hasCancelledPlan ? 'destructive' : 'default'}>
                         {member.planName}
                       </Badge>
                       {hasCancelledPlan && activeSubscription.endDate && (
                         <Badge variant="outline">
-                          Ends {format(new Date(activeSubscription.endDate), 'MMM d, yyyy')}
+                          Ends{' '}
+                          {format(
+                            new Date(activeSubscription.endDate),
+                            'MMM d, yyyy'
+                          )}
                         </Badge>
                       )}
                     </div>
@@ -284,8 +292,7 @@ export function MemberSubscriptionDialog({
                         variant="ghost"
                         size="sm"
                         onClick={handleCancelSubscription}
-                        disabled={isPending}
-                      >
+                        disabled={isPending}>
                         <XCircleIcon className="mr-2 h-4 w-4" />
                         Cancel Subscription
                       </Button>
@@ -295,8 +302,7 @@ export function MemberSubscriptionDialog({
                         variant="ghost"
                         size="sm"
                         onClick={handleRevertCancellation}
-                        disabled={isPending}
-                      >
+                        disabled={isPending}>
                         <RotateCcwIcon className="mr-2 h-4 w-4" />
                         Revert Cancellation
                       </Button>
@@ -325,7 +331,11 @@ export function MemberSubscriptionDialog({
                       </Badge>
                       {futureSubscription.startDate && (
                         <Badge variant="outline">
-                          Starts {format(new Date(futureSubscription.startDate), 'MMM d, yyyy')}
+                          Starts{' '}
+                          {format(
+                            new Date(futureSubscription.startDate),
+                            'MMM d, yyyy'
+                          )}
                         </Badge>
                       )}
                     </div>
@@ -335,8 +345,7 @@ export function MemberSubscriptionDialog({
                     variant="ghost"
                     size="sm"
                     onClick={handleCancelFutureSubscription}
-                    disabled={isPending}
-                  >
+                    disabled={isPending}>
                     <XCircleIcon className="mr-2 h-4 w-4" />
                     Cancel Future Subscription
                   </Button>
@@ -358,14 +367,17 @@ export function MemberSubscriptionDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                  <Select
+                    value={selectedPlanId}
+                    onValueChange={setSelectedPlanId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a plan" />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePlans.map((plan) => (
                         <SelectItem key={plan.id} value={String(plan.id)}>
-                          {plan.name} - ${plan.price}/month ({plan.minDurationMonths} months min)
+                          {plan.name} - ${plan.price}/month (
+                          {plan.minDurationMonths} months min)
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -374,9 +386,10 @@ export function MemberSubscriptionDialog({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={hasNoPlan ? handleAssignPlan : handleChangeSubscription}
-                    disabled={!selectedPlanId || isPending}
-                  >
+                    onClick={
+                      hasNoPlan ? handleAssignPlan : handleChangeSubscription
+                    }
+                    disabled={!selectedPlanId || isPending}>
                     <PlusIcon className="mr-2 h-4 w-4" />
                     {hasNoPlan ? 'Assign Plan' : 'Schedule Future Plan'}
                   </Button>
@@ -395,7 +408,9 @@ export function MemberSubscriptionDialog({
 
       {/* Cancel Confirmation Dialog */}
       {activeSubscription && (
-        <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <AlertDialog
+          open={showCancelConfirm}
+          onOpenChange={setShowCancelConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
@@ -453,8 +468,7 @@ export function MemberSubscriptionDialog({
       {futureSubscription && (
         <AlertDialog
           open={showCancelFutureConfirm}
-          onOpenChange={setShowCancelFutureConfirm}
-        >
+          onOpenChange={setShowCancelFutureConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Cancel Future Subscription?</AlertDialogTitle>

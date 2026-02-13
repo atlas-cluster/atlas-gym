@@ -10,6 +10,8 @@ export function formatRoute(route: string) {
       return 'Equipment'
     case '/rooms':
       return 'Rooms'
+    case '/subscription':
+      return 'Subscription'
     case '/members':
       return 'Members'
     case '/plans':

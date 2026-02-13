@@ -56,7 +56,7 @@ import {
   SortingState,
   VisibilityState,
   getCoreRowModel,
-} from '@tantml:table-core'
+} from '@tanstack/table-core'
 
 export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const { member: currentMember, refreshMember } = useAuth()

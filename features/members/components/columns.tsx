@@ -240,7 +240,7 @@ function ActionsCell({
   const member = row.original
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
-  
+
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -282,14 +282,14 @@ function ActionsCell({
                   Convert to Trainer
                 </DropdownMenuItem>
               )}
-              
+
               {/* Subscription Management */}
               <DropdownMenuItem
                 onSelect={() => meta?.manageSubscription?.(member.id)}>
                 <Settings />
                 Manage Subscription
               </DropdownMenuItem>
-              
+
               <DropdownMenuItem
                 variant={'destructive'}
                 onSelect={() => meta?.deleteMember?.(member.id)}>
