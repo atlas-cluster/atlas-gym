@@ -42,16 +42,8 @@ export async function revertCancellation(
     throw new Error('Cannot revert a subscription that has already ended')
   }
 
-  // Remove the end_date to revert the cancellation
-  const updateQuery = `
-    UPDATE subscriptions
-    SET end_date = NULL, updated_at = NOW()
-    WHERE id = $1 AND member_id = $2
-  `
-
-  await pool.query(updateQuery, [subscriptionId, memberId])
-
-  // Delete any future subscription (scheduled to start after this one)
+  // Delete any future subscription FIRST (before updating to avoid constraint violation)
+  // The unique_active_subscription constraint prevents multiple subscriptions with end_date IS NULL
   const deleteFutureQuery = `
     DELETE FROM subscriptions
     WHERE member_id = $1 
@@ -59,6 +51,15 @@ export async function revertCancellation(
   `
 
   await pool.query(deleteFutureQuery, [memberId, subscription.start_date])
+
+  // Now remove the end_date to revert the cancellation
+  const updateQuery = `
+    UPDATE subscriptions
+    SET end_date = NULL, updated_at = NOW()
+    WHERE id = $1 AND member_id = $2
+  `
+
+  await pool.query(updateQuery, [subscriptionId, memberId])
 
   updateTag('subscriptions')
   updateTag('members')

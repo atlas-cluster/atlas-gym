@@ -630,12 +630,6 @@ export function SubscriptionGrid({
                           )}
                         </>
                       )}
-                      {!plan.subscription && (
-                        <Badge variant="secondary" className="text-xs">
-                          <UsersIcon className="w-3 h-3" />
-                          {plan.subscriptionCount || 0}
-                        </Badge>
-                      )}
                     </CardTitle>
                     <CardDescription className="mt-2">
                       {plan.description || 'No description'}
@@ -647,7 +641,7 @@ export function SubscriptionGrid({
                     {(plan.subscription.status === 'active' ||
                       plan.subscription.status === 'future') && (
                       <Button
-                        variant="destructive"
+                        variant="ghost"
                         size="icon"
                         onClick={() => handleCancelClick(plan.subscription!)}
                         suppressHydrationWarning
