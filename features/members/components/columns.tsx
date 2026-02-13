@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import {
   ArrowDown,
   ArrowRight,
@@ -195,7 +196,11 @@ export const columns: ColumnDef<MemberDisplay>[] = [
         new Date(rowB.original.birthdate).getTime()
       )
     },
-    accessorFn: (row) => new Date(row.birthdate).toLocaleDateString('de-DE'),
+    cell: ({ row }) => (
+      <span className={'ml-3'}>
+        {format(new Date(row.original.birthdate), 'dd.MM.yyyy')}
+      </span>
+    ),
     enableSorting: true,
     enableHiding: true,
     enableGlobalFilter: false,
