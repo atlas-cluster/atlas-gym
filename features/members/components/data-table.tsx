@@ -1,6 +1,7 @@
 'use client'
 
 import { GraduationCap, RefreshCwIcon, UserIcon, XIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -54,7 +55,7 @@ import {
   SortingState,
   VisibilityState,
   getCoreRowModel,
-} from '@tanstack/table-core'
+} from '@tantml:table-core'
 
 export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const { member: currentMember, refreshMember } = useAuth()
@@ -198,6 +199,26 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     fetchData()
   }
 
+  const handleCancelSubscription = (memberId: string) => {
+    // Redirect to subscription page where they can cancel
+    window.location.href = '/subscription'
+  }
+
+  const handleRevertCancellation = (memberId: string) => {
+    // Redirect to subscription page where they can revert
+    window.location.href = '/subscription'
+  }
+
+  const handleChangeSubscription = (memberId: string) => {
+    // Redirect to subscription page where they can choose a new plan
+    window.location.href = '/subscription'
+  }
+
+  const handleCancelFutureSubscription = (memberId: string) => {
+    // Redirect to subscription page where they can cancel future subscription
+    window.location.href = '/subscription'
+  }
+
   const fetchData = () => {
     startTransition(async () => {
       const result = await getMembers()
@@ -246,6 +267,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       convertToMember: handleConvertToMember,
       convertToTrainer: handleConvertToTrainer,
       refreshMembers: handleRefresh,
+      cancelSubscription: handleCancelSubscription,
+      revertCancellation: handleRevertCancellation,
+      changeSubscription: handleChangeSubscription,
+      cancelFutureSubscription: handleCancelFutureSubscription,
     },
 
     enableRowSelection: true,

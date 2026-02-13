@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
+  CalendarPlus,
   Check,
   CreditCard,
   GraduationCap,
@@ -11,9 +12,11 @@ import {
   Landmark,
   MoreHorizontalIcon,
   PencilIcon,
+  RotateCcw,
   TrashIcon,
   User,
   X,
+  XCircle,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -236,9 +239,15 @@ function ActionsCell({
   table: Table<MemberDisplay>
 }) {
   const meta = table.options.meta as MembersTableMeta | undefined
-  const course = row.original
+  const member = row.original
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
+  
+  // Determine subscription status
+  const hasActivePlan = member.planName && !member.isCancelled
+  const hasCancelledPlan = member.planName && member.isCancelled
+  const hasFuturePlan = member.futureSubscriptionName
+  
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -253,36 +262,73 @@ function ActionsCell({
           {selectedRows.length <= 1 || !row.getIsSelected() ? (
             <>
               <DropdownMenuItem
-                onSelect={() => meta?.openMemberDetails?.(course)}>
+                onSelect={() => meta?.openMemberDetails?.(member)}>
                 <PencilIcon />
                 Edit Details
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => meta?.openMemberPayment?.(course)}>
+                onSelect={() => meta?.openMemberPayment?.(member)}>
                 <CreditCard />
                 Edit Payment
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => meta?.openChangePassword?.(course)}>
+                onSelect={() => meta?.openChangePassword?.(member)}>
                 <KeyRound />
                 Change Password
               </DropdownMenuItem>
               {row.original.isTrainer ? (
                 <DropdownMenuItem
-                  onSelect={() => meta?.convertToMember?.(course.id)}>
+                  onSelect={() => meta?.convertToMember?.(member.id)}>
                   <User />
                   Convert to Member
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
-                  onSelect={() => meta?.convertToTrainer?.(course.id)}>
+                  onSelect={() => meta?.convertToTrainer?.(member.id)}>
                   <GraduationCap />
                   Convert to Trainer
                 </DropdownMenuItem>
               )}
+              
+              {/* Subscription Actions */}
+              {hasActivePlan && (
+                <DropdownMenuItem
+                  onSelect={() => meta?.cancelSubscription?.(member.id)}>
+                  <XCircle />
+                  Cancel Subscription
+                </DropdownMenuItem>
+              )}
+              
+              {hasCancelledPlan && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={() => meta?.revertCancellation?.(member.id)}>
+                    <RotateCcw />
+                    Revert Cancellation
+                  </DropdownMenuItem>
+                  
+                  {!hasFuturePlan && (
+                    <DropdownMenuItem
+                      onSelect={() => meta?.changeSubscription?.(member.id)}>
+                      <CalendarPlus />
+                      Change Subscription
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
+              
+              {hasFuturePlan && hasCancelledPlan && (
+                <DropdownMenuItem
+                  variant={'destructive'}
+                  onSelect={() => meta?.cancelFutureSubscription?.(member.id)}>
+                  <XCircle />
+                  Cancel Future Subscription
+                </DropdownMenuItem>
+              )}
+              
               <DropdownMenuItem
                 variant={'destructive'}
-                onSelect={() => meta?.deleteMember?.(course.id)}>
+                onSelect={() => meta?.deleteMember?.(member.id)}>
                 <TrashIcon />
                 Delete
               </DropdownMenuItem>
