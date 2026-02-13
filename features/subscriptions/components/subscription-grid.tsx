@@ -113,8 +113,8 @@ export function SubscriptionGrid({
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(12)
   const [sortBy, setSortBy] = useState<
-    'name' | 'price' | 'minDuration' | 'subscriptionCount' | null
-  >(null)
+    'name' | 'price' | 'minDuration' | 'subscriptionCount'
+  >('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
