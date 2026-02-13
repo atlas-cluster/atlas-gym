@@ -297,7 +297,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           return
         }
 
-        await createSubscription(plans[planIndex].id)
+        await createSubscription(plans[planIndex].id, member.id)
         toast.success('Future subscription created successfully')
         fetchData()
       } catch (error) {
@@ -368,7 +368,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           return
         }
 
-        await createSubscription(plans[planIndex].id)
+        await createSubscription(plans[planIndex].id, member.id)
         toast.success('Subscription created successfully')
         fetchData()
       } catch (error) {
