@@ -633,12 +633,16 @@ export function SubscriptionGrid({
                       {plan.name}
                       {plan.subscription && (
                         <>
-                          {plan.subscription.status === 'active' && (
+                          {/* Active badge - show for both active and cancelled (if currently running) */}
+                          {(plan.subscription.status === 'active' ||
+                            plan.subscription.status === 'cancelled') && (
                             <Badge>
                               <Check />
                               Active
                             </Badge>
                           )}
+
+                          {/* Cancelled badge - show additional badge for cancelled subscriptions */}
                           {plan.subscription.status === 'cancelled' && (
                             <Badge variant="destructive">
                               <XCircleIcon />
@@ -649,8 +653,10 @@ export function SubscriptionGrid({
                               )}
                             </Badge>
                           )}
+
+                          {/* Future badge - show for subscriptions that haven't started yet */}
                           {plan.subscription.status === 'future' && (
-                            <Badge>
+                            <Badge variant="secondary">
                               <CalendarIcon />
                               Starts{' '}
                               {format(
