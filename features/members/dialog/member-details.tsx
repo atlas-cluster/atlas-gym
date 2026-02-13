@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Member, memberDetailsSchema } from '@/features/members'
+import { MemberDisplay, memberDetailsSchema } from '@/features/members'
 import { Button } from '@/features/shared/components/ui/button'
 import { Calendar } from '@/features/shared/components/ui/calendar'
 import {
@@ -34,7 +34,7 @@ import { cn } from '@/features/shared/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface MemberDetailsDialogProps {
-  member?: Member
+  member?: MemberDisplay
   trigger?: ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void

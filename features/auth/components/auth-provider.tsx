@@ -5,10 +5,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { getSession } from '@/features/auth/actions/get-session'
 import { logout as logoutAction } from '@/features/auth/actions/logout'
-import { Member } from '@/features/members'
+import { SessionMember } from '@/features/members'
 
 interface AuthContextType {
-  member: Member | null
+  member: SessionMember | null
   loading: boolean
   isAuthenticated: boolean
   logout: () => Promise<void>
@@ -29,7 +29,7 @@ export function useAuth() {
 
 interface AuthProviderProps {
   children: React.ReactNode
-  initialMember?: Member | null
+  initialMember?: SessionMember | null
 }
 
 export function AuthProvider({ children, initialMember }: AuthProviderProps) {
@@ -37,7 +37,9 @@ export function AuthProvider({ children, initialMember }: AuthProviderProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [member, setMember] = useState<Member | null>(initialMember || null)
+  const [member, setMember] = useState<SessionMember | null>(
+    initialMember || null
+  )
   const [loading, setLoading] = useState(!initialMember)
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialMember)
 
