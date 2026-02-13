@@ -43,6 +43,7 @@ import {
   cancelSubscription,
   createSubscription,
   getAvailablePlans,
+  getSubscriptionsByMember,
   revertCancellation,
 } from '@/features/subscriptions'
 import {
@@ -206,7 +207,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleCancelSubscription = (member: MemberDisplay) => {
-    // TODO: Add confirmation dialog
     if (
       !confirm(
         `Cancel subscription for ${member.firstname} ${member.lastname}?`
@@ -217,10 +217,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
     startTransition(async () => {
       try {
-        // Get member's subscriptions to find the active one
-        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions: { status: string; id: string }[] =
-          await response.json()
+        const subscriptions = await getSubscriptionsByMember(member.id)
         const activeSubscription = subscriptions.find(
           (s) => s.status === 'active' || s.status === 'cancelled'
         )
@@ -229,6 +226,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           await cancelSubscription(activeSubscription.id)
           toast.success('Subscription cancelled successfully')
           fetchData()
+        } else {
+          toast.error('No active subscription found')
         }
       } catch (error) {
         toast.error('Failed to cancel subscription')
@@ -248,9 +247,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
     startTransition(async () => {
       try {
-        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions: { status: string; id: string }[] =
-          await response.json()
+        const subscriptions = await getSubscriptionsByMember(member.id)
         const cancelledSubscription = subscriptions.find(
           (s) => s.status === 'cancelled'
         )
@@ -259,6 +256,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           await revertCancellation(cancelledSubscription.id)
           toast.success('Cancellation reverted successfully')
           fetchData()
+        } else {
+          toast.error('No cancelled subscription found')
         }
       } catch (error) {
         toast.error('Failed to revert cancellation')
@@ -319,9 +318,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
     startTransition(async () => {
       try {
-        const response = await fetch(`/api/subscriptions?memberId=${member.id}`)
-        const subscriptions: { status: string; id: string }[] =
-          await response.json()
+        const subscriptions = await getSubscriptionsByMember(member.id)
         const futureSubscription = subscriptions.find(
           (s) => s.status === 'future'
         )
@@ -330,6 +327,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           await cancelSubscription(futureSubscription.id)
           toast.success('Future subscription cancelled successfully')
           fetchData()
+        } else {
+          toast.error('No future subscription found')
         }
       } catch (error) {
         toast.error('Failed to cancel future subscription')
