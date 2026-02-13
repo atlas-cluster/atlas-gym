@@ -13,11 +13,13 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   RotateCcw,
+  Search,
   TrashIcon,
   User,
   X,
   XCircle,
 } from 'lucide-react'
+import { useState } from 'react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
 import { Badge } from '@/features/shared/components/ui/badge'
@@ -33,6 +35,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/features/shared/components/ui/dropdown-menu'
+import { Input } from '@/features/shared/components/ui/input'
 import { Table } from '@tanstack/react-table'
 import { ColumnDef, Row } from '@tanstack/table-core'
 
@@ -234,6 +237,69 @@ export const columns: ColumnDef<MemberDisplay>[] = [
   },
 ]
 
+// Scrollable Plan Selector Component with Search
+function ScrollablePlanSelector({
+  plans,
+  onSelectPlan,
+}: {
+  plans: Array<{
+    id: number
+    name: string
+    price: number
+    minDurationMonths: number
+  }>
+  onSelectPlan: (planId: number) => void
+}) {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredPlans = plans.filter((plan) =>
+    plan.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  return (
+    <div className="w-[280px]">
+      <div className="p-2 pb-1">
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search plans..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 pl-8"
+            autoFocus
+            onKeyDown={(e) => {
+              // Prevent dropdown from closing when typing
+              e.stopPropagation()
+            }}
+          />
+        </div>
+      </div>
+      <div className="max-h-[300px] overflow-y-auto overflow-x-hidden px-1">
+        {filteredPlans.length === 0 ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            No plans found
+          </div>
+        ) : (
+          filteredPlans.map((plan) => (
+            <DropdownMenuItem
+              key={plan.id}
+              onSelect={() => onSelectPlan(plan.id)}
+              className="cursor-pointer">
+              <div className="flex flex-col">
+                <span className="font-medium">{plan.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
+                  {plan.minDurationMonths === 1 ? 'month' : 'months'} min
+                </span>
+              </div>
+            </DropdownMenuItem>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ActionsCell({
   row,
   table,
@@ -313,26 +379,13 @@ function ActionsCell({
                         <CalendarPlus />
                         Change Subscription
                       </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent>
-                        {meta.availablePlans.map((plan) => (
-                          <DropdownMenuItem
-                            key={plan.id}
-                            onSelect={() =>
-                              meta?.changeSubscription?.(member, plan.id)
-                            }>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{plan.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                €{plan.price.toFixed(2)}/month •{' '}
-                                {plan.minDurationMonths}{' '}
-                                {plan.minDurationMonths === 1
-                                  ? 'month'
-                                  : 'months'}{' '}
-                                min
-                              </span>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
+                      <DropdownMenuSubContent className="p-0">
+                        <ScrollablePlanSelector
+                          plans={meta.availablePlans}
+                          onSelectPlan={(planId) =>
+                            meta?.changeSubscription?.(member, planId)
+                          }
+                        />
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
                   )}
@@ -354,22 +407,13 @@ function ActionsCell({
                     <CalendarPlus />
                     Choose Plan
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    {meta.availablePlans.map((plan) => (
-                      <DropdownMenuItem
-                        key={plan.id}
-                        onSelect={() => meta?.choosePlan?.(member, plan.id)}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{plan.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            €{plan.price.toFixed(2)}/month •{' '}
-                            {plan.minDurationMonths}{' '}
-                            {plan.minDurationMonths === 1 ? 'month' : 'months'}{' '}
-                            min
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
+                  <DropdownMenuSubContent className="p-0">
+                    <ScrollablePlanSelector
+                      plans={meta.availablePlans}
+                      onSelectPlan={(planId) =>
+                        meta?.choosePlan?.(member, planId)
+                      }
+                    />
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               )}
