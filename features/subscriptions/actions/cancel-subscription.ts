@@ -7,14 +7,26 @@ import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
 export async function cancelSubscription(
-  subscriptionId: string
+  subscriptionId: string,
+  targetMemberId?: string
 ): Promise<void> {
   const session = await getSession()
   if (!session.authenticated || !session.member) {
     throw new Error('Unauthorized')
   }
 
-  const memberId = session.member.id
+  // If targetMemberId is provided, verify the user is a trainer
+  let memberId: string
+  if (targetMemberId) {
+    if (!session.member.isTrainer) {
+      throw new Error(
+        'Only trainers can cancel subscriptions for other members'
+      )
+    }
+    memberId = targetMemberId
+  } else {
+    memberId = session.member.id
+  }
 
   // Get subscription details
   const subQuery = `

@@ -26,8 +26,10 @@ export type SessionMember = Omit<
 
 export type MemberDisplay = Omit<Member, 'created_at'> & {
   planName?: string
+  subscriptionId?: string
   isCancelled?: boolean
   futureSubscriptionName?: string
+  futureSubscriptionId?: string
 }
 
 export interface MembersTableMeta {
@@ -46,6 +48,13 @@ export interface MembersTableMeta {
   refreshMembers: () => void
   cancelSubscription?: (member: MemberDisplay) => void
   revertCancellation?: (member: MemberDisplay) => void
-  changeSubscription?: (member: MemberDisplay) => void
+  changeSubscription?: (member: MemberDisplay, planId: number) => void
   cancelFutureSubscription?: (member: MemberDisplay) => void
+  choosePlan?: (member: MemberDisplay, planId: number) => void
+  availablePlans?: {
+    id: number
+    name: string
+    price: number
+    minDurationMonths: number
+  }[]
 }
