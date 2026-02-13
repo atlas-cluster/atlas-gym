@@ -52,14 +52,23 @@ export async function cancelSubscription(
     // End date is the later of: end of current month OR end of minimum duration
     const endOfCurrentMonth = endOfMonth(today)
 
-    // Calculate minimum duration end date (end of the month after min duration)
+    // Calculate minimum duration end date
+    // Example: started Jan 13 + 6 months = Jul 13
+    // Then get the last day of the month before that (Jun 30)
+    // This ensures the subscription runs for the full minimum number of months
     const minDurationDate = new Date(startDate)
     minDurationDate.setMonth(
       minDurationDate.getMonth() + subscription.min_duration_months
     )
-    const minDurationEndDate = endOfMonth(
-      new Date(minDurationDate.getFullYear(), minDurationDate.getMonth() - 1, 1)
+
+    // Get the last day of the month BEFORE the calculated date
+    // E.g., if minDurationDate is Jul 13, we want Jun 30
+    const lastMonthStart = new Date(
+      minDurationDate.getFullYear(),
+      minDurationDate.getMonth() - 1,
+      1
     )
+    const minDurationEndDate = endOfMonth(lastMonthStart)
 
     // Use whichever is later
     const endDate =

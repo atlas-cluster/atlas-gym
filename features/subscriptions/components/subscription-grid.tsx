@@ -175,7 +175,7 @@ export function SubscriptionGrid({
   // 2. They have a cancelled subscription (ending in future) and no future subscription yet
   const canChooseNewPlan =
     (!activeSubscription && !cancelledSubscription && !futureSubscription) ||
-    (cancelledSubscription && !futureSubscription && !activeSubscription)
+    (cancelledSubscription && !futureSubscription)
   const allPlansToDisplay: (PlanDisplay & {
     isCurrentPlan?: boolean
     subscription?: MemberSubscriptionDisplay
