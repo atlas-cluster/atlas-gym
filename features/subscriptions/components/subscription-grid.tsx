@@ -10,7 +10,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  PlusIcon,
   RefreshCwIcon,
+  Trash2Icon,
   UsersIcon,
   XCircleIcon,
   XIcon,
@@ -596,13 +598,26 @@ export function SubscriptionGrid({
                     {(plan.subscription.status === 'active' ||
                       plan.subscription.status === 'future') && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="destructive"
+                        size="icon"
                         onClick={() => handleCancelClick(plan.subscription!)}
-                        suppressHydrationWarning>
-                        Cancel
+                        suppressHydrationWarning
+                        aria-label="Cancel subscription">
+                        <Trash2Icon className="w-4 h-4" />
                       </Button>
                     )}
+                  </CardAction>
+                )}
+                {!plan.subscription && canChooseNewPlan && (
+                  <CardAction>
+                    <Button
+                      variant="default"
+                      size="icon"
+                      onClick={() => handleChoosePlan(plan)}
+                      suppressHydrationWarning
+                      aria-label="Choose plan">
+                      <PlusIcon className="w-4 h-4" />
+                    </Button>
                   </CardAction>
                 )}
               </CardHeader>
@@ -618,16 +633,6 @@ export function SubscriptionGrid({
                     {plan.minDurationMonths === 1 ? 'month' : 'months'}
                   </span>
                 </div>
-                {!plan.subscription && canChooseNewPlan && (
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={() => handleChoosePlan(plan)}
-                    suppressHydrationWarning>
-                    <CheckCircle2Icon className="w-4 h-4" />
-                    Choose Plan
-                  </Button>
-                )}
               </CardContent>
             </Card>
           ))}
