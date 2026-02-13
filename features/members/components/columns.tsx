@@ -117,14 +117,42 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     enableGlobalFilter: false,
   },
   {
-    id: 'plan',
-    header: 'Plan',
+    id: 'subscription',
+    header: 'Subscription',
     accessorKey: 'planName',
     cell: ({ row }) => {
-      return row.original.planName ? (
-        <Badge variant="secondary">{row.original.planName}</Badge>
-      ) : (
-        <span className="text-muted-foreground text-sm">No active plan</span>
+      const { planName, subscriptionEndDate, futureSubscriptionName, futureSubscriptionStartDate } = row.original
+      
+      // No subscription at all
+      if (!planName && !futureSubscriptionName) {
+        return <span className="text-muted-foreground text-sm">No subscription</span>
+      }
+
+      const isCancelled = subscriptionEndDate && new Date(subscriptionEndDate) >= new Date()
+      
+      return (
+        <div className="flex flex-col gap-0.5 text-xs">
+          {planName && (
+            <div className="flex items-center gap-1">
+              <Badge variant={isCancelled ? "outline" : "secondary"} className="text-xs px-1.5 py-0">
+                {planName}
+              </Badge>
+              {isCancelled && (
+                <span className="text-muted-foreground text-[10px]">
+                  →{new Date(subscriptionEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+              )}
+            </div>
+          )}
+          {futureSubscriptionName && (
+            <div className="flex items-center gap-1">
+              <Badge variant="outline" className="text-[10px] px-1 py-0 opacity-70">
+                {futureSubscriptionStartDate && new Date(futureSubscriptionStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </Badge>
+              <span className="text-muted-foreground text-[10px]">{futureSubscriptionName}</span>
+            </div>
+          )}
+        </div>
       )
     },
     enableSorting: true,

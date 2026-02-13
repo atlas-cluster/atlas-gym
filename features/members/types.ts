@@ -18,6 +18,9 @@ export interface Member {
   isTrainer?: boolean
   paymentType?: PaymentType
   planName?: string
+  subscriptionEndDate?: Date | null
+  futureSubscriptionName?: string | null
+  futureSubscriptionStartDate?: Date | null
 }
 
 export type MemberDisplay = Member
