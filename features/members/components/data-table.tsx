@@ -8,20 +8,25 @@ import { z } from 'zod'
 import { useAuth } from '@/features/auth'
 import {
   MemberDisplay,
+  cancelFutureSubscription,
+  cancelSubscription,
   changePassword,
   changePasswordSchema,
   convertToMember,
   convertToTrainer,
+  createSubscription,
   deleteMember,
   deleteMembers,
   getMembers,
   memberDetailsSchema,
   memberPaymentSchema,
+  revertCancellation,
   updateMember,
   updateMemberPayment,
 } from '@/features/members'
 import { columns } from '@/features/members/components/columns'
 import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
+import { ChoosePlanDialog } from '@/features/members/dialog/choose-plan'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
@@ -63,6 +68,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
+  const [choosePlanOpen, setChoosePlanOpen] = useState(false)
+  const [changePlanOpen, setChangePlanOpen] = useState(false)
   const [detailsMember, setDetailsMember] = useState<
     MemberDisplay | undefined
   >()
@@ -72,6 +79,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [passwordMember, setPasswordMember] = useState<
     MemberDisplay | undefined
   >()
+  const [planMember, setPlanMember] = useState<MemberDisplay | undefined>()
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([])
@@ -138,10 +146,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
   const handleDetailsOpenChange = (nextOpen: boolean) => {
     setDetailsOpen(nextOpen)
-  }
-
-  const handlePaymentOpenChange = (nextOpen: boolean) => {
-    setPaymentOpen(nextOpen)
   }
 
   const handleDelete = (id: string) => {
@@ -222,6 +226,56 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     return promise
   }
 
+  const handleCancelSubscription = (subscriptionId: string) => {
+    const promise = cancelSubscription(subscriptionId).then(() => fetchData())
+
+    toast.promise(promise, {
+      loading: 'Cancelling subscription...',
+      success: 'Subscription cancelled successfully',
+      error: 'Error cancelling subscription',
+    })
+  }
+
+  const handleRevertCancellation = (subscriptionId: string) => {
+    const promise = revertCancellation(subscriptionId).then(() => fetchData())
+
+    toast.promise(promise, {
+      loading: 'Reverting cancellation...',
+      success: 'Cancellation reverted successfully',
+      error: 'Error reverting cancellation',
+    })
+  }
+
+  const handleCancelFutureSubscription = (subscriptionId: string) => {
+    const promise = cancelFutureSubscription(subscriptionId).then(() =>
+      fetchData()
+    )
+
+    toast.promise(promise, {
+      loading: 'Cancelling future subscription...',
+      success: 'Future subscription cancelled successfully',
+      error: 'Error cancelling future subscription',
+    })
+  }
+
+  const handleSubscribeToPlan = (planId: number, isFuture: boolean) => {
+    if (!planMember) return
+
+    const promise = createSubscription(planMember.id, planId, isFuture).then(
+      () => fetchData()
+    )
+
+    toast.promise(promise, {
+      loading: isFuture
+        ? 'Scheduling future subscription...'
+        : 'Creating subscription...',
+      success: isFuture
+        ? 'Future subscription scheduled successfully'
+        : 'Subscription created successfully',
+      error: 'Error creating subscription',
+    })
+  }
+
   const table = useReactTable({
     data: tableData,
     columns,
@@ -246,6 +300,17 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       convertToMember: handleConvertToMember,
       convertToTrainer: handleConvertToTrainer,
       refreshMembers: handleRefresh,
+      cancelSubscription: handleCancelSubscription,
+      revertCancellation: handleRevertCancellation,
+      openChoosePlan: (member: MemberDisplay) => {
+        setPlanMember(member)
+        setChoosePlanOpen(true)
+      },
+      openChangePlan: (member: MemberDisplay) => {
+        setPlanMember(member)
+        setChangePlanOpen(true)
+      },
+      cancelFutureSubscription: handleCancelFutureSubscription,
     },
 
     enableRowSelection: true,
@@ -298,6 +363,20 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         onOpenChange={setPasswordOpen}
         member={passwordMember}
         onSubmit={handlePasswordChange}
+      />
+      <ChoosePlanDialog
+        open={choosePlanOpen}
+        onOpenChange={setChoosePlanOpen}
+        memberId={planMember?.id || ''}
+        isFuture={false}
+        onSubmit={handleSubscribeToPlan}
+      />
+      <ChoosePlanDialog
+        open={changePlanOpen}
+        onOpenChange={setChangePlanOpen}
+        memberId={planMember?.id || ''}
+        isFuture={true}
+        onSubmit={handleSubscribeToPlan}
       />
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">

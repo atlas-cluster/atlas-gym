@@ -2,14 +2,17 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  CalendarPlus,
   CreditCard,
   GraduationCap,
   KeyRound,
   Landmark,
   MoreHorizontalIcon,
   PencilIcon,
+  RotateCcw,
   TrashIcon,
   User,
+  X,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -198,9 +201,18 @@ function ActionsCell({
   table: Table<MemberDisplay>
 }) {
   const meta = table.options.meta as MembersTableMeta | undefined
-  const course = row.original
+  const member = row.original
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
+
+  // Determine subscription state
+  const hasActiveSubscription =
+    member.subscriptionId && member.subscriptionEndDate === null
+  const hasCancelledSubscription =
+    member.subscriptionId && member.subscriptionEndDate !== null
+  const hasFutureSubscription = member.futureSubscriptionId
+  const hasNoSubscription = !member.subscriptionId
+
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -215,36 +227,96 @@ function ActionsCell({
           {selectedRows.length <= 1 || !row.getIsSelected() ? (
             <>
               <DropdownMenuItem
-                onSelect={() => meta?.openMemberDetails?.(course)}>
+                onSelect={() => meta?.openMemberDetails?.(member)}>
                 <PencilIcon />
                 Edit Details
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => meta?.openMemberPayment?.(course)}>
+                onSelect={() => meta?.openMemberPayment?.(member)}>
                 <CreditCard />
                 Edit Payment
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => meta?.openChangePassword?.(course)}>
+                onSelect={() => meta?.openChangePassword?.(member)}>
                 <KeyRound />
                 Change Password
               </DropdownMenuItem>
               {row.original.isTrainer ? (
                 <DropdownMenuItem
-                  onSelect={() => meta?.convertToMember?.(course.id)}>
+                  onSelect={() => meta?.convertToMember?.(member.id)}>
                   <User />
                   Convert to Member
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
-                  onSelect={() => meta?.convertToTrainer?.(course.id)}>
+                  onSelect={() => meta?.convertToTrainer?.(member.id)}>
                   <GraduationCap />
                   Convert to Trainer
                 </DropdownMenuItem>
               )}
+
+              {/* Subscription Actions */}
+              {hasActiveSubscription && (
+                <DropdownMenuItem
+                  variant={'destructive'}
+                  onSelect={() =>
+                    meta?.cancelSubscription?.(member.subscriptionId!)
+                  }>
+                  <X />
+                  Cancel Subscription
+                </DropdownMenuItem>
+              )}
+
+              {hasCancelledSubscription && !hasFutureSubscription && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      meta?.revertCancellation?.(member.subscriptionId!)
+                    }>
+                    <RotateCcw />
+                    Revert Cancellation
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => meta?.openChangePlan?.(member)}>
+                    <CalendarPlus />
+                    Change Subscription
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              {hasCancelledSubscription && hasFutureSubscription && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      meta?.revertCancellation?.(member.subscriptionId!)
+                    }>
+                    <RotateCcw />
+                    Revert Cancellation
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant={'destructive'}
+                    onSelect={() =>
+                      meta?.cancelFutureSubscription?.(
+                        member.futureSubscriptionId!
+                      )
+                    }>
+                    <X />
+                    Cancel Future Subscription
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              {hasNoSubscription && (
+                <DropdownMenuItem
+                  onSelect={() => meta?.openChoosePlan?.(member)}>
+                  <CalendarPlus />
+                  Choose Plan
+                </DropdownMenuItem>
+              )}
+
               <DropdownMenuItem
                 variant={'destructive'}
-                onSelect={() => meta?.deleteMember?.(course.id)}>
+                onSelect={() => meta?.deleteMember?.(member.id)}>
                 <TrashIcon />
                 Delete
               </DropdownMenuItem>

@@ -18,6 +18,12 @@ export interface Member {
   isTrainer?: boolean
   paymentType?: PaymentType
   planName?: string
+  subscriptionId?: string
+  subscriptionStartDate?: Date
+  subscriptionEndDate?: Date | null
+  futureSubscriptionId?: string
+  futurePlanName?: string
+  futureSubscriptionStartDate?: Date
 }
 
 export type MemberDisplay = Member
@@ -36,4 +42,9 @@ export interface MembersTableMeta {
   convertToMember: (id: string) => void
   convertToTrainer: (id: string) => void
   refreshMembers: () => void
+  cancelSubscription: (subscriptionId: string) => void
+  revertCancellation: (subscriptionId: string) => void
+  openChoosePlan: (member: MemberDisplay) => void
+  openChangePlan: (member: MemberDisplay) => void
+  cancelFutureSubscription: (subscriptionId: string) => void
 }
