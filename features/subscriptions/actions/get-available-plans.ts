@@ -21,7 +21,6 @@ const getAvailablePlansCached = unstable_cache(
       FROM plans p
       LEFT JOIN subscriptions s ON p.id = s.plan_id
       GROUP BY p.id
-      ORDER BY p.name
     `
 
     const result = await pool.query(query)
