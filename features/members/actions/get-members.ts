@@ -20,9 +20,11 @@ const getMembersCached = unstable_cache(
              m.payment_type as "paymentType",
              CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
              -- Current/cancelled subscription
+             current_s.id as "subscriptionId",
              current_p.name as "planName",
              CASE WHEN current_s.end_date IS NOT NULL THEN true ELSE false END as "isCancelled",
              -- Future subscription
+             future_s.id as "futureSubscriptionId",
              future_p.name as "futureSubscriptionName"
       FROM members m
              LEFT JOIN trainers t ON m.id = t.member_id

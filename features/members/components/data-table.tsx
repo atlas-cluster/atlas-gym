@@ -54,7 +54,6 @@ import {
   cancelSubscription,
   createSubscription,
   getAvailablePlans,
-  getSubscriptionsByMember,
   revertCancellation,
 } from '@/features/subscriptions'
 import {
@@ -248,19 +247,14 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     if (!selectedMember) return
 
     const promise = (async () => {
-      const subscriptions = await getSubscriptionsByMember(selectedMember.id)
-      const activeSubscription = subscriptions.find(
-        (s) => s.status === 'active' || s.status === 'cancelled'
-      )
-
-      if (activeSubscription) {
-        await cancelSubscription(activeSubscription.id, selectedMember.id)
-        setCancelSubDialogOpen(false)
-        setSelectedMember(null)
-        // fetchData() removed - server action updateTag('members') will auto-refresh
-      } else {
+      if (!selectedMember.subscriptionId) {
         throw new Error('No active subscription found')
       }
+
+      await cancelSubscription(selectedMember.subscriptionId, selectedMember.id)
+      setCancelSubDialogOpen(false)
+      setSelectedMember(null)
+      // fetchData() removed - server action updateTag('members') will auto-refresh
     })()
 
     toast.promise(promise, {
@@ -279,19 +273,14 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     if (!selectedMember) return
 
     const promise = (async () => {
-      const subscriptions = await getSubscriptionsByMember(selectedMember.id)
-      const cancelledSubscription = subscriptions.find(
-        (s) => s.status === 'cancelled'
-      )
-
-      if (cancelledSubscription) {
-        await revertCancellation(cancelledSubscription.id, selectedMember.id)
-        setRevertCancelDialogOpen(false)
-        setSelectedMember(null)
-        // fetchData() removed - server action updateTag('members') will auto-refresh
-      } else {
+      if (!selectedMember.subscriptionId) {
         throw new Error('No cancelled subscription found')
       }
+
+      await revertCancellation(selectedMember.subscriptionId, selectedMember.id)
+      setRevertCancelDialogOpen(false)
+      setSelectedMember(null)
+      // fetchData() removed - server action updateTag('members') will auto-refresh
     })()
 
     toast.promise(promise, {
@@ -324,19 +313,17 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     if (!selectedMember) return
 
     const promise = (async () => {
-      const subscriptions = await getSubscriptionsByMember(selectedMember.id)
-      const futureSubscription = subscriptions.find(
-        (s) => s.status === 'future'
-      )
-
-      if (futureSubscription) {
-        await cancelSubscription(futureSubscription.id, selectedMember.id)
-        setCancelFutureDialogOpen(false)
-        setSelectedMember(null)
-        // fetchData() removed - server action updateTag('members') will auto-refresh
-      } else {
+      if (!selectedMember.futureSubscriptionId) {
         throw new Error('No future subscription found')
       }
+
+      await cancelSubscription(
+        selectedMember.futureSubscriptionId,
+        selectedMember.id
+      )
+      setCancelFutureDialogOpen(false)
+      setSelectedMember(null)
+      // fetchData() removed - server action updateTag('members') will auto-refresh
     })()
 
     toast.promise(promise, {
