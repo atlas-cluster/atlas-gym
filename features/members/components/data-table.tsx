@@ -42,8 +42,6 @@ import {
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import { Input } from '@/features/shared/components/ui/input'
-import { Label } from '@/features/shared/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/features/shared/components/ui/radio-group'
 import {
   Table,
   TableBody,
@@ -566,26 +564,24 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
               {selectedMember?.lastname}:
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="py-4">
-            <RadioGroup
-              value={selectedPlanId}
-              onValueChange={setSelectedPlanId}>
-              {availablePlans.map((plan) => (
-                <div key={plan.id} className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={String(plan.id)}
-                    id={`plan-${plan.id}`}
-                  />
-                  <Label htmlFor={`plan-${plan.id}`} className="flex-1">
-                    <div className="font-medium">{plan.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
-                      {plan.minDurationMonths === 1 ? 'month' : 'months'} min
-                    </div>
-                  </Label>
+          <div className="py-4 space-y-2">
+            {availablePlans.map((plan) => (
+              <Button
+                key={plan.id}
+                variant={
+                  selectedPlanId === String(plan.id) ? 'default' : 'outline'
+                }
+                className="w-full justify-start"
+                onClick={() => setSelectedPlanId(String(plan.id))}>
+                <div className="flex flex-col items-start">
+                  <div className="font-medium">{plan.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
+                    {plan.minDurationMonths === 1 ? 'month' : 'months'} min
+                  </div>
                 </div>
-              ))}
-            </RadioGroup>
+              </Button>
+            ))}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -611,26 +607,24 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
               subscription that starts when the current one ends.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="py-4">
-            <RadioGroup
-              value={selectedPlanId}
-              onValueChange={setSelectedPlanId}>
-              {availablePlans.map((plan) => (
-                <div key={plan.id} className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={String(plan.id)}
-                    id={`change-plan-${plan.id}`}
-                  />
-                  <Label htmlFor={`change-plan-${plan.id}`} className="flex-1">
-                    <div className="font-medium">{plan.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
-                      {plan.minDurationMonths === 1 ? 'month' : 'months'} min
-                    </div>
-                  </Label>
+          <div className="py-4 space-y-2">
+            {availablePlans.map((plan) => (
+              <Button
+                key={plan.id}
+                variant={
+                  selectedPlanId === String(plan.id) ? 'default' : 'outline'
+                }
+                className="w-full justify-start"
+                onClick={() => setSelectedPlanId(String(plan.id))}>
+                <div className="flex flex-col items-start">
+                  <div className="font-medium">{plan.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    €{plan.price.toFixed(2)}/month • {plan.minDurationMonths}{' '}
+                    {plan.minDurationMonths === 1 ? 'month' : 'months'} min
+                  </div>
                 </div>
-              ))}
-            </RadioGroup>
+              </Button>
+            ))}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
