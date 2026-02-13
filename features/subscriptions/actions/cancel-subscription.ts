@@ -1,7 +1,7 @@
 'use server'
 
 import { endOfMonth } from 'date-fns'
-import { unstable_cacheTag as cacheTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
@@ -85,5 +85,6 @@ export async function cancelSubscription(
     await pool.query(updateQuery, [endDate, subscriptionId, memberId])
   }
 
-  cacheTag('subscriptions')
+  updateTag('subscriptions')
+  updateTag('members')
 }

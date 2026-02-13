@@ -1,6 +1,6 @@
 'use server'
 
-import { unstable_cacheTag as cacheTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
@@ -60,5 +60,6 @@ export async function revertCancellation(
 
   await pool.query(deleteFutureQuery, [memberId, subscription.start_date])
 
-  cacheTag('subscriptions')
+  updateTag('subscriptions')
+  updateTag('members')
 }
