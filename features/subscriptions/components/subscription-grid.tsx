@@ -302,9 +302,6 @@ export function SubscriptionGrid({
       if (a.isCurrentPlan && !b.isCurrentPlan) return -1
       if (!a.isCurrentPlan && b.isCurrentPlan) return 1
 
-      // If no sort is selected, maintain native DB order (no sorting)
-      if (!sortBy) return 0
-
       let comparison = 0
 
       switch (sortBy) {

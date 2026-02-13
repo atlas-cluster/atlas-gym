@@ -194,9 +194,6 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       return true
     })
     .sort((a, b) => {
-      // If no sort is selected, maintain native DB order (no sorting)
-      if (!sortBy) return 0
-
       let comparison = 0
 
       switch (sortBy) {
