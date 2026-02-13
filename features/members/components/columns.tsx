@@ -4,7 +4,6 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
-  CalendarPlus,
   Check,
   CreditCard,
   GraduationCap,
@@ -12,11 +11,10 @@ import {
   Landmark,
   MoreHorizontalIcon,
   PencilIcon,
-  RotateCcw,
+  Settings,
   TrashIcon,
   User,
   X,
-  XCircle,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -243,11 +241,6 @@ function ActionsCell({
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
   
-  // Determine subscription status
-  const hasActivePlan = member.planName && !member.isCancelled
-  const hasCancelledPlan = member.planName && member.isCancelled
-  const hasFuturePlan = member.futureSubscriptionName
-  
   return (
     <div className="flex justify-end">
       <DropdownMenu>
@@ -290,41 +283,12 @@ function ActionsCell({
                 </DropdownMenuItem>
               )}
               
-              {/* Subscription Actions */}
-              {hasActivePlan && (
-                <DropdownMenuItem
-                  onSelect={() => meta?.cancelSubscription?.(member.id)}>
-                  <XCircle />
-                  Cancel Subscription
-                </DropdownMenuItem>
-              )}
-              
-              {hasCancelledPlan && (
-                <>
-                  <DropdownMenuItem
-                    onSelect={() => meta?.revertCancellation?.(member.id)}>
-                    <RotateCcw />
-                    Revert Cancellation
-                  </DropdownMenuItem>
-                  
-                  {!hasFuturePlan && (
-                    <DropdownMenuItem
-                      onSelect={() => meta?.changeSubscription?.(member.id)}>
-                      <CalendarPlus />
-                      Change Subscription
-                    </DropdownMenuItem>
-                  )}
-                </>
-              )}
-              
-              {hasFuturePlan && hasCancelledPlan && (
-                <DropdownMenuItem
-                  variant={'destructive'}
-                  onSelect={() => meta?.cancelFutureSubscription?.(member.id)}>
-                  <XCircle />
-                  Cancel Future Subscription
-                </DropdownMenuItem>
-              )}
+              {/* Subscription Management */}
+              <DropdownMenuItem
+                onSelect={() => meta?.manageSubscription?.(member.id)}>
+                <Settings />
+                Manage Subscription
+              </DropdownMenuItem>
               
               <DropdownMenuItem
                 variant={'destructive'}

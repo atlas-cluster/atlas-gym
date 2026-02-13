@@ -25,6 +25,7 @@ import { columns } from '@/features/members/components/columns'
 import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
 import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
 import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
+import { MemberSubscriptionDialog } from '@/features/members/dialog/member-subscription'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -64,6 +65,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false)
   const [detailsMember, setDetailsMember] = useState<
     MemberDisplay | undefined
   >()
@@ -71,6 +73,9 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     MemberDisplay | undefined
   >()
   const [passwordMember, setPasswordMember] = useState<
+    MemberDisplay | undefined
+  >()
+  const [subscriptionMember, setSubscriptionMember] = useState<
     MemberDisplay | undefined
   >()
 
@@ -267,10 +272,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       convertToMember: handleConvertToMember,
       convertToTrainer: handleConvertToTrainer,
       refreshMembers: handleRefresh,
-      cancelSubscription: handleCancelSubscription,
-      revertCancellation: handleRevertCancellation,
-      changeSubscription: handleChangeSubscription,
-      cancelFutureSubscription: handleCancelFutureSubscription,
+      manageSubscription: handleManageSubscription,
     },
 
     enableRowSelection: true,
@@ -323,6 +325,12 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         onOpenChange={setPasswordOpen}
         member={passwordMember}
         onSubmit={handlePasswordChange}
+      />
+      <MemberSubscriptionDialog
+        open={subscriptionOpen}
+        onOpenChange={setSubscriptionOpen}
+        member={subscriptionMember}
+        onSuccess={fetchData}
       />
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">

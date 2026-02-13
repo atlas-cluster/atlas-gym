@@ -44,8 +44,5 @@ export interface MembersTableMeta {
   convertToMember: (id: string) => void
   convertToTrainer: (id: string) => void
   refreshMembers: () => void
-  cancelSubscription?: (memberId: string) => void
-  revertCancellation?: (memberId: string) => void
-  changeSubscription?: (memberId: string) => void
-  cancelFutureSubscription?: (memberId: string) => void
+  manageSubscription?: (memberId: string) => void
 }
