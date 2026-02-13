@@ -245,10 +245,28 @@ export function SubscriptionGrid({
     }
   })
 
-  // Sort so current plan comes first
+  // Sort so active subscription comes first, then future, then others
   const sortedPlans = [...allPlansToDisplay].sort((a, b) => {
-    if (a.isCurrentPlan && !b.isCurrentPlan) return -1
-    if (!a.isCurrentPlan && b.isCurrentPlan) return 1
+    // Active subscription (active or cancelled status) comes first
+    const aIsActive =
+      a.subscription &&
+      (a.subscription.status === 'active' ||
+        a.subscription.status === 'cancelled')
+    const bIsActive =
+      b.subscription &&
+      (b.subscription.status === 'active' ||
+        b.subscription.status === 'cancelled')
+
+    if (aIsActive && !bIsActive) return -1
+    if (!aIsActive && bIsActive) return 1
+
+    // Future subscription comes second
+    const aIsFuture = a.subscription && a.subscription.status === 'future'
+    const bIsFuture = b.subscription && b.subscription.status === 'future'
+
+    if (aIsFuture && !bIsFuture) return -1
+    if (!aIsFuture && bIsFuture) return 1
+
     return 0
   })
 
