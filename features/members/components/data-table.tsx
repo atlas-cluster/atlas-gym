@@ -257,7 +257,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         await cancelSubscription(activeSubscription.id, selectedMember.id)
         setCancelSubDialogOpen(false)
         setSelectedMember(null)
-        fetchData()
+        // fetchData() removed - server action updateTag('members') will auto-refresh
       } else {
         throw new Error('No active subscription found')
       }
@@ -288,7 +288,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         await revertCancellation(cancelledSubscription.id, selectedMember.id)
         setRevertCancelDialogOpen(false)
         setSelectedMember(null)
-        fetchData()
+        // fetchData() removed - server action updateTag('members') will auto-refresh
       } else {
         throw new Error('No cancelled subscription found')
       }
@@ -305,9 +305,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     member: MemberDisplay,
     planId: number
   ) => {
-    const promise = createSubscription(planId, member.id).then(() => {
-      fetchData()
-    })
+    const promise = createSubscription(planId, member.id)
+    // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
 
     toast.promise(promise, {
       loading: 'Creating future subscription...',
@@ -334,7 +333,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         await cancelSubscription(futureSubscription.id, selectedMember.id)
         setCancelFutureDialogOpen(false)
         setSelectedMember(null)
-        fetchData()
+        // fetchData() removed - server action updateTag('members') will auto-refresh
       } else {
         throw new Error('No future subscription found')
       }
@@ -348,9 +347,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleChoosePlan = async (member: MemberDisplay, planId: number) => {
-    const promise = createSubscription(planId, member.id).then(() => {
-      fetchData()
-    })
+    const promise = createSubscription(planId, member.id)
+    // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
 
     toast.promise(promise, {
       loading: 'Creating subscription...',

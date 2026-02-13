@@ -339,7 +339,6 @@ function ActionsCell({
 
                   {member.futureSubscriptionName && (
                     <DropdownMenuItem
-                      variant={'destructive'}
                       onSelect={() => meta?.cancelFutureSubscription?.(member)}>
                       <XCircle />
                       Cancel Future Subscription
