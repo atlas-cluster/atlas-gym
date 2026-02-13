@@ -78,8 +78,8 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(12)
   const [sortBy, setSortBy] = useState<
-    'name' | 'price' | 'minDuration' | 'subscriptionCount'
-  >('name')
+    'name' | 'price' | 'minDuration' | 'subscriptionCount' | null
+  >(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
@@ -194,6 +194,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       return true
     })
     .sort((a, b) => {
+      // If no sort is selected, maintain native DB order (no sorting)
+      if (!sortBy) return 0
+
       let comparison = 0
 
       switch (sortBy) {

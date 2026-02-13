@@ -113,8 +113,8 @@ export function SubscriptionGrid({
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize, setPageSize] = useState(12)
   const [sortBy, setSortBy] = useState<
-    'name' | 'price' | 'minDuration' | 'subscriptionCount'
-  >('name')
+    'name' | 'price' | 'minDuration' | 'subscriptionCount' | null
+  >(null)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
@@ -301,6 +301,9 @@ export function SubscriptionGrid({
       // Keep current plan first regardless of sorting
       if (a.isCurrentPlan && !b.isCurrentPlan) return -1
       if (!a.isCurrentPlan && b.isCurrentPlan) return 1
+
+      // If no sort is selected, maintain native DB order (no sorting)
+      if (!sortBy) return 0
 
       let comparison = 0
 
