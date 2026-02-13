@@ -1,7 +1,7 @@
 'use client'
 
 /* eslint-disable react-hooks/set-state-in-effect */
-import { endOfMonth, format } from 'date-fns'
+import { addMonths, endOfMonth, format } from 'date-fns'
 import {
   ArrowUpDown,
   CalendarIcon,
@@ -67,6 +67,26 @@ import {
   getMemberSubscriptions,
   revertCancellation,
 } from '@/features/subscriptions'
+
+// Helper function to calculate the actual cancellation end date
+function calculateCancelEndDate(
+  startDate: Date,
+  minDurationMonths: number
+): Date {
+  const today = new Date()
+  const endOfCurrentMonth = endOfMonth(today)
+
+  // Calculate minimum duration end date
+  // Add (minDurationMonths - 1) months to start date, then get end of that month
+  const minDurationEndDate = endOfMonth(
+    addMonths(new Date(startDate), minDurationMonths - 1)
+  )
+
+  // Return whichever is later
+  return minDurationEndDate > endOfCurrentMonth
+    ? minDurationEndDate
+    : endOfCurrentMonth
+}
 
 export function SubscriptionGrid({
   initialSubscriptions,
@@ -306,7 +326,17 @@ export function SubscriptionGrid({
             <AlertDialogDescription>
               {subscriptionToCancel?.status === 'future'
                 ? `This will immediately cancel your future subscription to "${subscriptionToCancel?.planName}".`
-                : `This will cancel your subscription to "${subscriptionToCancel?.planName}" at the end of the current month${subscriptionToCancel?.endDate ? ` (${format(endOfMonth(new Date()), 'MMMM yyyy')})` : ''}.`}
+                : (() => {
+                    if (!subscriptionToCancel) return ''
+                    const endDate = calculateCancelEndDate(
+                      new Date(subscriptionToCancel.startDate),
+                      subscriptionToCancel.planMinDurationMonths
+                    )
+                    const currentMonthEnd = endOfMonth(new Date())
+                    const isMinDurationEnforced = endDate > currentMonthEnd
+
+                    return `This will cancel your subscription to "${subscriptionToCancel.planName}" at the end of ${isMinDurationEnforced ? 'the minimum duration period' : 'the current month'} (${format(endDate, 'MMMM yyyy')}).`
+                  })()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
