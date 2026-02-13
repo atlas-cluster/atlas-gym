@@ -3,7 +3,6 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
-  Calendar,
   CalendarClock,
   CreditCard,
   GraduationCap,
@@ -126,13 +125,7 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     header: 'Subscription',
     accessorKey: 'planName',
     cell: ({ row }) => {
-      const {
-        planName,
-        subscriptionEndDate,
-        isCancelled,
-        futureSubscriptionName,
-        futureSubscriptionStartDate,
-      } = row.original
+      const { planName, isCancelled, futureSubscriptionName } = row.original
 
       if (!planName && !futureSubscriptionName) {
         return (
@@ -149,35 +142,19 @@ export const columns: ColumnDef<MemberDisplay>[] = [
               className="h-6 w-fit gap-1">
               {isCancelled && <XCircle className="h-3 w-3" />}
               <span>{planName}</span>
-              {isCancelled && subscriptionEndDate && (
-                <>
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {new Date(subscriptionEndDate).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </>
-              )}
             </Badge>
           )}
 
           {/* Future Subscription */}
-          {futureSubscriptionName && futureSubscriptionStartDate && (
+          {futureSubscriptionName && (
             <Badge variant="secondary" className="h-6 w-fit gap-1">
               <CalendarClock className="h-3 w-3" />
               <span>{futureSubscriptionName}</span>
-              <Calendar className="h-3 w-3" />
-              <span>
-                {new Date(futureSubscriptionStartDate).toLocaleDateString(
-                  'en-US',
-                  {
-                    month: 'short',
-                    day: 'numeric',
-                  }
-                )}
-              </span>
+            </Badge>
+          )}
+        </div>
+      )
+    },
             </Badge>
           )}
         </div>

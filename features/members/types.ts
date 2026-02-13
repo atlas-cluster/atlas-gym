@@ -26,10 +26,8 @@ export type SessionMember = Omit<
 
 export type MemberDisplay = Omit<Member, 'created_at'> & {
   planName?: string
-  subscriptionEndDate?: Date | null
   isCancelled?: boolean
   futureSubscriptionName?: string
-  futureSubscriptionStartDate?: Date | null
 }
 
 export interface MembersTableMeta {

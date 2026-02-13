@@ -21,11 +21,9 @@ const getMembersCached = unstable_cache(
              CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
              -- Current/cancelled subscription
              current_p.name as "planName",
-             current_s.end_date as "subscriptionEndDate",
              CASE WHEN current_s.end_date IS NOT NULL THEN true ELSE false END as "isCancelled",
              -- Future subscription
-             future_p.name as "futureSubscriptionName",
-             future_s.start_date as "futureSubscriptionStartDate"
+             future_p.name as "futureSubscriptionName"
       FROM members m
              LEFT JOIN trainers t ON m.id = t.member_id
              -- Current or cancelled subscription (where end_date is NULL or in the future)
