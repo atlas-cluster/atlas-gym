@@ -1,3 +1,5 @@
+'use client'
+
 import { ReactNode, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useHookFormMask } from 'use-mask-input'

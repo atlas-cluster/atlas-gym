@@ -13,3 +13,5 @@ export * from '@/features/members/actions/convert-to-member'
 export * from '@/features/members/actions/convert-to-trainer'
 
 export { DataTable as MembersDataTable } from '@/features/members/components/data-table'
+export { MemberDetailsDialog } from '@/features/members/dialog/member-details'
+export { MemberPaymentDialog } from '@/features/members/dialog/member-payment'

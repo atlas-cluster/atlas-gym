@@ -4,8 +4,9 @@ import {
   CalendarIcon,
   DumbbellIcon,
   HomeIcon,
+  Layers,
   MapPinIcon,
-  ReceiptTextIcon,
+  Repeat,
   UserStarIcon,
   UsersIcon,
 } from 'lucide-react'
@@ -33,12 +34,12 @@ const mainNavItems = [
   { title: 'Reservations', url: '/reservations', icon: BookCheckIcon },
   { title: 'Equipment', url: '/equipment', icon: DumbbellIcon },
   { title: 'Rooms', url: '/rooms', icon: MapPinIcon },
-  { title: 'Subscription', url: '/subscription', icon: ReceiptTextIcon },
+  { title: 'Subscription', url: '/subscription', icon: Repeat },
 ]
 
 const trainerNavItems = [
   { title: 'Members', url: '/members', icon: UsersIcon },
-  { title: 'Plans', url: '/plans', icon: ReceiptTextIcon },
+  { title: 'Plans', url: '/plans', icon: Layers },
   { title: 'Trainers', url: '/trainers', icon: UserStarIcon },
 ]
 

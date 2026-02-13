@@ -17,10 +17,20 @@ export interface Member {
   phone?: string
   isTrainer?: boolean
   paymentType?: PaymentType
-  planName?: string
 }
 
-export type MemberDisplay = Member
+export type SessionMember = Omit<
+  Member,
+  'created_at' | 'address' | 'birthdate' | 'phone' | 'paymentType'
+>
+
+export type MemberDisplay = Omit<Member, 'created_at'> & {
+  planName?: string
+  subscriptionId?: string
+  isCancelled?: boolean
+  futureSubscriptionName?: string
+  futureSubscriptionId?: string
+}
 
 export interface MembersTableMeta {
   updateMember: (id: string, data: z.infer<typeof memberDetailsSchema>) => void
@@ -36,4 +46,15 @@ export interface MembersTableMeta {
   convertToMember: (id: string) => void
   convertToTrainer: (id: string) => void
   refreshMembers: () => void
+  cancelSubscription?: (member: MemberDisplay) => void
+  revertCancellation?: (member: MemberDisplay) => void
+  changeSubscription?: (member: MemberDisplay, planId: number) => void
+  cancelFutureSubscription?: (member: MemberDisplay) => void
+  choosePlan?: (member: MemberDisplay, planId: number) => void
+  availablePlans?: {
+    id: number
+    name: string
+    price: number
+    minDurationMonths: number
+  }[]
 }

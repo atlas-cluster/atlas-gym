@@ -1,26 +1,21 @@
-import { CircleAlertIcon } from 'lucide-react'
-
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/features/shared/components/ui/empty'
+  SubscriptionGrid,
+  getAvailablePlans,
+  getMemberSubscriptions,
+} from '@/features/subscriptions'
 
-export default function SubscriptionPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function SubscriptionPage() {
+  const [subscriptions, plans] = await Promise.all([
+    getMemberSubscriptions(),
+    getAvailablePlans(),
+  ])
+
   return (
-    <Empty className={'h-full'}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <CircleAlertIcon />
-        </EmptyMedia>
-        <EmptyTitle>No Content Available</EmptyTitle>
-        <EmptyDescription>
-          There is currently no content to display here. Please check back later
-          or add new content to get started.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <SubscriptionGrid
+      initialSubscriptions={subscriptions}
+      initialPlans={plans}
+    />
   )
 }

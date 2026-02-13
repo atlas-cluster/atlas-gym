@@ -1,5 +1,3 @@
-import { z } from 'zod'
-
 import { memberBaseSchema } from '@/features/members/schemas/member'
 import { refinePaymentFields } from '@/features/shared/schemas/payment'
 
@@ -15,5 +13,3 @@ export const memberPaymentSchema = memberBaseSchema
   .superRefine((data, ctx) => {
     refinePaymentFields(data, ctx)
   })
-
-export type MemberPaymentInput = z.infer<typeof memberPaymentSchema>
