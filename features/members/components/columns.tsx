@@ -3,6 +3,7 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpDown,
+  Check,
   CreditCard,
   GraduationCap,
   KeyRound,
@@ -127,7 +128,12 @@ export const columns: ColumnDef<MemberDisplay>[] = [
 
       // Active subscription
       if (planName && !isCancelled && !futureSubscriptionName) {
-        return <Badge>{planName}</Badge>
+        return (
+          <Badge>
+            <Check />
+            {planName}
+          </Badge>
+        )
       }
 
       // Cancelled subscription without future subscription
@@ -135,6 +141,7 @@ export const columns: ColumnDef<MemberDisplay>[] = [
         return (
           <Badge variant={'destructive'}>
             <X />
+            {planName}
           </Badge>
         )
       }

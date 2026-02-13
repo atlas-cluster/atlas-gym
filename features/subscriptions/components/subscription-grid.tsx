@@ -1,10 +1,11 @@
 'use client'
 
 /* eslint-disable react-hooks/set-state-in-effect */
-import { format } from 'date-fns'
+import { endOfMonth, format } from 'date-fns'
 import {
   ArrowUpDown,
   CalendarIcon,
+  Check,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -13,7 +14,6 @@ import {
   RefreshCwIcon,
   RotateCcwIcon,
   Trash2Icon,
-  UsersIcon,
   XCircleIcon,
   XIcon,
 } from 'lucide-react'
@@ -604,28 +604,28 @@ export function SubscriptionGrid({
                       {plan.subscription && (
                         <>
                           {plan.subscription.status === 'active' && (
-                            <Badge variant="default" className="text-xs">
-                              <UsersIcon className="w-3 h-3" />
+                            <Badge>
+                              <Check />
                               Active
                             </Badge>
                           )}
                           {plan.subscription.status === 'cancelled' && (
-                            <Badge variant="secondary" className="text-xs">
-                              <XCircleIcon className="w-3 h-3" />
-                              Cancelled - Ends{' '}
+                            <Badge variant="destructive">
+                              <XCircleIcon />
+                              Cancelled{' '}
                               {format(
                                 new Date(plan.subscription.endDate!),
-                                'MMM d'
+                                'dd.MM'
                               )}
                             </Badge>
                           )}
                           {plan.subscription.status === 'future' && (
-                            <Badge variant="outline" className="text-xs">
-                              <CalendarIcon className="w-3 h-3" />
+                            <Badge>
+                              <CalendarIcon />
                               Starts{' '}
                               {format(
                                 new Date(plan.subscription.startDate),
-                                'MMM d'
+                                'dd.MM'
                               )}
                             </Badge>
                           )}
@@ -647,17 +647,17 @@ export function SubscriptionGrid({
                         onClick={() => handleCancelClick(plan.subscription!)}
                         suppressHydrationWarning
                         aria-label="Cancel subscription">
-                        <Trash2Icon className="w-4 h-4" />
+                        <Trash2Icon />
                       </Button>
                     )}
                     {plan.subscription.status === 'cancelled' && (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => handleRevertClick(plan.subscription!)}
                         suppressHydrationWarning
                         aria-label="Revert cancellation">
-                        <RotateCcwIcon className="w-4 h-4" />
+                        <RotateCcwIcon />
                       </Button>
                     )}
                   </CardAction>
@@ -665,12 +665,11 @@ export function SubscriptionGrid({
                 {!plan.subscription && canChooseNewPlan && (
                   <CardAction>
                     <Button
-                      variant="default"
                       size="icon"
                       onClick={() => handleChoosePlan(plan)}
                       suppressHydrationWarning
                       aria-label="Choose plan">
-                      <PlusIcon className="w-4 h-4" />
+                      <PlusIcon />
                     </Button>
                   </CardAction>
                 )}
