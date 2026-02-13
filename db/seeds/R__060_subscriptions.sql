@@ -1,6 +1,3 @@
--- Subscriptions seed with dates relative to CURRENT_DATE
--- About 70-80% of members will have subscriptions
--- Mix of active, cancelled, ended, and future subscriptions
 INSERT INTO
   subscriptions (member_id, plan_id, start_date, end_date)
 SELECT
