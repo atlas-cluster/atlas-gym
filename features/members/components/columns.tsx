@@ -2,6 +2,8 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  Calendar,
+  CalendarClock,
   CreditCard,
   GraduationCap,
   KeyRound,
@@ -10,6 +12,7 @@ import {
   PencilIcon,
   TrashIcon,
   User,
+  XCircle,
 } from 'lucide-react'
 
 import { MemberDisplay, MembersTableMeta } from '@/features/members'
@@ -139,40 +142,42 @@ export const columns: ColumnDef<MemberDisplay>[] = [
         subscriptionEndDate && new Date(subscriptionEndDate) >= new Date()
 
       return (
-        <div className="flex flex-col gap-0.5 text-xs">
+        <div className="flex flex-col gap-1">
           {planName && (
-            <div className="flex items-center gap-1">
-              <Badge
-                variant={isCancelled ? 'outline' : 'secondary'}
-                className="text-xs px-1.5 py-0">
-                {planName}
-              </Badge>
+            <Badge
+              variant={isCancelled ? 'destructive' : 'default'}
+              className="text-xs w-fit h-6">
+              {isCancelled && <XCircle className="h-3 w-3" />}
+              <span>{planName}</span>
               {isCancelled && (
-                <span className="text-muted-foreground text-[10px]">
-                  →
-                  {new Date(subscriptionEndDate).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
+                <>
+                  <Calendar className="h-3 w-3" />
+                  <span>
+                    {new Date(subscriptionEndDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </>
               )}
-            </div>
+            </Badge>
           )}
           {futureSubscriptionName && (
-            <div className="flex items-center gap-1">
-              <Badge
-                variant="outline"
-                className="text-[10px] px-1 py-0 opacity-70">
-                {futureSubscriptionStartDate &&
-                  new Date(futureSubscriptionStartDate).toLocaleDateString(
-                    'en-US',
-                    { month: 'short', day: 'numeric' }
-                  )}
-              </Badge>
-              <span className="text-muted-foreground text-[10px]">
-                {futureSubscriptionName}
-              </span>
-            </div>
+            <Badge variant="secondary" className="text-xs w-fit h-6">
+              <CalendarClock className="h-3 w-3" />
+              <span>{futureSubscriptionName}</span>
+              {futureSubscriptionStartDate && (
+                <>
+                  <Calendar className="h-3 w-3" />
+                  <span>
+                    {new Date(futureSubscriptionStartDate).toLocaleDateString(
+                      'en-US',
+                      { month: 'short', day: 'numeric' }
+                    )}
+                  </span>
+                </>
+              )}
+            </Badge>
           )}
         </div>
       )
