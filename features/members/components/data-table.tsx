@@ -204,24 +204,12 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     fetchData()
   }
 
-  const handleCancelSubscription = (memberId: string) => {
-    // Redirect to subscription page where they can cancel
-    window.location.href = '/subscription'
-  }
-
-  const handleRevertCancellation = (memberId: string) => {
-    // Redirect to subscription page where they can revert
-    window.location.href = '/subscription'
-  }
-
-  const handleChangeSubscription = (memberId: string) => {
-    // Redirect to subscription page where they can choose a new plan
-    window.location.href = '/subscription'
-  }
-
-  const handleCancelFutureSubscription = (memberId: string) => {
-    // Redirect to subscription page where they can cancel future subscription
-    window.location.href = '/subscription'
+  const handleManageSubscription = (memberId: string) => {
+    const member = tableData.find((m) => m.id === memberId)
+    if (member) {
+      setSubscriptionMember(member)
+      setSubscriptionOpen(true)
+    }
   }
 
   const fetchData = () => {

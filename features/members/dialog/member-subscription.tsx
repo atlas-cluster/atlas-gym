@@ -1,3 +1,5 @@
+'use client'
+
 import { addMonths, endOfMonth, format } from 'date-fns'
 import { CalendarIcon, PlusIcon, RotateCcwIcon, XCircleIcon } from 'lucide-react'
 import { ReactNode, useEffect, useState, useTransition } from 'react'
