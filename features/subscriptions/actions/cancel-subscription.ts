@@ -40,7 +40,7 @@ export async function cancelSubscription(
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Future subscriptions can always be cancelled immediately
+  // Future subscriptions can always be cancelled immediately (deleted)
   if (startDate > today) {
     const deleteQuery = `
       DELETE FROM subscriptions
@@ -48,8 +48,24 @@ export async function cancelSubscription(
     `
     await pool.query(deleteQuery, [subscriptionId, memberId])
   } else {
-    // For current subscriptions, set end_date to end of current month
-    const endDate = endOfMonth(today)
+    // For active subscriptions, calculate end date
+    // End date is the later of: end of current month OR end of minimum duration
+    const endOfCurrentMonth = endOfMonth(today)
+
+    // Calculate minimum duration end date (end of the month after min duration)
+    const minDurationDate = new Date(startDate)
+    minDurationDate.setMonth(
+      minDurationDate.getMonth() + subscription.min_duration_months
+    )
+    const minDurationEndDate = endOfMonth(
+      new Date(minDurationDate.getFullYear(), minDurationDate.getMonth() - 1, 1)
+    )
+
+    // Use whichever is later
+    const endDate =
+      endOfCurrentMonth > minDurationEndDate
+        ? endOfCurrentMonth
+        : minDurationEndDate
 
     const updateQuery = `
       UPDATE subscriptions

@@ -593,7 +593,8 @@ export function SubscriptionGrid({
                 </div>
                 {plan.subscription && (
                   <CardAction>
-                    {plan.subscription.canCancel && (
+                    {(plan.subscription.status === 'active' ||
+                      plan.subscription.status === 'future') && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -617,17 +618,16 @@ export function SubscriptionGrid({
                     {plan.minDurationMonths === 1 ? 'month' : 'months'}
                   </span>
                 </div>
-                {!plan.subscription &&
-                  (canChooseNewPlan || cancelledSubscription) && (
-                    <Button
-                      variant="default"
-                      className="w-full"
-                      onClick={() => handleChoosePlan(plan)}
-                      suppressHydrationWarning>
-                      <CheckCircle2Icon className="w-4 h-4" />
-                      Choose Plan
-                    </Button>
-                  )}
+                {!plan.subscription && canChooseNewPlan && (
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => handleChoosePlan(plan)}
+                    suppressHydrationWarning>
+                    <CheckCircle2Icon className="w-4 h-4" />
+                    Choose Plan
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}
