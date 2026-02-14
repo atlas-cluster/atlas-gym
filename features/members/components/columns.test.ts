@@ -1,19 +1,8 @@
+import { facetedFilter } from './columns'
 import { describe, expect, it } from 'vitest'
 
 import { MemberDisplay } from '@/features/members'
 import { Row } from '@tanstack/table-core'
-
-// Extract the facetedFilter function for testing
-// This is a copy of the function from columns.tsx
-const facetedFilter = (
-  row: Row<MemberDisplay>,
-  _columnId: string,
-  filterValues: string[]
-) => {
-  if (!filterValues?.length) return true
-  const cellValue = row.getValue(_columnId)
-  return filterValues.includes(String(cellValue))
-}
 
 // Mock a row object
 const createMockRow = (value: string): Row<MemberDisplay> => {
