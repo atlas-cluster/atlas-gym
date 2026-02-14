@@ -1,11 +1,7 @@
 'use server'
 
+import { AuditLogsParams, AuditLogsResponse } from '@/features/audit-logs/types'
 import { pool } from '@/features/shared/lib/db'
-import {
-  AuditLogsParams,
-  AuditLogsResponse,
-  AuditLogDisplay,
-} from '@/features/audit-logs/types'
 
 export async function getAuditLogs(
   params: AuditLogsParams = {}
@@ -105,11 +101,7 @@ export async function getAuditLogs(
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
   `
 
-  const dataResult = await pool.query(dataQuery, [
-    ...values,
-    pageSize,
-    offset,
-  ])
+  const dataResult = await pool.query(dataQuery, [...values, pageSize, offset])
 
   return {
     data: dataResult.rows,

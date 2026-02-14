@@ -16,7 +16,7 @@ export default async function AuditLogsPage({
   searchParams,
 }: AuditLogsPageProps) {
   const params = await searchParams
-  
+
   const auditLogs = await getAuditLogs({
     page: params.page ? parseInt(params.page, 10) : 1,
     pageSize: params.pageSize ? parseInt(params.pageSize, 10) : 10,

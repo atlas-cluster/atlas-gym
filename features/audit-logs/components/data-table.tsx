@@ -1,15 +1,21 @@
 'use client'
 
+import { RefreshCwIcon, XIcon } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { RefreshCwIcon, XIcon } from 'lucide-react'
 
 import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
 import { ActionType } from '@/features/audit-logs/types'
-import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { Button } from '@/features/shared/components/ui/button'
 import { Input } from '@/features/shared/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/features/shared/components/ui/select'
 import {
   Table,
   TableBody,
@@ -19,18 +25,11 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/features/shared/components/ui/select'
-import {
+  ColumnFiltersState,
+  SortingState,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  SortingState,
-  ColumnFiltersState,
 } from '@tanstack/react-table'
 
 interface DataTableProps {
@@ -38,6 +37,7 @@ interface DataTableProps {
 }
 
 const actionOptions = [
+  { label: 'All', value: '' },
   { label: 'Create', value: 'CREATE' },
   { label: 'Update', value: 'UPDATE' },
   { label: 'Delete', value: 'DELETE' },
@@ -47,7 +47,7 @@ export function DataTable({ initialData }: DataTableProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
-  
+
   const [data, setData] = useState(initialData)
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [sorting, setSorting] = useState<SortingState>([])
@@ -101,7 +101,7 @@ export function DataTable({ initialData }: DataTableProps) {
   // Update URL when filters change
   const updateURL = (params: Record<string, string | null>) => {
     const newSearchParams = new URLSearchParams(searchParams.toString())
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
         newSearchParams.set(key, value)
@@ -124,12 +124,8 @@ export function DataTable({ initialData }: DataTableProps) {
   }
 
   // Handle filter changes
-  const handleActionFilterChange = (values: string[]) => {
-    updateURL({ action: values[0] || null, page: '1' })
-  }
-
-  const handleEntityTypeFilterChange = (values: string[]) => {
-    updateURL({ entityType: values[0] || null, page: '1' })
+  const handleActionFilterChange = (value: string) => {
+    updateURL({ action: value || null, page: '1' })
   }
 
   // Handle page size change
@@ -182,16 +178,21 @@ export function DataTable({ initialData }: DataTableProps) {
             disabled={isPending}>
             Search
           </Button>
-          
-          {table.getColumn('action') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('action')!}
-              title="Action"
-              options={actionOptions}
-              selectedValues={currentAction ? [currentAction] : []}
-              onFilterChange={handleActionFilterChange}
-            />
-          )}
+
+          <Select
+            value={currentAction || ''}
+            onValueChange={handleActionFilterChange}>
+            <SelectTrigger className="h-8 w-[150px]">
+              <SelectValue placeholder="Action" />
+            </SelectTrigger>
+            <SelectContent>
+              {actionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {hasFilters && (
             <Button
@@ -272,8 +273,9 @@ export function DataTable({ initialData }: DataTableProps) {
 
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing {data.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0} to{' '}
-          {Math.min(currentPage * currentPageSize, data.totalCount)} of{' '}
+          Showing{' '}
+          {data.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0}{' '}
+          to {Math.min(currentPage * currentPageSize, data.totalCount)} of{' '}
           {data.totalCount} audit logs
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">

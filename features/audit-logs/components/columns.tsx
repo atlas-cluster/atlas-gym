@@ -1,11 +1,11 @@
 'use client'
 
-import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown } from 'lucide-react'
 
 import { AuditLogDisplay } from '@/features/audit-logs/types'
-import { Button } from '@/features/shared/components/ui/button'
 import { Badge } from '@/features/shared/components/ui/badge'
+import { Button } from '@/features/shared/components/ui/button'
+import { ColumnDef } from '@tanstack/react-table'
 
 const actionColorMap = {
   CREATE: 'bg-green-500/10 text-green-700 dark:text-green-400',
