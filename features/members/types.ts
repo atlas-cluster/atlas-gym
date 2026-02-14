@@ -19,10 +19,7 @@ export interface Member {
   paymentType?: PaymentType
 }
 
-export type SessionMember = Omit<
-  Member,
-  'created_at' | 'address' | 'birthdate' | 'phone' | 'paymentType'
->
+export type SessionMember = Omit<Member, 'created_at'>
 
 export type MemberDisplay = Omit<Member, 'created_at'> & {
   planName?: string

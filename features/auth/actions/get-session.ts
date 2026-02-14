@@ -25,7 +25,11 @@ export const getSession = cache(
          m.email, 
          m.firstname, 
          m.lastname, 
-         m.middlename, 
+         m.middlename,
+         m.address,
+         m.birthdate,
+         m.phone,
+         m.payment_type,
         CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as is_trainer
        FROM sessions s
        JOIN members m ON s.member_id = m.id
@@ -47,6 +51,10 @@ export const getSession = cache(
         firstname: row.firstname,
         lastname: row.lastname,
         middlename: row.middlename || undefined,
+        address: row.address || undefined,
+        birthdate: row.birthdate,
+        phone: row.phone || undefined,
+        paymentType: row.payment_type || undefined,
         isTrainer: row.is_trainer,
       }
 
