@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
 import { PlanDisplay } from '@/features/plans/types'
 import { Button } from '@/features/shared/components/ui/button'
+import { Checkbox } from '@/features/shared/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export function PlanDetailsDialog({
       price: 0,
       minDurationMonths: 1,
       description: '',
+      isDefault: false,
     },
   })
 
@@ -57,6 +59,7 @@ export function PlanDetailsDialog({
         price: plan.price,
         minDurationMonths: plan.minDurationMonths,
         description: plan.description || '',
+        isDefault: plan.isDefault,
       })
     } else {
       form.reset({
@@ -64,6 +67,7 @@ export function PlanDetailsDialog({
         price: 0,
         minDurationMonths: 1,
         description: '',
+        isDefault: false,
       })
     }
   }, [plan, form])
@@ -146,6 +150,30 @@ export function PlanDetailsDialog({
             {form.formState.errors.description && (
               <FieldError>
                 {form.formState.errors.description.message}
+              </FieldError>
+            )}
+          </Field>
+
+          <Field>
+            <FieldContent className="flex items-center space-x-2">
+              <Controller
+                name="isDefault"
+                control={form.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isDefault"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <FieldLabel htmlFor="isDefault" className="!mt-0 cursor-pointer">
+                Set as default plan
+              </FieldLabel>
+            </FieldContent>
+            {form.formState.errors.isDefault && (
+              <FieldError>
+                {form.formState.errors.isDefault.message}
               </FieldError>
             )}
           </Field>
