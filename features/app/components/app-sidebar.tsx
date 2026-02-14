@@ -3,6 +3,7 @@ import {
   BookCheckIcon,
   CalendarIcon,
   DumbbellIcon,
+  FileTextIcon,
   HomeIcon,
   Layers,
   MapPinIcon,
@@ -41,6 +42,7 @@ const trainerNavItems = [
   { title: 'Members', url: '/members', icon: UsersIcon },
   { title: 'Plans', url: '/plans', icon: Layers },
   { title: 'Trainers', url: '/trainers', icon: UserStarIcon },
+  { title: 'Audit Logs', url: '/audit-logs', icon: FileTextIcon },
 ]
 
 export function AppSidebar() {
