@@ -39,6 +39,19 @@ import { Input } from '@/features/shared/components/ui/input'
 import { Table } from '@tanstack/react-table'
 import { ColumnDef, Row } from '@tanstack/table-core'
 
+// Custom filter function for faceted filters
+// Uses OR logic within a single faceted filter (matches ANY of the selected values)
+// TanStack Table applies AND logic across different column filters
+export const facetedFilter = (
+  row: Row<MemberDisplay>,
+  columnId: string,
+  filterValues: string[]
+) => {
+  if (!filterValues?.length) return true
+  const cellValue = row.getValue(columnId)
+  return filterValues.includes(String(cellValue))
+}
+
 export const columns: ColumnDef<MemberDisplay>[] = [
   {
     id: 'select',
@@ -95,6 +108,7 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     accessorKey: 'type',
     header: 'Type',
     accessorFn: (row) => (row.isTrainer ? 'trainer' : 'member'),
+    filterFn: facetedFilter,
     cell: ({ row }) => (
       <Badge variant={row.original.isTrainer ? 'default' : 'secondary'}>
         {row.original.isTrainer ? <GraduationCap /> : <User />}
@@ -133,6 +147,7 @@ export const columns: ColumnDef<MemberDisplay>[] = [
     id: 'subscription',
     header: 'Subscription',
     accessorKey: 'planName',
+    filterFn: facetedFilter,
     cell: ({ row }) => {
       const { planName, isCancelled, futureSubscriptionName } = row.original
 
