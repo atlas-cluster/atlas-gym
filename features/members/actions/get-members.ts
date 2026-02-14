@@ -11,6 +11,7 @@ const getMembersCached = unstable_cache(
       SELECT m.id,
              m.email,
              m.created_at,
+             m.updated_at,
              m.firstname,
              m.lastname,
              m.middlename,
