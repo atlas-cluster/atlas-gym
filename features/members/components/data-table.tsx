@@ -292,7 +292,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
   const handleChangeSubscription = async (
     member: MemberDisplay,
-    planId: number
+    planId: string
   ) => {
     const promise = createSubscription(planId, member.id)
     // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
@@ -333,7 +333,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     })
   }
 
-  const handleChoosePlan = async (member: MemberDisplay, planId: number) => {
+  const handleChoosePlan = async (member: MemberDisplay, planId: string) => {
     const promise = createSubscription(planId, member.id)
     // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
 

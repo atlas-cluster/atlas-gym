@@ -258,12 +258,12 @@ function ScrollablePlanSelector({
   onSelectPlan,
 }: {
   plans: Array<{
-    id: number
+    id: string
     name: string
     price: number
     minDurationMonths: number
   }>
-  onSelectPlan: (planId: number) => void
+  onSelectPlan: (planId: string) => void
 }) {
   const [searchQuery, setSearchQuery] = useState('')
 
