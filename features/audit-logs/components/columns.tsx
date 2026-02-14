@@ -1,5 +1,6 @@
 'use client'
 
+import { format } from 'date-fns'
 import { ArrowUpDown } from 'lucide-react'
 
 import { AuditLogDisplay } from '@/features/audit-logs/types'
@@ -30,7 +31,7 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
       const date = new Date(row.getValue('createdAt'))
       return (
         <div className="text-sm">
-          {date.toLocaleDateString()} {date.toLocaleTimeString()}
+          {format(date, 'dd.MM.yyyy HH:mm')}
         </div>
       )
     },

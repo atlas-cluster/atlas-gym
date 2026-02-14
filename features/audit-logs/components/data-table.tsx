@@ -2,7 +2,7 @@
 
 import { RefreshCwIcon, XIcon } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 
 import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
