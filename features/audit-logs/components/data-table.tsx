@@ -2,7 +2,7 @@
 
 import { RefreshCwIcon, XIcon } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 
 import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
@@ -53,11 +53,23 @@ export function DataTable({ initialData }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  // Extract current filters from URL
-  const currentPage = parseInt(searchParams.get('page') || '1', 10)
-  const currentPageSize = parseInt(searchParams.get('pageSize') || '10', 10)
-  const currentAction = searchParams.get('action') as ActionType | null
-  const currentEntityType = searchParams.get('entityType') || null
+  // Extract current filters from URL - using useMemo to prevent hydration mismatches
+  const currentPage = useMemo(
+    () => parseInt(searchParams.get('page') || '1', 10),
+    [searchParams]
+  )
+  const currentPageSize = useMemo(
+    () => parseInt(searchParams.get('pageSize') || '10', 10),
+    [searchParams]
+  )
+  const currentAction = useMemo(
+    () => searchParams.get('action') as ActionType | null,
+    [searchParams]
+  )
+  const currentEntityType = useMemo(
+    () => searchParams.get('entityType') || null,
+    [searchParams]
+  )
 
   const table = useReactTable({
     data: data.data,
