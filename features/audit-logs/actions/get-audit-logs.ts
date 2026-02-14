@@ -22,6 +22,7 @@ export async function getAuditLogs(
   let paramIndex = 1
 
   // Search filter - searches in member name, entity type, and description
+  // Note: CONCAT is used here for filtering and again in the SELECT for display
   if (search) {
     conditions.push(`(
       CONCAT(m.firstname, ' ', m.lastname) ILIKE $${paramIndex} OR

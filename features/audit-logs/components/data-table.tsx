@@ -80,7 +80,7 @@ export function DataTable({ initialData }: DataTableProps) {
   })
 
   // Fetch data when filters/sorting/pagination change
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const sortBy = sorting[0]?.id || 'createdAt'
     const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
@@ -96,7 +96,14 @@ export function DataTable({ initialData }: DataTableProps) {
       })
       setData(result)
     })
-  }
+  }, [
+    sorting,
+    currentPage,
+    currentPageSize,
+    search,
+    currentAction,
+    currentEntityType,
+  ])
 
   // Update URL when filters change
   const updateURL = (params: Record<string, string | null>) => {
@@ -155,8 +162,7 @@ export function DataTable({ initialData }: DataTableProps) {
   // Fetch data when URL changes
   useEffect(() => {
     fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, sorting])
+  }, [fetchData])
 
   const hasFilters = search || currentAction || currentEntityType
 

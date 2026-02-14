@@ -110,6 +110,6 @@ SELECT
     ELSE 'DELETE'
   END,
   'Sample audit log entry ' || gs.i,
-  NOW() - (gs.i || ' hours')::INTERVAL
+  NOW() - gs.i * INTERVAL '1 hour'
 FROM generate_series(1, 50) AS gs(i);
 
