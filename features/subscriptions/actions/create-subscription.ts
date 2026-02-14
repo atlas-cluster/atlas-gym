@@ -6,7 +6,7 @@ import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
 export async function createSubscription(
-  planId: number,
+  planId: string,
   targetMemberId?: string
 ): Promise<void> {
   const session = await getSession()

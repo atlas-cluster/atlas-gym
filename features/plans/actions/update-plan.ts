@@ -7,7 +7,7 @@ import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
 import { pool } from '@/features/shared/lib/db'
 
 export async function updatePlan(
-  id: number,
+  id: string,
   data: z.infer<typeof planDetailsSchema>
 ) {
   const validated = planDetailsSchema.parse(data)

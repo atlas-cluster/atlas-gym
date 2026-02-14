@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
 
 export interface Plan {
-  id: number
+  id: string
   name: string
   price: number
   minDurationMonths: number
@@ -16,8 +16,8 @@ export interface Plan {
 export type PlanDisplay = Plan
 
 export interface PlansTableMeta {
-  updatePlan: (id: number, data: z.infer<typeof planDetailsSchema>) => void
+  updatePlan: (id: string, data: z.infer<typeof planDetailsSchema>) => void
   openPlanDetails: (plan: PlanDisplay | null) => void
-  deletePlan: (id: number) => void
+  deletePlan: (id: string) => void
   refreshPlans: () => void
 }
