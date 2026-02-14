@@ -8,7 +8,7 @@ export interface AuditLogDisplay {
   entityType: string
   action: ActionType
   description: string
-  createdAt: Date
+  createdAt: string // Serialized as string when passing from server to client
 }
 
 export interface AuditLogsParams {
