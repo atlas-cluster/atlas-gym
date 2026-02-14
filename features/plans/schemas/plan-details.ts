@@ -11,5 +11,4 @@ export const planDetailsSchema = z.object({
     .int()
     .min(1, 'Minimum duration must be at least 1 month'),
   description: z.string().optional(),
-  isDefault: z.boolean().default(false),
 })

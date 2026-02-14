@@ -8,7 +8,6 @@ export interface Plan {
   price: number
   minDurationMonths: number
   description?: string
-  isDefault: boolean
   createdAt: Date
   updatedAt: Date
   subscriptionCount?: number

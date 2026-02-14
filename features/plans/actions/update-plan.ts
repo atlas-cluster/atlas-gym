@@ -18,15 +18,13 @@ export async function updatePlan(
          price = $2, 
          min_duration_months = $3, 
          description = $4,
-         is_default = $5,
          updated_at = CURRENT_TIMESTAMP
-     WHERE id = $6`,
+     WHERE id = $5`,
     [
       validated.name,
       validated.price,
       validated.minDurationMonths,
       validated.description || null,
-      validated.isDefault,
       id,
     ]
   )

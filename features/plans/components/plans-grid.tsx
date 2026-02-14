@@ -495,11 +495,6 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
                       {plan.name}
-                      {plan.isDefault && (
-                        <Badge variant="default" className="text-xs">
-                          Default
-                        </Badge>
-                      )}
                       <Badge variant="secondary" className="text-xs">
                         <UsersIcon className="w-3 h-3" />
                         {plan.subscriptionCount || 0}
