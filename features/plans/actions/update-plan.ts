@@ -7,7 +7,7 @@ import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
 import { pool } from '@/features/shared/lib/db'
 
 export async function updatePlan(
-  id: number,
+  id: string,
   data: z.infer<typeof planDetailsSchema>
 ) {
   const validated = planDetailsSchema.parse(data)
@@ -18,13 +18,15 @@ export async function updatePlan(
          price = $2, 
          min_duration_months = $3, 
          description = $4,
+         is_default = $5,
          updated_at = CURRENT_TIMESTAMP
-     WHERE id = $5`,
+     WHERE id = $6`,
     [
       validated.name,
       validated.price,
       validated.minDurationMonths,
       validated.description || null,
+      validated.isDefault,
       id,
     ]
   )

@@ -9,6 +9,7 @@ export interface Member {
   id: string
   email: string
   created_at: Date
+  updated_at: Date
   firstname: string
   lastname: string
   middlename?: string
@@ -19,9 +20,9 @@ export interface Member {
   paymentType?: PaymentType
 }
 
-export type SessionMember = Omit<Member, 'created_at'>
+export type SessionMember = Omit<Member, 'created_at' | 'updated_at'>
 
-export type MemberDisplay = Omit<Member, 'created_at'> & {
+export type MemberDisplay = Omit<Member, 'created_at' | 'updated_at'> & {
   planName?: string
   subscriptionId?: string
   isCancelled?: boolean
@@ -45,11 +46,11 @@ export interface MembersTableMeta {
   refreshMembers: () => void
   cancelSubscription?: (member: MemberDisplay) => void
   revertCancellation?: (member: MemberDisplay) => void
-  changeSubscription?: (member: MemberDisplay, planId: number) => void
+  changeSubscription?: (member: MemberDisplay, planId: string) => void
   cancelFutureSubscription?: (member: MemberDisplay) => void
-  choosePlan?: (member: MemberDisplay, planId: number) => void
+  choosePlan?: (member: MemberDisplay, planId: string) => void
   availablePlans?: {
-    id: number
+    id: string
     name: string
     price: number
     minDurationMonths: number
