@@ -104,11 +104,11 @@ SELECT
     WHEN 3 THEN 'payment'
     ELSE 'equipment'
   END,
-  CASE (gs.i % 3)
+  (CASE (gs.i % 3)
     WHEN 0 THEN 'CREATE'
     WHEN 1 THEN 'UPDATE'
     ELSE 'DELETE'
-  END,
+  END)::action_type,
   'Sample audit log entry ' || gs.i,
   NOW() - gs.i * INTERVAL '1 hour'
 FROM generate_series(1, 50) AS gs(i);
