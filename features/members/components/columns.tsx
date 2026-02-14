@@ -42,7 +42,11 @@ import { ColumnDef, Row } from '@tanstack/table-core'
 // Custom filter function for faceted filters
 // Uses OR logic within a single faceted filter (matches ANY of the selected values)
 // TanStack Table applies AND logic across different column filters
-const facetedFilter = (row: Row<MemberDisplay>, columnId: string, filterValues: string[]) => {
+const facetedFilter = (
+  row: Row<MemberDisplay>,
+  columnId: string,
+  filterValues: string[]
+) => {
   if (!filterValues?.length) return true
   const cellValue = row.getValue(columnId)
   return filterValues.includes(String(cellValue))
