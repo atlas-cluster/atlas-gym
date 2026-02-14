@@ -7,3 +7,4 @@ public
 package-lock.json
 *.drawio.dtmp
 *.drawio.bkp
+db/seeds/R__070_audit_logs.sql
