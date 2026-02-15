@@ -2,6 +2,8 @@
 
 import {
   ActivityIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DatabaseIcon,
@@ -11,10 +13,10 @@ import {
   UserIcon,
   XIcon,
 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { AuditLogsResponse } from '@/features/audit-logs'
+import { getAuditLogs } from '@/features/audit-logs/actions/get-audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
@@ -37,10 +39,17 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import {
+  ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 
@@ -49,183 +58,70 @@ interface DataTableProps {
 }
 
 export function DataTable({ initialData }: DataTableProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-
-  // Read current URL params
-  const currentPage = useMemo(
-    () => parseInt(searchParams.get('page') || '1', 10),
-    [searchParams]
-  )
-  const currentPageSize = useMemo(
-    () => parseInt(searchParams.get('pageSize') || '10', 10),
-    [searchParams]
-  )
-  const currentSearch = useMemo(
-    () => searchParams.get('search') || '',
-    [searchParams]
-  )
-  const currentAction = useMemo(
-    () => searchParams.get('action') || null,
-    [searchParams]
-  )
-  const currentEntityType = useMemo(
-    () => searchParams.get('entityType') || null,
-    [searchParams]
-  )
-  const currentMember = useMemo(
-    () => searchParams.get('member') || null,
-    [searchParams]
-  )
-  const currentSortBy = useMemo(
-    () => searchParams.get('sortBy') || 'createdAt',
-    [searchParams]
-  )
-  const currentSortOrder = useMemo(
-    () => searchParams.get('sortOrder') || 'desc',
-    [searchParams]
-  )
-
-  // Column visibility state
+  // Client-side state
+  const [data, setData] = useState(initialData.data)
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'timestamp', desc: true },
+  ])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const [searchInput, setSearchInput] = useState('')
 
-  // Get unique values for faceted filters from current page data
-  const uniqueMembers = useMemo(() => {
-    const seen = new Set<string>()
-    const members: Array<{ value: string; label: string }> = []
-    
-    for (const log of initialData.data) {
-      if (log.memberName && !seen.has(log.memberName)) {
-        seen.add(log.memberName)
-        members.push({ value: log.memberName, label: log.memberName })
-      }
-    }
-    
-    return members.sort((a, b) => a.label.localeCompare(b.label))
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setGlobalFilter(searchInput)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  // Update data when initialData changes
+  useEffect(() => {
+    setData(initialData.data)
   }, [initialData.data])
-
-  const uniqueEntityTypes = useMemo(() => {
-    const seen = new Set<string>()
-    const types: Array<{ value: string; label: string }> = []
-    
-    for (const log of initialData.data) {
-      if (log.entityType && !seen.has(log.entityType)) {
-        seen.add(log.entityType)
-        types.push({
-          value: log.entityType,
-          label: log.entityType.charAt(0).toUpperCase() + log.entityType.slice(1),
-        })
-      }
-    }
-    
-    return types.sort((a, b) => a.label.localeCompare(b.label))
-  }, [initialData.data])
-
-  // Update URL params
-  const updateURL = useCallback(
-    (updates: Record<string, string | null>) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === null || value === '') {
-          params.delete(key)
-        } else {
-          params.set(key, value)
-        }
-      })
-      
-      startTransition(() => {
-        router.push(`?${params.toString()}`)
-      })
-    },
-    [router, searchParams]
-  )
-
-  // Sorting state derived from URL
-  const sorting: SortingState = useMemo(
-    () => [
-      {
-        id: currentSortBy === 'createdAt' ? 'timestamp' : currentSortBy,
-        desc: currentSortOrder === 'desc',
-      },
-    ],
-    [currentSortBy, currentSortOrder]
-  )
-
-  const handleSortingChange = useCallback(
-    (updater: any) => {
-      const newSorting = typeof updater === 'function' ? updater(sorting) : updater
-      
-      if (newSorting.length > 0) {
-        const sortBy = newSorting[0].id === 'timestamp' ? 'createdAt' : newSorting[0].id
-        const sortOrder = newSorting[0].desc ? 'desc' : 'asc'
-        updateURL({ sortBy, sortOrder, page: '1' })
-      }
-    },
-    [sorting, updateURL]
-  )
 
   const table = useReactTable({
-    data: initialData.data,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
-    manualFiltering: true,
-    manualPagination: true,
-    pageCount: initialData.totalPages,
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
+      columnFilters,
       columnVisibility,
-      pagination: {
-        pageIndex: currentPage - 1,
-        pageSize: currentPageSize,
-      },
+      globalFilter,
+      pagination,
     },
-    onSortingChange: handleSortingChange,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    globalFilterFn: 'includesString',
   })
 
-  const handleRefresh = () => {
-    startTransition(() => {
-      router.refresh()
-    })
-  }
-
-  const handleSearch = (value: string) => {
-    updateURL({ search: value || null, page: '1' })
-  }
-
-  const handleActionFilterChange = (values: string[]) => {
-    updateURL({ action: values.length > 0 ? values[0] : null, page: '1' })
-  }
-
-  const handleEntityTypeFilterChange = (values: string[]) => {
-    updateURL({ entityType: values.length > 0 ? values[0] : null, page: '1' })
-  }
-
-  const handleMemberFilterChange = (values: string[]) => {
-    updateURL({ member: values.length > 0 ? values[0] : null, page: '1' })
+  const handleRefresh = async () => {
+    const result = await getAuditLogs({ pageSize: 1000 })
+    setData(result.data)
   }
 
   const handleClearFilters = () => {
-    updateURL({
-      search: null,
-      action: null,
-      entityType: null,
-      member: null,
-      page: '1',
-    })
+    setColumnFilters([])
+    setGlobalFilter('')
+    setSearchInput('')
   }
 
-  const hasFilters = currentSearch || currentAction || currentEntityType || currentMember
-
-  const paginationInfo = useMemo(() => {
-    const startRow =
-      initialData.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
-    const endRow = Math.min(currentPage * currentPageSize, initialData.totalCount)
-    return { startRow, endRow }
-  }, [currentPage, currentPageSize, initialData.data.length, initialData.totalCount])
+  const hasFilters = columnFilters.length > 0 || globalFilter.length > 0
 
   return (
     <div className="w-full space-y-3">
@@ -236,40 +132,29 @@ export function DataTable({ initialData }: DataTableProps) {
             <Input
               className={'hidden md:flex'}
               placeholder="Search audit logs..."
-              defaultValue={currentSearch}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch(e.currentTarget.value)
-                }
-              }}
-              onBlur={(e) => handleSearch(e.currentTarget.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
             {/** Mobile only: Show input, view options and refresh button */}
             <ButtonGroup className={'w-full flex-1 md:hidden'}>
               <Input
                 placeholder="Search audit logs..."
-                defaultValue={currentSearch}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSearch(e.currentTarget.value)
-                  }
-                }}
-                onBlur={(e) => handleSearch(e.currentTarget.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
               <DataTableViewOptions table={table} />
               <Button
                 variant="outline"
                 size="icon"
                 type="button"
-                disabled={isPending}
-                suppressHydrationWarning
                 onClick={handleRefresh}>
-                <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+                <RefreshCwIcon />
                 <span className={'sr-only'}>Refresh Data</span>
               </Button>
             </ButtonGroup>
           </div>
           <DataTableFacetedFilter
+            column={table.getColumn('action')}
             title={'Action'}
             options={[
               {
@@ -288,33 +173,30 @@ export function DataTable({ initialData }: DataTableProps) {
                 icon: Trash2Icon,
               },
             ]}
-            selectedValues={new Set(currentAction ? [currentAction] : [])}
-            onSelectedValuesChange={handleActionFilterChange}
           />
           <DataTableFacetedFilter
+            column={table.getColumn('entityType')}
             title={'Entity Type'}
-            options={uniqueEntityTypes.map((type) => ({
-              ...type,
-              icon: DatabaseIcon,
-            }))}
-            selectedValues={new Set(currentEntityType ? [currentEntityType] : [])}
-            onSelectedValuesChange={handleEntityTypeFilterChange}
+            options={[
+              { value: 'session', label: 'Session', icon: DatabaseIcon },
+              { value: 'member', label: 'Member', icon: DatabaseIcon },
+              { value: 'subscription', label: 'Subscription', icon: DatabaseIcon },
+              { value: 'plan', label: 'Plan', icon: DatabaseIcon },
+            ]}
           />
           <DataTableFacetedFilter
+            column={table.getColumn('memberName')}
             title={'Member'}
-            options={uniqueMembers.map((member) => ({
-              ...member,
+            options={Array.from(
+              table.getColumn('memberName')?.getFacetedUniqueValues() || new Map()
+            ).map(([value]) => ({
+              value: value as string,
+              label: value as string,
               icon: UserIcon,
             }))}
-            selectedValues={new Set(currentMember ? [currentMember] : [])}
-            onSelectedValuesChange={handleMemberFilterChange}
           />
           {hasFilters && (
-            <Button
-              variant="ghost"
-              size={'icon'}
-              onClick={handleClearFilters}
-              suppressHydrationWarning>
+            <Button variant="ghost" size={'icon'} onClick={handleClearFilters}>
               <XIcon />
               <span className={'sr-only'}>Remove filters</span>
             </Button>
@@ -328,10 +210,8 @@ export function DataTable({ initialData }: DataTableProps) {
               variant="outline"
               size="icon"
               type="button"
-              disabled={isPending}
-              suppressHydrationWarning
               onClick={handleRefresh}>
-              <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+              <RefreshCwIcon />
               <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
@@ -387,16 +267,20 @@ export function DataTable({ initialData }: DataTableProps) {
       </div>
       <div className="flex items-center justify-between">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
-          {initialData.totalCount} audit logs
+          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+          {Math.min(
+            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+            table.getFilteredRowModel().rows.length
+          )}{' '}
+          of {table.getFilteredRowModel().rows.length} audit logs
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">Rows per page</p>
             <Select
-              value={currentPageSize.toString()}
+              value={table.getState().pagination.pageSize.toString()}
               onValueChange={(value) => {
-                updateURL({ pageSize: value, page: '1' })
+                table.setPageSize(Number(value))
               }}>
               <SelectTrigger className="h-8 w-[70px]">
                 <SelectValue placeholder="10" />
@@ -411,24 +295,41 @@ export function DataTable({ initialData }: DataTableProps) {
             </Select>
           </div>
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {currentPage} of {initialData.totalPages}
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getPageCount()}
           </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}>
+              <span className="sr-only">Go to first page</span>
+              <ChevronsLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() => updateURL({ page: (currentPage - 1).toString() })}
-              disabled={currentPage <= 1 || isPending}>
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}>
               <span className="sr-only">Go to previous page</span>
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() => updateURL({ page: (currentPage + 1).toString() })}
-              disabled={currentPage >= initialData.totalPages || isPending}>
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}>
               <span className="sr-only">Go to next page</span>
               <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}>
+              <span className="sr-only">Go to last page</span>
+              <ChevronsRightIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>

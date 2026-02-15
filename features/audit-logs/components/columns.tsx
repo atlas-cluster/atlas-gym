@@ -38,11 +38,14 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
     enableGlobalFilter: false,
   },
   {
-    id: 'member',
+    id: 'memberName',
     accessorKey: 'memberName',
     header: 'Member',
     cell: ({ row }) => {
-      return <span className="font-medium">{row.getValue('member')}</span>
+      return <span className="font-medium">{row.getValue('memberName')}</span>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
     },
   },
   {
@@ -57,13 +60,19 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
         </Badge>
       )
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
   },
   {
-    id: 'entity type',
+    id: 'entityType',
     accessorKey: 'entityType',
     header: 'Entity Type',
     cell: ({ row }) => {
-      return <div className="capitalize">{row.getValue('entity type')}</div>
+      return <div className="capitalize">{row.getValue('entityType')}</div>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
     },
   },
   {
