@@ -71,6 +71,13 @@ export function DataTable({ initialData }: DataTableProps) {
     [searchParams]
   )
 
+  // Memoize pagination display values to prevent hydration mismatches
+  const paginationInfo = useMemo(() => {
+    const startRow = data.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
+    const endRow = Math.min(currentPage * currentPageSize, data.totalCount)
+    return { startRow, endRow }
+  }, [currentPage, currentPageSize, data.data.length, data.totalCount])
+
   const table = useReactTable({
     data: data.data,
     columns,
@@ -291,9 +298,7 @@ export function DataTable({ initialData }: DataTableProps) {
 
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing{' '}
-          {data.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0}{' '}
-          to {Math.min(currentPage * currentPageSize, data.totalCount)} of{' '}
+          Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
           {data.totalCount} audit logs
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
