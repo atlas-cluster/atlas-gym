@@ -1,23 +1,26 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, RefreshCwIcon, XIcon } from 'lucide-react'
+import {
+  ActivityIcon,
+  DatabaseIcon,
+  PlusCircleIcon,
+  RefreshCwIcon,
+  Trash2Icon,
+  UserIcon,
+  XIcon,
+} from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 
 import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
 import { ActionType } from '@/features/audit-logs/types'
+import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
+import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import { Input } from '@/features/shared/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/features/shared/components/ui/select'
 import {
   Table,
   TableBody,
@@ -32,6 +35,9 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -41,162 +47,79 @@ interface DataTableProps {
   initialData: AuditLogsResponse
 }
 
-const actionOptions = [
-  { label: 'All', value: 'all' },
-  { label: 'Create', value: 'CREATE' },
-  { label: 'Update', value: 'UPDATE' },
-  { label: 'Delete', value: 'DELETE' },
-]
-
 export function DataTable({ initialData }: DataTableProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-  const [data, setData] = useState(initialData)
-  const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [tableData, setTableData] = useState(initialData.data)
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'createdAt', desc: true },
+  ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  // Extract current filters from URL - using useMemo to prevent hydration mismatches
-  const currentPage = useMemo(
-    () => parseInt(searchParams.get('page') || '1', 10),
-    [searchParams]
-  )
-  const currentPageSize = useMemo(
-    () => parseInt(searchParams.get('pageSize') || '10', 10),
-    [searchParams]
-  )
-  const currentAction = useMemo(
-    () => searchParams.get('action') as ActionType | null,
-    [searchParams]
-  )
-  const currentEntityType = useMemo(
-    () => searchParams.get('entityType') || null,
-    [searchParams]
-  )
-
-  // Memoize pagination display values to prevent hydration mismatches
-  const paginationInfo = useMemo(() => {
-    const dataArray = data?.data ?? []
-    const totalCount = data?.totalCount ?? 0
-    const startRow =
-      dataArray.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
-    const endRow = Math.min(currentPage * currentPageSize, totalCount)
-    return { startRow, endRow }
-  }, [currentPage, currentPageSize, data?.data, data?.totalCount])
-
   const table = useReactTable({
-    data: data?.data ?? [],
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    pageCount: data?.totalPages ?? 1,
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      pagination: {
-        pageIndex: currentPage - 1,
-        pageSize: currentPageSize,
-      },
+      globalFilter,
     },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
   })
 
-  // Fetch data when filters/sorting/pagination change
   const fetchData = useCallback(async () => {
-    const sortBy = sorting[0]?.id || 'createdAt'
-    const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
-
     startTransition(async () => {
       const result = await getAuditLogs({
-        page: currentPage,
-        pageSize: currentPageSize,
-        search,
-        sortBy,
-        sortOrder,
-        action: currentAction || undefined,
-        entityType: currentEntityType || undefined,
+        page: 1,
+        pageSize: 1000, // Get all data for client-side filtering/sorting
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
       })
-      setData(result)
+      setTableData(result.data)
     })
-  }, [
-    sorting,
-    currentPage,
-    currentPageSize,
-    search,
-    currentAction,
-    currentEntityType,
-  ])
+  }, [])
 
-  // Update URL when filters change
-  const updateURL = (params: Record<string, string | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString())
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) {
-        newSearchParams.set(key, value)
-      } else {
-        newSearchParams.delete(key)
-      }
-    })
-
-    router.push(`?${newSearchParams.toString()}`, { scroll: false })
-  }
-
-  // Handle search input change
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-  }
-
-  // Handle search submit
-  const handleSearchSubmit = () => {
-    updateURL({ search: search || null, page: '1' })
-  }
-
-  // Handle filter changes
-  const handleActionFilterChange = (value: string) => {
-    updateURL({ action: value === 'all' ? null : value, page: '1' })
-  }
-
-  // Handle page size change
-  const handlePageSizeChange = (value: string) => {
-    updateURL({ pageSize: value, page: '1' })
-  }
-
-  // Handle pagination
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      updateURL({ page: (currentPage - 1).toString() })
-    }
-  }
-
-  const handleNextPage = () => {
-    if (currentPage < (data?.totalPages ?? 1)) {
-      updateURL({ page: (currentPage + 1).toString() })
-    }
-  }
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    setSearch('')
-    router.push('?page=1&pageSize=10', { scroll: false })
-  }
-
-  // Fetch data when URL changes
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  const hasFilters = search || currentAction || currentEntityType
+  const handleRefresh = () => {
+    fetchData()
+  }
+
+  // Get unique member names for faceted filter
+  const uniqueMembers = Array.from(
+    new Set(tableData.map((log) => log.memberName).filter(Boolean))
+  )
+    .sort()
+    .map((name) => ({
+      value: name,
+      label: name,
+    }))
+
+  // Get unique entity types for faceted filter
+  const uniqueEntityTypes = Array.from(
+    new Set(tableData.map((log) => log.entityType).filter(Boolean))
+  )
+    .sort()
+    .map((type) => ({
+      value: type,
+      label: type.charAt(0).toUpperCase() + type.slice(1),
+    }))
 
   return (
     <div className="w-full space-y-3">
@@ -207,17 +130,15 @@ export function DataTable({ initialData }: DataTableProps) {
             <Input
               className={'hidden md:flex'}
               placeholder="Search audit logs..."
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+              value={globalFilter}
+              onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
             {/** Mobile only: Show input, view options and refresh button */}
             <ButtonGroup className={'w-full flex-1 md:hidden'}>
               <Input
                 placeholder="Search audit logs..."
-                value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                value={globalFilter}
+                onChange={(e) => table.setGlobalFilter(String(e.target.value))}
               />
               <DataTableViewOptions table={table} />
               <Button
@@ -226,41 +147,57 @@ export function DataTable({ initialData }: DataTableProps) {
                 type="button"
                 disabled={isPending}
                 suppressHydrationWarning
-                onClick={fetchData}>
+                onClick={handleRefresh}>
                 <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
                 <span className={'sr-only'}>Refresh Data</span>
               </Button>
             </ButtonGroup>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSearchSubmit}
-            disabled={isPending}
-            className="hidden md:flex">
-            Search
-          </Button>
-
-          <Select
-            value={currentAction || 'all'}
-            onValueChange={handleActionFilterChange}>
-            <SelectTrigger className="h-10 w-[150px]">
-              <SelectValue placeholder="Action" />
-            </SelectTrigger>
-            <SelectContent>
-              {actionOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {hasFilters && (
+          <DataTableFacetedFilter
+            title={'Action'}
+            options={[
+              {
+                value: 'CREATE',
+                label: 'Create',
+                icon: PlusCircleIcon,
+              },
+              {
+                value: 'UPDATE',
+                label: 'Update',
+                icon: ActivityIcon,
+              },
+              {
+                value: 'DELETE',
+                label: 'Delete',
+                icon: Trash2Icon,
+              },
+            ]}
+            column={table.getColumn('action')}
+          />
+          <DataTableFacetedFilter
+            title={'Entity Type'}
+            options={uniqueEntityTypes.map((type) => ({
+              ...type,
+              icon: DatabaseIcon,
+            }))}
+            column={table.getColumn('entityType')}
+          />
+          <DataTableFacetedFilter
+            title={'Member'}
+            options={uniqueMembers.map((member) => ({
+              ...member,
+              icon: UserIcon,
+            }))}
+            column={table.getColumn('memberName')}
+          />
+          {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button
               variant="ghost"
               size={'icon'}
-              onClick={handleClearFilters}
+              onClick={() => {
+                table.resetColumnFilters()
+                table.setGlobalFilter('')
+              }}
               suppressHydrationWarning>
               <XIcon />
               <span className={'sr-only'}>Remove filters</span>
@@ -277,29 +214,30 @@ export function DataTable({ initialData }: DataTableProps) {
               type="button"
               disabled={isPending}
               suppressHydrationWarning
-              onClick={fetchData}>
+              onClick={handleRefresh}>
               <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
               <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
         </div>
       </div>
-
       <div className="overflow-hidden rounded-md border mb-3">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -331,56 +269,7 @@ export function DataTable({ initialData }: DataTableProps) {
           </TableBody>
         </Table>
       </div>
-
-      {/* Custom pagination matching DataTablePagination style */}
-      <div className="flex items-center justify-between px-2">
-        <div className="text-muted-foreground flex-1 text-sm">
-          Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
-          {data?.totalCount ?? 0} audit logs
-        </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={currentPageSize.toString()}
-              onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={currentPageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 25, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={pageSize.toString()}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {currentPage} of {data?.totalPages ?? 1}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={handlePreviousPage}
-              disabled={currentPage <= 1 || isPending}>
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={handleNextPage}
-              disabled={currentPage >= (data?.totalPages ?? 1) || isPending}>
-              <span className="sr-only">Go to next page</span>
-              <ChevronRight />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   )
 }
