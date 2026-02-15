@@ -65,12 +65,12 @@ export async function updateMemberPayment(
   } finally {
     client.release()
   }
-  
+
   // Create audit log
   const { createAuditLog } = await import('@/features/audit-logs')
   const { getSession } = await import('@/features/auth')
   const session = await getSession()
-  
+
   if (session.authenticated && session.member) {
     await createAuditLog({
       memberId: session.member.id,

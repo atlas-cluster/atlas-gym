@@ -8,14 +8,14 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function convertToTrainer(id: string) {
   const session = await getSession()
-  
+
   // Get member info for audit log
   const memberResult = await pool.query(
     'SELECT firstname, lastname FROM members WHERE id = $1',
     [id]
   )
   const member = memberResult.rows[0]
-  
+
   await pool.query(
     `INSERT INTO trainers (member_id)
      VALUES ($1)
@@ -23,7 +23,7 @@ export async function convertToTrainer(id: string) {
     [id]
   )
   updateTag('members')
-  
+
   // Create audit log
   if (session.authenticated && session.member && member) {
     await createAuditLog({

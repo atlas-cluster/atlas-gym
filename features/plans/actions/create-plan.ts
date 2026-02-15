@@ -26,7 +26,7 @@ export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
 
   updateTag('plans')
   updateTag('members')
-  
+
   // Create audit log
   if (session.authenticated && session.member) {
     const planId = result.rows[0].id

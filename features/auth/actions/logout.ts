@@ -14,7 +14,7 @@ export async function logout() {
   if (sessionId) {
     try {
       await pool.query('DELETE FROM sessions WHERE id = $1', [sessionId])
-      
+
       // Create audit log
       if (session.authenticated && session.member) {
         await createAuditLog({

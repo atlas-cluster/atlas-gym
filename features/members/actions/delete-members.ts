@@ -8,10 +8,10 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function deleteMembers(ids: string[]) {
   const session = await getSession()
-  
+
   await pool.query('DELETE FROM members WHERE id = ANY($1)', [ids])
   updateTag('members')
-  
+
   // Create audit log
   if (session.authenticated && session.member) {
     await createAuditLog({

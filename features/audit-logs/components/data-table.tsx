@@ -55,7 +55,7 @@ export function DataTable({ initialData }: DataTableProps) {
   const [tableData, setTableData] = useState(initialData.data)
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'createdAt', desc: true },
+    { id: 'timestamp', desc: true },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -86,7 +86,7 @@ export function DataTable({ initialData }: DataTableProps) {
       const result = await getAuditLogs({
         page: 1,
         pageSize: 1000, // Get all data for client-side filtering/sorting
-        sortBy: 'createdAt',
+        sortBy: 'timestamp',
         sortOrder: 'desc',
       })
       setTableData(result.data)
@@ -180,7 +180,7 @@ export function DataTable({ initialData }: DataTableProps) {
               ...type,
               icon: DatabaseIcon,
             }))}
-            column={table.getColumn('entityType')}
+            column={table.getColumn('entity type')}
           />
           <DataTableFacetedFilter
             title={'Member'}
@@ -188,7 +188,7 @@ export function DataTable({ initialData }: DataTableProps) {
               ...member,
               icon: UserIcon,
             }))}
-            column={table.getColumn('memberName')}
+            column={table.getColumn('member')}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button

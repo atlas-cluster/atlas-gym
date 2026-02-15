@@ -90,14 +90,17 @@ export async function createSubscription(
 
   updateTag('subscriptions')
   updateTag('members')
-  
+
   // Create audit log
   const { createAuditLog } = await import('@/features/audit-logs')
-  
+
   // Get plan name for better description
-  const planNameResult = await pool.query('SELECT name FROM plans WHERE id = $1', [planId])
+  const planNameResult = await pool.query(
+    'SELECT name FROM plans WHERE id = $1',
+    [planId]
+  )
   const planName = planNameResult.rows[0]?.name || 'Unknown plan'
-  
+
   await createAuditLog({
     memberId: session.member.id,
     entityId: planId,

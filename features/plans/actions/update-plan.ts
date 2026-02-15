@@ -34,7 +34,7 @@ export async function updatePlan(
 
   updateTag('plans')
   updateTag('members')
-  
+
   // Create audit log
   if (session.authenticated && session.member) {
     await createAuditLog({

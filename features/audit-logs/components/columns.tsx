@@ -6,6 +6,7 @@ import { ArrowUpDown } from 'lucide-react'
 import { AuditLogDisplay } from '@/features/audit-logs/types'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
+import { cn } from '@/features/shared/lib/utils'
 import { ColumnDef } from '@tanstack/react-table'
 
 const actionColorMap = {
@@ -16,6 +17,7 @@ const actionColorMap = {
 
 export const columns: ColumnDef<AuditLogDisplay>[] = [
   {
+    id: 'timestamp',
     accessorKey: 'createdAt',
     header: ({ column }) => {
       return (
@@ -23,43 +25,30 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
           Timestamp
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue('createdAt'))
-      return <div className="text-sm">{format(date, 'dd.MM.yyyy HH:mm')}</div>
+      const date = new Date(row.getValue('timestamp'))
+      return <span className="ml-3">{format(date, 'dd.MM.yyyy HH:mm')}</span>
     },
+    enableSorting: true,
+    enableHiding: true,
+    enableGlobalFilter: false,
   },
   {
+    id: 'member',
     accessorKey: 'memberName',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Member
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: 'Member',
     cell: ({ row }) => {
-      return <div className="font-medium">{row.getValue('memberName')}</div>
+      return <span className="font-medium">{row.getValue('member')}</span>
     },
   },
   {
+    id: 'action',
     accessorKey: 'action',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Action
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: 'Action',
     cell: ({ row }) => {
       const action = row.getValue('action') as keyof typeof actionColorMap
       return (
@@ -70,35 +59,18 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
     },
   },
   {
+    id: 'entity type',
     accessorKey: 'entityType',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Entity Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: 'Entity Type',
     cell: ({ row }) => {
-      return <div className="capitalize">{row.getValue('entityType')}</div>
+      return <div className="capitalize">{row.getValue('entity type')}</div>
     },
   },
   {
     accessorKey: 'description',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Description
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: 'Description',
     cell: ({ row }) => {
-      return <div className="max-w-[500px]">{row.getValue('description')}</div>
+      return <span className="max-w-125">{row.getValue('description')}</span>
     },
   },
 ]

@@ -8,15 +8,17 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function deletePlan(id: string) {
   const session = await getSession()
-  
+
   // Get plan name before deletion for audit log
-  const planResult = await pool.query('SELECT name FROM plans WHERE id = $1', [id])
+  const planResult = await pool.query('SELECT name FROM plans WHERE id = $1', [
+    id,
+  ])
   const plan = planResult.rows[0]
-  
+
   await pool.query('DELETE FROM plans WHERE id = $1', [id])
   updateTag('plans')
   updateTag('members')
-  
+
   // Create audit log
   if (session.authenticated && session.member && plan) {
     await createAuditLog({
