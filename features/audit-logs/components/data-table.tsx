@@ -73,19 +73,21 @@ export function DataTable({ initialData }: DataTableProps) {
 
   // Memoize pagination display values to prevent hydration mismatches
   const paginationInfo = useMemo(() => {
-    const startRow = data.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
-    const endRow = Math.min(currentPage * currentPageSize, data.totalCount)
+    const dataArray = data?.data ?? []
+    const totalCount = data?.totalCount ?? 0
+    const startRow = dataArray.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
+    const endRow = Math.min(currentPage * currentPageSize, totalCount)
     return { startRow, endRow }
-  }, [currentPage, currentPageSize, data.data.length, data.totalCount])
+  }, [currentPage, currentPageSize, data?.data, data?.totalCount])
 
   const table = useReactTable({
-    data: data.data,
+    data: data?.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    pageCount: data.totalPages,
+    pageCount: data?.totalPages ?? 1,
     state: {
       sorting,
       columnFilters,
@@ -167,7 +169,7 @@ export function DataTable({ initialData }: DataTableProps) {
   }
 
   const handleNextPage = () => {
-    if (currentPage < data.totalPages) {
+    if (currentPage < (data?.totalPages ?? 1)) {
       updateURL({ page: (currentPage + 1).toString() })
     }
   }
@@ -299,7 +301,7 @@ export function DataTable({ initialData }: DataTableProps) {
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
           Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
-          {data.totalCount} audit logs
+          {data?.totalCount ?? 0} audit logs
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
@@ -320,7 +322,7 @@ export function DataTable({ initialData }: DataTableProps) {
             </Select>
           </div>
           <div className="flex items-center justify-center text-sm font-medium">
-            Page {currentPage} of {data.totalPages}
+            Page {currentPage} of {data?.totalPages ?? 1}
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -334,7 +336,7 @@ export function DataTable({ initialData }: DataTableProps) {
               variant="outline"
               size="sm"
               onClick={handleNextPage}
-              disabled={currentPage >= data.totalPages || isPending}>
+              disabled={currentPage >= (data?.totalPages ?? 1) || isPending}>
               Next
             </Button>
           </div>
