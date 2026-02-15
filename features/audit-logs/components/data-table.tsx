@@ -1,6 +1,6 @@
 'use client'
 
-import { RefreshCwIcon, XIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCwIcon, XIcon } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 
@@ -199,28 +199,52 @@ export function DataTable({ initialData }: DataTableProps) {
   const hasFilters = search || currentAction || currentEntityType
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-1 items-center gap-2">
-          <Input
-            placeholder="Search audit logs..."
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-            className="h-8 w-[250px]"
-          />
+    <div className="w-full space-y-3">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+        <div className="flex w-full flex-wrap items-center gap-2">
+          <div className="flex w-full gap-2 md:w-64">
+            {/** Desktop only: Show input only */}
+            <Input
+              className={'hidden md:flex'}
+              placeholder="Search audit logs..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+            />
+            {/** Mobile only: Show input, view options and refresh button */}
+            <ButtonGroup className={'w-full flex-1 md:hidden'}>
+              <Input
+                placeholder="Search audit logs..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+              />
+              <DataTableViewOptions table={table} />
+              <Button
+                variant="outline"
+                size="icon"
+                type="button"
+                disabled={isPending}
+                suppressHydrationWarning
+                onClick={fetchData}>
+                <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+                <span className={'sr-only'}>Refresh Data</span>
+              </Button>
+            </ButtonGroup>
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleSearchSubmit}
-            disabled={isPending}>
+            disabled={isPending}
+            className="hidden md:flex">
             Search
           </Button>
 
           <Select
             value={currentAction || 'all'}
             onValueChange={handleActionFilterChange}>
-            <SelectTrigger className="h-8 w-[150px]">
+            <SelectTrigger className="h-10 w-[150px]">
               <SelectValue placeholder="Action" />
             </SelectTrigger>
             <SelectContent>
@@ -239,11 +263,11 @@ export function DataTable({ initialData }: DataTableProps) {
               onClick={handleClearFilters}
               suppressHydrationWarning>
               <XIcon />
-              <span className={'sr-only'}>Clear filters</span>
+              <span className={'sr-only'}>Remove filters</span>
             </Button>
           )}
         </div>
-
+        {/** Desktop only: Show view options and refresh button on the right */}
         <div className={'hidden md:flex gap-2'}>
           <ButtonGroup>
             <DataTableViewOptions table={table} />
@@ -255,7 +279,7 @@ export function DataTable({ initialData }: DataTableProps) {
               suppressHydrationWarning
               onClick={fetchData}>
               <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
-              <span className={'sr-only'}>Refresh</span>
+              <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
         </div>
@@ -280,15 +304,7 @@ export function DataTable({ initialData }: DataTableProps) {
             ))}
           </TableHeader>
           <TableBody>
-            {isPending ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -316,8 +332,9 @@ export function DataTable({ initialData }: DataTableProps) {
         </Table>
       </div>
 
+      {/* Custom pagination matching DataTablePagination style */}
       <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex-1 text-sm">
           Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
           {data?.totalCount ?? 0} audit logs
         </div>
@@ -328,10 +345,10 @@ export function DataTable({ initialData }: DataTableProps) {
               value={currentPageSize.toString()}
               onValueChange={handlePageSizeChange}>
               <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder="10" />
+                <SelectValue placeholder={currentPageSize} />
               </SelectTrigger>
               <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((pageSize) => (
+                {[10, 20, 25, 30, 40, 50].map((pageSize) => (
                   <SelectItem key={pageSize} value={pageSize.toString()}>
                     {pageSize}
                   </SelectItem>
@@ -339,23 +356,27 @@ export function DataTable({ initialData }: DataTableProps) {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-center text-sm font-medium">
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {currentPage} of {data?.totalPages ?? 1}
           </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="size-8"
               onClick={handlePreviousPage}
               disabled={currentPage <= 1 || isPending}>
-              Previous
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft />
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="size-8"
               onClick={handleNextPage}
               disabled={currentPage >= (data?.totalPages ?? 1) || isPending}>
-              Next
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight />
             </Button>
           </div>
         </div>
