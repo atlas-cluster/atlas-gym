@@ -7,7 +7,9 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
 import { ActionType } from '@/features/audit-logs/types'
+import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
 import { Button } from '@/features/shared/components/ui/button'
+import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import { Input } from '@/features/shared/components/ui/input'
 import {
   Select,
@@ -27,8 +29,11 @@ import {
 import {
   ColumnFiltersState,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 
@@ -52,6 +57,7 @@ export function DataTable({ initialData }: DataTableProps) {
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
   // Extract current filters from URL - using useMemo to prevent hydration mismatches
   const currentPage = useMemo(
@@ -85,6 +91,8 @@ export function DataTable({ initialData }: DataTableProps) {
     data: data?.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
@@ -92,6 +100,7 @@ export function DataTable({ initialData }: DataTableProps) {
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
       pagination: {
         pageIndex: currentPage - 1,
         pageSize: currentPageSize,
@@ -99,6 +108,7 @@ export function DataTable({ initialData }: DataTableProps) {
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
   })
 
   // Fetch data when filters/sorting/pagination change
@@ -225,26 +235,33 @@ export function DataTable({ initialData }: DataTableProps) {
           {hasFilters && (
             <Button
               variant="ghost"
-              size="sm"
+              size={'icon'}
               onClick={handleClearFilters}
-              className="h-8 px-2 lg:px-3">
-              Clear
-              <XIcon className="ml-2 h-4 w-4" />
+              suppressHydrationWarning>
+              <XIcon />
+              <span className={'sr-only'}>Clear filters</span>
             </Button>
           )}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchData}
-          disabled={isPending}>
-          <RefreshCwIcon className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+        <div className={'hidden md:flex gap-2'}>
+          <ButtonGroup>
+            <DataTableViewOptions table={table} />
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              disabled={isPending}
+              suppressHydrationWarning
+              onClick={fetchData}>
+              <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+              <span className={'sr-only'}>Refresh</span>
+            </Button>
+          </ButtonGroup>
+        </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-md border mb-3">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

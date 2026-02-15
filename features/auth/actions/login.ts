@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { loginSchema } from '@/features/auth/schemas/login'
 import { LoginError } from '@/features/auth/types'
 import { pool } from '@/features/shared/lib/db'
@@ -49,7 +50,16 @@ export async function login(
 
     const sessionId = sessionResult.rows[0].id
 
-    // 4. Set cookie
+    // 4. Create audit log
+    await createAuditLog({
+      memberId: member.id,
+      entityId: sessionId,
+      entityType: 'session',
+      action: 'CREATE',
+      description: `User logged in`,
+    })
+
+    // 5. Set cookie
     const cookieStore = await cookies()
     cookieStore.set('session', sessionId, {
       httpOnly: true,
