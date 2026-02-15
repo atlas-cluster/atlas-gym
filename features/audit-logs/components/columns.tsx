@@ -29,11 +29,7 @@ export const columns: ColumnDef<AuditLogDisplay>[] = [
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue('createdAt'))
-      return (
-        <div className="text-sm">
-          {format(date, 'dd.MM.yyyy HH:mm')}
-        </div>
-      )
+      return <div className="text-sm">{format(date, 'dd.MM.yyyy HH:mm')}</div>
     },
   },
   {

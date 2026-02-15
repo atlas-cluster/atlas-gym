@@ -37,7 +37,7 @@ interface DataTableProps {
 }
 
 const actionOptions = [
-  { label: 'All', value: '' },
+  { label: 'All', value: 'all' },
   { label: 'Create', value: 'CREATE' },
   { label: 'Update', value: 'UPDATE' },
   { label: 'Delete', value: 'DELETE' },
@@ -75,7 +75,8 @@ export function DataTable({ initialData }: DataTableProps) {
   const paginationInfo = useMemo(() => {
     const dataArray = data?.data ?? []
     const totalCount = data?.totalCount ?? 0
-    const startRow = dataArray.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
+    const startRow =
+      dataArray.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
     const endRow = Math.min(currentPage * currentPageSize, totalCount)
     return { startRow, endRow }
   }, [currentPage, currentPageSize, data?.data, data?.totalCount])
@@ -153,7 +154,7 @@ export function DataTable({ initialData }: DataTableProps) {
 
   // Handle filter changes
   const handleActionFilterChange = (value: string) => {
-    updateURL({ action: value || null, page: '1' })
+    updateURL({ action: value === 'all' ? null : value, page: '1' })
   }
 
   // Handle page size change
@@ -207,7 +208,7 @@ export function DataTable({ initialData }: DataTableProps) {
           </Button>
 
           <Select
-            value={currentAction || ''}
+            value={currentAction || 'all'}
             onValueChange={handleActionFilterChange}>
             <SelectTrigger className="h-8 w-[150px]">
               <SelectValue placeholder="Action" />
