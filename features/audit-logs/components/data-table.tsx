@@ -303,7 +303,7 @@ export function DataTable({ initialData }: DataTableProps) {
               value={currentPageSize.toString()}
               onValueChange={handlePageSizeChange}>
               <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={currentPageSize} />
+                <SelectValue placeholder="10" />
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 40, 50].map((pageSize) => (
