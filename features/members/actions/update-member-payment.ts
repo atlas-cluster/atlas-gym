@@ -65,4 +65,19 @@ export async function updateMemberPayment(
   } finally {
     client.release()
   }
+  
+  // Create audit log
+  const { createAuditLog } = await import('@/features/audit-logs')
+  const { getSession } = await import('@/features/auth')
+  const session = await getSession()
+  
+  if (session.authenticated && session.member) {
+    await createAuditLog({
+      memberId: session.member.id,
+      entityId: id,
+      entityType: 'member',
+      action: 'UPDATE',
+      description: `Updated payment method to ${paymentType}`,
+    }).catch((error) => console.error('Failed to create audit log:', error))
+  }
 }

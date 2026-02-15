@@ -99,4 +99,17 @@ export async function cancelSubscription(
 
   updateTag('subscriptions')
   updateTag('members')
+  
+  // Create audit log
+  const { createAuditLog } = await import('@/features/audit-logs')
+  
+  await createAuditLog({
+    memberId: session.member.id,
+    entityId: subscriptionId,
+    entityType: 'subscription',
+    action: 'UPDATE',
+    description: targetMemberId
+      ? `Cancelled subscription for member`
+      : `Cancelled subscription`,
+  }).catch((error) => console.error('Failed to create audit log:', error))
 }

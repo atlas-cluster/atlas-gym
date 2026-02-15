@@ -75,4 +75,17 @@ export async function revertCancellation(
 
   updateTag('subscriptions')
   updateTag('members')
+  
+  // Create audit log
+  const { createAuditLog } = await import('@/features/audit-logs')
+  
+  await createAuditLog({
+    memberId: session.member.id,
+    entityId: subscriptionId,
+    entityType: 'subscription',
+    action: 'UPDATE',
+    description: targetMemberId
+      ? `Reverted subscription cancellation for member`
+      : `Reverted subscription cancellation`,
+  }).catch((error) => console.error('Failed to create audit log:', error))
 }
