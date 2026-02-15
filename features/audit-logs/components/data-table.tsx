@@ -2,6 +2,8 @@
 
 import {
   ActivityIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   DatabaseIcon,
   PlusCircleIcon,
   RefreshCwIcon,
@@ -10,17 +12,22 @@ import {
   XIcon,
 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 
-import { AuditLogsResponse, getAuditLogs } from '@/features/audit-logs'
+import { AuditLogsResponse } from '@/features/audit-logs'
 import { columns } from '@/features/audit-logs/components/columns'
-import { ActionType } from '@/features/audit-logs/types'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
-import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import { Input } from '@/features/shared/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/features/shared/components/ui/select'
 import {
   Table,
   TableBody,
@@ -30,16 +37,10 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import {
-  ColumnFiltersState,
   SortingState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 
@@ -52,74 +53,179 @@ export function DataTable({ initialData }: DataTableProps) {
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-  const [tableData, setTableData] = useState(initialData.data)
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'timestamp', desc: true },
-  ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  // Read current URL params
+  const currentPage = useMemo(
+    () => parseInt(searchParams.get('page') || '1', 10),
+    [searchParams]
+  )
+  const currentPageSize = useMemo(
+    () => parseInt(searchParams.get('pageSize') || '10', 10),
+    [searchParams]
+  )
+  const currentSearch = useMemo(
+    () => searchParams.get('search') || '',
+    [searchParams]
+  )
+  const currentAction = useMemo(
+    () => searchParams.get('action') || null,
+    [searchParams]
+  )
+  const currentEntityType = useMemo(
+    () => searchParams.get('entityType') || null,
+    [searchParams]
+  )
+  const currentMember = useMemo(
+    () => searchParams.get('member') || null,
+    [searchParams]
+  )
+  const currentSortBy = useMemo(
+    () => searchParams.get('sortBy') || 'createdAt',
+    [searchParams]
+  )
+  const currentSortOrder = useMemo(
+    () => searchParams.get('sortOrder') || 'desc',
+    [searchParams]
+  )
+
+  // Column visibility state
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
+  // Get unique values for faceted filters from current page data
+  const uniqueMembers = useMemo(() => {
+    const seen = new Set<string>()
+    const members: Array<{ value: string; label: string }> = []
+    
+    for (const log of initialData.data) {
+      if (log.memberName && !seen.has(log.memberName)) {
+        seen.add(log.memberName)
+        members.push({ value: log.memberName, label: log.memberName })
+      }
+    }
+    
+    return members.sort((a, b) => a.label.localeCompare(b.label))
+  }, [initialData.data])
+
+  const uniqueEntityTypes = useMemo(() => {
+    const seen = new Set<string>()
+    const types: Array<{ value: string; label: string }> = []
+    
+    for (const log of initialData.data) {
+      if (log.entityType && !seen.has(log.entityType)) {
+        seen.add(log.entityType)
+        types.push({
+          value: log.entityType,
+          label: log.entityType.charAt(0).toUpperCase() + log.entityType.slice(1),
+        })
+      }
+    }
+    
+    return types.sort((a, b) => a.label.localeCompare(b.label))
+  }, [initialData.data])
+
+  // Update URL params
+  const updateURL = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString())
+      
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === '') {
+          params.delete(key)
+        } else {
+          params.set(key, value)
+        }
+      })
+      
+      startTransition(() => {
+        router.push(`?${params.toString()}`)
+      })
+    },
+    [router, searchParams]
+  )
+
+  // Sorting state derived from URL
+  const sorting: SortingState = useMemo(
+    () => [
+      {
+        id: currentSortBy === 'createdAt' ? 'timestamp' : currentSortBy,
+        desc: currentSortOrder === 'desc',
+      },
+    ],
+    [currentSortBy, currentSortOrder]
+  )
+
+  const handleSortingChange = useCallback(
+    (updater: any) => {
+      const newSorting = typeof updater === 'function' ? updater(sorting) : updater
+      
+      if (newSorting.length > 0) {
+        const sortBy = newSorting[0].id === 'timestamp' ? 'createdAt' : newSorting[0].id
+        const sortOrder = newSorting[0].desc ? 'desc' : 'asc'
+        updateURL({ sortBy, sortOrder, page: '1' })
+      }
+    },
+    [sorting, updateURL]
+  )
+
   const table = useReactTable({
-    data: tableData,
+    data: initialData.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: setGlobalFilter,
+    manualSorting: true,
+    manualFiltering: true,
+    manualPagination: true,
+    pageCount: initialData.totalPages,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
-      globalFilter,
+      pagination: {
+        pageIndex: currentPage - 1,
+        pageSize: currentPageSize,
+      },
     },
+    onSortingChange: handleSortingChange,
+    onColumnVisibilityChange: setColumnVisibility,
   })
 
-  const fetchData = useCallback(async () => {
-    startTransition(async () => {
-      const result = await getAuditLogs({
-        page: 1,
-        pageSize: 1000, // Get all data for client-side filtering/sorting
-        sortBy: 'timestamp',
-        sortOrder: 'desc',
-      })
-      setTableData(result.data)
-    })
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
   const handleRefresh = () => {
-    fetchData()
+    startTransition(() => {
+      router.refresh()
+    })
   }
 
-  // Get unique member names for faceted filter
-  const uniqueMembers = Array.from(
-    new Set(tableData.map((log) => log.memberName).filter(Boolean))
-  )
-    .sort()
-    .map((name) => ({
-      value: name,
-      label: name,
-    }))
+  const handleSearch = (value: string) => {
+    updateURL({ search: value || null, page: '1' })
+  }
 
-  // Get unique entity types for faceted filter
-  const uniqueEntityTypes = Array.from(
-    new Set(tableData.map((log) => log.entityType).filter(Boolean))
-  )
-    .sort()
-    .map((type) => ({
-      value: type,
-      label: type.charAt(0).toUpperCase() + type.slice(1),
-    }))
+  const handleActionFilterChange = (values: string[]) => {
+    updateURL({ action: values.length > 0 ? values[0] : null, page: '1' })
+  }
+
+  const handleEntityTypeFilterChange = (values: string[]) => {
+    updateURL({ entityType: values.length > 0 ? values[0] : null, page: '1' })
+  }
+
+  const handleMemberFilterChange = (values: string[]) => {
+    updateURL({ member: values.length > 0 ? values[0] : null, page: '1' })
+  }
+
+  const handleClearFilters = () => {
+    updateURL({
+      search: null,
+      action: null,
+      entityType: null,
+      member: null,
+      page: '1',
+    })
+  }
+
+  const hasFilters = currentSearch || currentAction || currentEntityType || currentMember
+
+  const paginationInfo = useMemo(() => {
+    const startRow =
+      initialData.data.length > 0 ? (currentPage - 1) * currentPageSize + 1 : 0
+    const endRow = Math.min(currentPage * currentPageSize, initialData.totalCount)
+    return { startRow, endRow }
+  }, [currentPage, currentPageSize, initialData.data.length, initialData.totalCount])
 
   return (
     <div className="w-full space-y-3">
@@ -130,15 +236,25 @@ export function DataTable({ initialData }: DataTableProps) {
             <Input
               className={'hidden md:flex'}
               placeholder="Search audit logs..."
-              value={globalFilter}
-              onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+              defaultValue={currentSearch}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(e.currentTarget.value)
+                }
+              }}
+              onBlur={(e) => handleSearch(e.currentTarget.value)}
             />
             {/** Mobile only: Show input, view options and refresh button */}
             <ButtonGroup className={'w-full flex-1 md:hidden'}>
               <Input
                 placeholder="Search audit logs..."
-                value={globalFilter}
-                onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+                defaultValue={currentSearch}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch(e.currentTarget.value)
+                  }
+                }}
+                onBlur={(e) => handleSearch(e.currentTarget.value)}
               />
               <DataTableViewOptions table={table} />
               <Button
@@ -172,7 +288,8 @@ export function DataTable({ initialData }: DataTableProps) {
                 icon: Trash2Icon,
               },
             ]}
-            column={table.getColumn('action')}
+            selectedValues={new Set(currentAction ? [currentAction] : [])}
+            onSelectedValuesChange={handleActionFilterChange}
           />
           <DataTableFacetedFilter
             title={'Entity Type'}
@@ -180,7 +297,8 @@ export function DataTable({ initialData }: DataTableProps) {
               ...type,
               icon: DatabaseIcon,
             }))}
-            column={table.getColumn('entity type')}
+            selectedValues={new Set(currentEntityType ? [currentEntityType] : [])}
+            onSelectedValuesChange={handleEntityTypeFilterChange}
           />
           <DataTableFacetedFilter
             title={'Member'}
@@ -188,16 +306,14 @@ export function DataTable({ initialData }: DataTableProps) {
               ...member,
               icon: UserIcon,
             }))}
-            column={table.getColumn('member')}
+            selectedValues={new Set(currentMember ? [currentMember] : [])}
+            onSelectedValuesChange={handleMemberFilterChange}
           />
-          {(table.getState().columnFilters.length > 0 || globalFilter) && (
+          {hasFilters && (
             <Button
               variant="ghost"
               size={'icon'}
-              onClick={() => {
-                table.resetColumnFilters()
-                table.setGlobalFilter('')
-              }}
+              onClick={handleClearFilters}
               suppressHydrationWarning>
               <XIcon />
               <span className={'sr-only'}>Remove filters</span>
@@ -269,7 +385,54 @@ export function DataTable({ initialData }: DataTableProps) {
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <div className="flex items-center justify-between">
+        <div className="flex-1 text-sm text-muted-foreground">
+          Showing {paginationInfo.startRow} to {paginationInfo.endRow} of{' '}
+          {initialData.totalCount} audit logs
+        </div>
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <Select
+              value={currentPageSize.toString()}
+              onValueChange={(value) => {
+                updateURL({ pageSize: value, page: '1' })
+              }}>
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 40, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {currentPage} of {initialData.totalPages}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => updateURL({ page: (currentPage - 1).toString() })}
+              disabled={currentPage <= 1 || isPending}>
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => updateURL({ page: (currentPage + 1).toString() })}
+              disabled={currentPage >= initialData.totalPages || isPending}>
+              <span className="sr-only">Go to next page</span>
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

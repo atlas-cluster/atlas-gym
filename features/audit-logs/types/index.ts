@@ -19,6 +19,7 @@ export interface AuditLogsParams {
   sortOrder?: 'asc' | 'desc'
   action?: ActionType
   entityType?: string
+  member?: string
 }
 
 export interface AuditLogsResponse {

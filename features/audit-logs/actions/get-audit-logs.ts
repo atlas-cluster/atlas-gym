@@ -14,6 +14,7 @@ export async function getAuditLogs(
     sortOrder = 'desc',
     action,
     entityType,
+    member,
   } = params
 
   const offset = (page - 1) * pageSize
@@ -44,6 +45,13 @@ export async function getAuditLogs(
   if (entityType) {
     conditions.push(`al.entity_type = $${paramIndex}`)
     values.push(entityType)
+    paramIndex++
+  }
+
+  // Member filter
+  if (member) {
+    conditions.push(`CONCAT(m.firstname, ' ', m.lastname) = $${paramIndex}`)
+    values.push(member)
     paramIndex++
   }
 

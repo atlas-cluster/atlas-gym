@@ -9,6 +9,9 @@ interface AuditLogsPageProps {
     search?: string
     action?: string
     entityType?: string
+    member?: string
+    sortBy?: string
+    sortOrder?: string
   }>
 }
 
@@ -22,9 +25,10 @@ export default async function AuditLogsPage({
     pageSize: params.pageSize ? parseInt(params.pageSize, 10) : 10,
     search: params.search,
     sortBy: params.sortBy || 'createdAt',
-    sortOrder: params.sortOrder || 'desc',
+    sortOrder: (params.sortOrder as 'asc' | 'desc') || 'desc',
     action: params.action as 'CREATE' | 'UPDATE' | 'DELETE' | undefined,
     entityType: params.entityType,
+    member: params.member,
   })
 
   return <DataTable initialData={auditLogs} />
