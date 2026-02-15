@@ -75,6 +75,7 @@ import {
 } from '@tanstack/table-core'
 
 export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
+  const router = useRouter()
   const { member: currentMember, refreshMember } = useAuth()
   const [isPending, startTransition] = useTransition()
   const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
@@ -185,7 +186,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleDelete = (id: string) => {
-    const promise = deleteMember(id).then(() => fetchData())
+    const promise = deleteMember(id).then(() => router.refresh())
 
     toast.promise(promise, {
       loading: 'Deleting member...',
@@ -195,7 +196,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleDeleteMany = (ids: string[]) => {
-    const promise = deleteMembers(ids).then(() => fetchData())
+    const promise = deleteMembers(ids).then(() => router.refresh())
 
     toast.promise(promise, {
       loading: 'Deleting members...',
@@ -235,7 +236,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   }
 
   const handleRefresh = () => {
-    fetchData()
+    router.refresh()
   }
 
   const handleCancelSubscription = (member: MemberDisplay) => {
@@ -341,14 +342,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       loading: 'Creating subscription...',
       success: 'Subscription created successfully',
       error: (err) => err?.message || 'Failed to create subscription',
-    })
-  }
-
-  const fetchData = () => {
-    startTransition(async () => {
-      const result = await getMembers()
-      setRowSelection({})
-      setTableData(result)
     })
   }
 
