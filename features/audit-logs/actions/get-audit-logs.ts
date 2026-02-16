@@ -1,6 +1,7 @@
 'use server'
 
 import {
+  Action,
   AuditLog,
   GetAuditLogsParams,
   GetAuditLogsResponse,
@@ -244,8 +245,7 @@ export async function getAuditLogs(
         row.firstname && row.lastname
           ? `${row.firstname} ${row.lastname}`
           : 'Unknown User',
-      action: (row.action.charAt(0).toUpperCase() +
-        row.action.slice(1).toLowerCase()) as Action,
+      action: row.action as Action,
       entity: row.entity,
       description: row.description,
       timestamp: row.timestamp,

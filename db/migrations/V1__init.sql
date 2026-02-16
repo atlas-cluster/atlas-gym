@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TYPE payment_type AS ENUM ('credit_card', 'iban');
 
-CREATE TYPE action_type AS ENUM ('CREATE', 'UPDATE', 'DELETE');
+CREATE TYPE action_type AS ENUM ('Create', 'Update', 'Delete');
 
 CREATE TABLE members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
