@@ -37,8 +37,11 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
       const result = await executeSQL(code)
       
       if (result.success) {
+        const truncatedWarning = result.truncated 
+          ? '\n\n⚠️ Warning: Results truncated to 100 rows. Use LIMIT in your query for specific row counts.' 
+          : ''
         setResult(
-          `Query executed successfully.\n\nRows returned: ${result.rowCount}\n\n${JSON.stringify(result.data, null, 2)}`
+          `Query executed successfully.${truncatedWarning}\n\nRows returned: ${result.rowCount}\n\n${JSON.stringify(result.data, null, 2)}`
         )
       } else {
         setResult(`Error: ${result.error || 'Unknown error'}`)
