@@ -21,6 +21,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/prismjs": "^1.26.6",
+    "@uiw/codemirror-theme-material": "^4.25.4",
     "@uiw/react-codemirror": "^4.25.4",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

@@ -2,9 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { EditorView } from '@codemirror/view'
-import { Extension } from '@codemirror/state'
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { tags as t } from '@lezer/highlight'
 
 import { executeSQL, getDBSchema } from '@/features/app'
 import { Button } from '@/features/shared/components/ui/button'
@@ -25,6 +22,7 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import { PostgreSQL, sql } from '@codemirror/lang-sql'
+import { materialDark } from '@uiw/codemirror-theme-material'
 import CodeMirror from '@uiw/react-codemirror'
 
 interface SQLEditorSheetProps {
@@ -39,123 +37,6 @@ interface QueryResult {
   truncated?: boolean
   error?: string
 }
-
-// Create a custom theme that matches shadcn colors - defined once outside component
-const shadcnTheme = EditorView.theme(
-  {
-    '&': {
-      color: 'hsl(var(--foreground))',
-      backgroundColor: 'hsl(var(--background))',
-      fontSize: '14px',
-      border: '1px solid hsl(var(--border))',
-      borderRadius: 'calc(var(--radius) - 2px)',
-    },
-    '.cm-content': {
-      caretColor: 'hsl(var(--foreground))',
-      padding: '8px 0',
-    },
-    '.cm-cursor, .cm-dropCursor': {
-      borderLeftColor: 'hsl(var(--foreground))',
-    },
-    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
-      {
-        backgroundColor: 'hsl(var(--accent))',
-      },
-    '.cm-activeLine': {
-      backgroundColor: 'hsl(var(--accent) / 0.5)',
-    },
-    '.cm-gutters': {
-      backgroundColor: 'hsl(var(--muted))',
-      color: 'hsl(var(--muted-foreground))',
-      border: 'none',
-      borderTopLeftRadius: 'calc(var(--radius) - 2px)',
-      borderBottomLeftRadius: 'calc(var(--radius) - 2px)',
-    },
-    '.cm-activeLineGutter': {
-      backgroundColor: 'hsl(var(--accent))',
-    },
-    '.cm-foldPlaceholder': {
-      backgroundColor: 'hsl(var(--muted))',
-      border: 'none',
-      color: 'hsl(var(--muted-foreground))',
-    },
-    '.cm-tooltip': {
-      border: '1px solid hsl(var(--border))',
-      backgroundColor: 'hsl(var(--popover))',
-      color: 'hsl(var(--popover-foreground))',
-      borderRadius: 'calc(var(--radius) - 2px)',
-    },
-    '.cm-tooltip.cm-tooltip-autocomplete': {
-      '& > ul': {
-        fontFamily: 'var(--font-mono)',
-        maxHeight: '15em',
-      },
-      '& > ul > li[aria-selected]': {
-        backgroundColor: 'hsl(var(--accent))',
-        color: 'hsl(var(--accent-foreground))',
-      },
-    },
-  },
-  { dark: false }
-)
-
-// Custom syntax highlighting that matches shadcn theme - defined once outside component
-const shadcnHighlightStyle = HighlightStyle.define([
-  { tag: t.keyword, color: 'hsl(var(--primary))' },
-  {
-    tag: [t.name, t.deleted, t.character, t.propertyName, t.macroName],
-    color: 'hsl(var(--foreground))',
-  },
-  {
-    tag: [t.function(t.variableName), t.labelName],
-    color: 'hsl(var(--primary))',
-  },
-  {
-    tag: [t.color, t.constant(t.name), t.standard(t.name)],
-    color: 'hsl(var(--chart-1))',
-  },
-  { tag: [t.definition(t.name), t.separator], color: 'hsl(var(--foreground))' },
-  {
-    tag: [
-      t.typeName,
-      t.className,
-      t.number,
-      t.changed,
-      t.annotation,
-      t.modifier,
-      t.self,
-      t.namespace,
-    ],
-    color: 'hsl(var(--chart-2))',
-  },
-  {
-    tag: [
-      t.operator,
-      t.operatorKeyword,
-      t.url,
-      t.escape,
-      t.regexp,
-      t.link,
-      t.special(t.string),
-    ],
-    color: 'hsl(var(--chart-3))',
-  },
-  { tag: [t.meta, t.comment], color: 'hsl(var(--muted-foreground))' },
-  { tag: t.strong, fontWeight: 'bold' },
-  { tag: t.emphasis, fontStyle: 'italic' },
-  { tag: t.strikethrough, textDecoration: 'line-through' },
-  { tag: t.link, color: 'hsl(var(--primary))', textDecoration: 'underline' },
-  { tag: t.heading, fontWeight: 'bold', color: 'hsl(var(--primary))' },
-  {
-    tag: [t.atom, t.bool, t.special(t.variableName)],
-    color: 'hsl(var(--chart-4))',
-  },
-  {
-    tag: [t.processingInstruction, t.string, t.inserted],
-    color: 'hsl(var(--chart-5))',
-  },
-  { tag: t.invalid, color: 'hsl(var(--destructive))' },
-])
 
 export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const [code, setCode] = useState(
@@ -229,6 +110,24 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     return sql({ dialect: PostgreSQL })
   }, [schema])
 
+  // Custom theme extension to match site colors
+  const customTheme = useMemo(() => {
+    return EditorView.theme({
+      '&': {
+        backgroundColor: 'transparent',
+        fontSize: '14px',
+      },
+      '.cm-scroller': {
+        fontFamily: 'var(--font-mono)',
+      },
+      '.cm-gutters': {
+        backgroundColor: 'hsl(var(--muted))',
+        color: 'hsl(var(--muted-foreground))',
+        border: 'none',
+      },
+    })
+  }, [])
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-6xl overflow-y-auto">
@@ -239,18 +138,15 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-col gap-4 py-4">
+        <div className="flex flex-col gap-4 py-4 px-6">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Query</label>
-            <div className="rounded-md overflow-hidden">
+            <div className="rounded-md overflow-hidden border border-border">
               <CodeMirror
                 value={code}
                 height="300px"
-                extensions={[
-                  sqlExtension,
-                  shadcnTheme,
-                  syntaxHighlighting(shadcnHighlightStyle),
-                ]}
+                theme={materialDark}
+                extensions={[sqlExtension, customTheme]}
                 onChange={(value) => setCode(value)}
                 basicSetup={{
                   lineNumbers: true,
@@ -338,7 +234,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
           )}
         </div>
 
-        <SheetFooter>
+        <SheetFooter className="px-6">
           <div className="flex gap-2 w-full">
             <Button
               variant="outline"
