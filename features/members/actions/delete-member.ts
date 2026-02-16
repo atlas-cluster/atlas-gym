@@ -20,7 +20,7 @@ export async function deleteMember(id: string) {
   if (member) {
     await createAuditLog({
       memberId: member.id,
-      action: 'DELETE',
+      action: 'Delete',
       entityId: id,
       entityType: 'member',
       description: `Member ${targetName} deleted`,

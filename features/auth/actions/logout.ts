@@ -19,7 +19,7 @@ export async function logout() {
       if (result.rows.length > 0) {
         await createAuditLog({
           memberId: result.rows[0].member_id,
-          action: 'DELETE',
+          action: 'Delete',
           entityId: sessionId,
           entityType: 'session',
           description: 'Member logged out',
