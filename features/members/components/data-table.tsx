@@ -180,10 +180,6 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     setDetailsOpen(nextOpen)
   }
 
-  const handlePaymentOpenChange = (nextOpen: boolean) => {
-    setPaymentOpen(nextOpen)
-  }
-
   const handleDelete = (id: string) => {
     const promise = deleteMember(id).then(() => fetchData())
 

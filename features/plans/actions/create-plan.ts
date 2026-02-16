@@ -28,7 +28,7 @@ export async function createPlan(data: z.infer<typeof planDetailsSchema>) {
   if (member) {
     await createAuditLog({
       memberId: member.id,
-      action: 'CREATE',
+      action: 'Create',
       entityId: result.rows[0].id,
       entityType: 'plan',
       description: `Plan created: ${validated.name}`,

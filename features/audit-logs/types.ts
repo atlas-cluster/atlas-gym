@@ -21,7 +21,7 @@ export const entityIcons: Record<string, typeof Activity> = {
   room: MapPin,
 }
 
-export type Action = 'CREATE' | 'UPDATE' | 'DELETE'
+export type Action = 'Create' | 'Update' | 'Delete'
 
 export interface AuditLog {
   member: string

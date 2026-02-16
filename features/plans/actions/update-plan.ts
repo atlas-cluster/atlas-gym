@@ -36,7 +36,7 @@ export async function updatePlan(
   if (member) {
     await createAuditLog({
       memberId: member.id,
-      action: 'UPDATE',
+      action: 'Update',
       entityId: id,
       entityType: 'plan',
       description: `Plan updated: ${validated.name}`,

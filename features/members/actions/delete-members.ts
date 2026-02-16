@@ -23,7 +23,7 @@ export async function deleteMembers(ids: string[]) {
         const name = membersMap.get(id) || 'Unknown member'
         return createAuditLog({
           memberId: member.id,
-          action: 'DELETE',
+          action: 'Delete',
           entityId: id,
           entityType: 'member',
           description: `Member ${name} deleted`,

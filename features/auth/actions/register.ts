@@ -119,7 +119,7 @@ export async function register(data: z.infer<typeof registerSchema>) {
     await createAuditLog({
       client,
       memberId,
-      action: 'CREATE',
+      action: 'Create',
       entityId: memberId,
       entityType: 'member',
       description: `Member registered: ${firstname} ${lastname}`,
@@ -128,7 +128,7 @@ export async function register(data: z.infer<typeof registerSchema>) {
     await createAuditLog({
       client,
       memberId,
-      action: 'CREATE',
+      action: 'Create',
       entityId: sessionId,
       entityType: 'session',
       description: 'Member logged in (auto)',

@@ -53,7 +53,7 @@ export async function login(
 
     await createAuditLog({
       memberId: member.id,
-      action: 'CREATE',
+      action: 'Create',
       entityId: sessionId,
       entityType: 'session',
       description: `Member logged in: ${memberName}`,

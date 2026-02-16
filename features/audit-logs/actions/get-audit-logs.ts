@@ -54,14 +54,18 @@ export async function getAuditLogs(
             }
             pIndex++
           } else if (filter.id === 'action') {
+            const actionValues = Array.isArray(filter.value)
+              ? (filter.value as string[]).map((v) => v.toUpperCase())
+              : [(filter.value as string).toUpperCase()]
+
             if (Array.isArray(filter.value)) {
               if (filter.value.length > 0) {
                 clause += ` AND al.action::text = ANY($${pIndex})`
-                clauseValues.push(filter.value)
+                clauseValues.push(actionValues)
               }
             } else {
               clause += ` AND al.action::text = $${pIndex}`
-              clauseValues.push(filter.value)
+              clauseValues.push(actionValues[0])
             }
             pIndex++
           } else if (filter.id === 'entity') {
@@ -240,7 +244,8 @@ export async function getAuditLogs(
         row.firstname && row.lastname
           ? `${row.firstname} ${row.lastname}`
           : 'Unknown User',
-      action: row.action,
+      action: (row.action.charAt(0).toUpperCase() +
+        row.action.slice(1).toLowerCase()) as Action,
       entity: row.entity,
       description: row.description,
       timestamp: row.timestamp,

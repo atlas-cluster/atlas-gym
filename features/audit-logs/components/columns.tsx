@@ -52,9 +52,9 @@ export const columns: ColumnDef<AuditLog>[] = [
       const action = row.getValue('action') as Action
       return (
         <Badge
-          variant={action === 'DELETE' ? 'destructive' : 'default'}
+          variant={action === 'Delete' ? 'destructive' : 'default'}
           className={
-            action === 'UPDATE' ? 'bg-chart-1 text-secondary-foreground' : ''
+            action === 'Update' ? 'bg-chart-1 text-secondary-foreground' : ''
           }>
           {action}
         </Badge>

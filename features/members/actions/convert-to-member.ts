@@ -20,7 +20,7 @@ export async function convertToMember(id: string) {
   if (member) {
     await createAuditLog({
       memberId: member.id,
-      action: 'UPDATE',
+      action: 'Update',
       entityId: id,
       entityType: 'member',
       description: `Demoted ${targetName} from trainer`,

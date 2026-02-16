@@ -34,7 +34,7 @@ export async function updateMember(
       await createAuditLog({
         client,
         memberId: member.id,
-        action: 'UPDATE',
+        action: 'Update',
         entityId: id,
         entityType: 'member',
         description: `Member updated: ${firstname} ${lastname}`,

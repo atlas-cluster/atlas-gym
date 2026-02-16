@@ -73,7 +73,7 @@ export async function updateMemberPayment(
       await createAuditLog({
         client,
         memberId: member.id,
-        action: 'UPDATE',
+        action: 'Update',
         entityId: id,
         entityType: 'member',
         description: `Payment method updated to ${paymentType} for ${targetName}`,

@@ -67,7 +67,7 @@ export async function cancelSubscription(
     if (session.member) {
       await createAuditLog({
         memberId: session.member.id,
-        action: 'DELETE',
+        action: 'Delete',
         entityId: subscriptionId,
         entityType: 'subscription',
         description: `Future subscription to ${planName} deleted for ${memberName}`,
@@ -113,10 +113,10 @@ export async function cancelSubscription(
     if (session.member) {
       await createAuditLog({
         memberId: session.member.id,
-        action: 'UPDATE',
+        action: 'Update',
         entityId: subscriptionId,
         entityType: 'subscription',
-        description: `Subscription to ${planName} cancelled for ${memberName}, effective ${endDate.toDateString()}`,
+        description: `Subscription to ${planName} cancelled for ${memberName}`,
       })
     }
   }

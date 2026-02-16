@@ -168,14 +168,14 @@ export function DataTable({
             {/** Desktop only: Show input only */}
             <Input
               className={'hidden md:flex'}
-              placeholder="Search Audit Logs..."
+              placeholder="Search audit logs..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
             />
             {/** Mobile only: Show input, view options and refresh button */}
             <ButtonGroup className={'w-full flex-1 md:hidden'}>
               <Input
-                placeholder="Search Audit Logs..."
+                placeholder="Search audit logs..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
               />
@@ -205,7 +205,7 @@ export function DataTable({
             column={table.getColumn('action')}
             title="Action"
             options={Object.keys(facets.action).map((key) => ({
-              label: key.charAt(0).toUpperCase() + key.slice(1),
+              label: key,
               value: key,
             }))}
             facets={new Map(Object.entries(facets.action))}

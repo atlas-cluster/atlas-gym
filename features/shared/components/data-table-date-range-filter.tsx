@@ -14,7 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/features/shared/components/ui/popover'
-import { cn } from '@/features/shared/lib/utils'
 import { Column } from '@tanstack/react-table'
 
 interface DataTableDateRangeFilterProps<TData, TValue> {
@@ -48,7 +47,7 @@ export function DataTableDateRangeFilter<TData, TValue>({
         setDate(undefined)
       }
     }
-  }, [filterValue, date]) // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValue, date])
 
   const updateFilter = (
     newDate: DateRange | undefined,

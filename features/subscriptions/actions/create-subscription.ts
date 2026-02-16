@@ -111,7 +111,7 @@ export async function createSubscription(
   if (session.member) {
     await createAuditLog({
       memberId: session.member.id,
-      action: 'CREATE',
+      action: 'Create',
       entityId: result.rows[0].id,
       entityType: 'subscription',
       description: `Subscription to ${planName} created for ${memberName}`,

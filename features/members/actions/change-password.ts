@@ -37,7 +37,7 @@ export async function changePassword(
       await createAuditLog({
         client,
         memberId: member.id,
-        action: 'UPDATE',
+        action: 'Update',
         entityId: id,
         entityType: 'member',
         description: `Password changed for ${updatedMember.firstname} ${updatedMember.lastname}`,

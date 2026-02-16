@@ -15,7 +15,7 @@ export async function deletePlan(id: string) {
   if (member) {
     await createAuditLog({
       memberId: member.id,
-      action: 'DELETE',
+      action: 'Delete',
       entityId: id,
       entityType: 'plan',
       description: `Plan ${planName} deleted`,

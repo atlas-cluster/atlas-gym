@@ -81,7 +81,7 @@ export async function revertCancellation(
   if (session.member) {
     await createAuditLog({
       memberId: session.member.id,
-      action: 'UPDATE',
+      action: 'Update',
       entityId: subscriptionId,
       entityType: 'subscription',
       description: `Cancellation reverted for ${planName} subscription of ${memberName}`,
