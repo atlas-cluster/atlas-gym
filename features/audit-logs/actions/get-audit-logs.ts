@@ -244,7 +244,7 @@ export async function getAuditLogs(
       member:
         row.firstname && row.lastname
           ? `${row.firstname} ${row.lastname}`
-          : 'Unknown User',
+          : 'Unknown member',
       action: row.action as Action,
       entity: row.entity,
       description: row.description,
