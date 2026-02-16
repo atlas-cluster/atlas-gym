@@ -3,6 +3,8 @@
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
+import { createAuditLog } from '@/features/audit-logs'
+import { getSession } from '@/features/auth'
 import { memberPaymentSchema } from '@/features/members/schemas/member-payment'
 import { pool } from '@/features/shared/lib/db'
 
@@ -10,6 +12,14 @@ export async function updateMemberPayment(
   id: string,
   data: z.infer<typeof memberPaymentSchema>
 ) {
+  const result = await pool.query(
+    'SELECT firstname, lastname FROM members WHERE id = $1',
+    [id]
+  )
+  const targetName = result.rows[0]
+    ? `${result.rows[0].firstname} ${result.rows[0].lastname}`
+    : 'Unknown member'
+
   const validation = memberPaymentSchema.safeParse(data)
 
   if (!validation.success) {
@@ -55,6 +65,19 @@ export async function updateMemberPayment(
          ) VALUES ($1, $2)`,
         [id, cleanIban]
       )
+    }
+
+    const { member } = await getSession()
+
+    if (member) {
+      await createAuditLog({
+        client,
+        memberId: member.id,
+        action: 'UPDATE',
+        entityId: id,
+        entityType: 'member',
+        description: `Payment method updated to ${paymentType} for ${targetName}`,
+      })
     }
 
     await client.query('COMMIT')

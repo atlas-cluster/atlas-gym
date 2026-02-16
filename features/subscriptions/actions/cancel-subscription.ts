@@ -3,6 +3,7 @@
 import { endOfMonth } from 'date-fns'
 import { updateTag } from 'next/cache'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
@@ -30,9 +31,10 @@ export async function cancelSubscription(
 
   // Get subscription details
   const subQuery = `
-    SELECT s.id, s.member_id, s.start_date, s.end_date, p.min_duration_months
+    SELECT s.id, s.member_id, s.start_date, s.end_date, p.min_duration_months, p.name as plan_name, m.firstname, m.lastname
     FROM subscriptions s
     JOIN plans p ON s.plan_id = p.id
+    JOIN members m ON s.member_id = m.id
     WHERE s.id = $1 AND s.member_id = $2
   `
 
@@ -43,6 +45,8 @@ export async function cancelSubscription(
   }
 
   const subscription = subResult.rows[0]
+  const memberName = `${subscription.firstname} ${subscription.lastname}`
+  const planName = subscription.plan_name
 
   if (subscription.end_date) {
     throw new Error('Subscription is already cancelled')
@@ -59,6 +63,16 @@ export async function cancelSubscription(
       WHERE id = $1 AND member_id = $2
     `
     await pool.query(deleteQuery, [subscriptionId, memberId])
+
+    if (session.member) {
+      await createAuditLog({
+        memberId: session.member.id,
+        action: 'DELETE',
+        entityId: subscriptionId,
+        entityType: 'subscription',
+        description: `Future subscription to ${planName} deleted for ${memberName}`,
+      })
+    }
   } else {
     // For active subscriptions, calculate end date
     // End date is the later of: end of current month OR end of minimum duration
@@ -95,6 +109,16 @@ export async function cancelSubscription(
     `
 
     await pool.query(updateQuery, [endDate, subscriptionId, memberId])
+
+    if (session.member) {
+      await createAuditLog({
+        memberId: session.member.id,
+        action: 'UPDATE',
+        entityId: subscriptionId,
+        entityType: 'subscription',
+        description: `Subscription to ${planName} cancelled for ${memberName}, effective ${endDate.toDateString()}`,
+      })
+    }
   }
 
   updateTag('subscriptions')

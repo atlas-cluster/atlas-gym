@@ -16,7 +16,7 @@ export function formatRoute(route: string) {
       return 'Members'
     case '/plans':
       return 'Plans'
-    case '/trainers':
-      return 'Trainers'
+    case '/audit-logs':
+      return 'Audit Logs'
   }
 }

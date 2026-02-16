@@ -2,6 +2,7 @@
 
 import { updateTag } from 'next/cache'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
@@ -28,12 +29,13 @@ export async function createSubscription(
   }
 
   // Check if plan exists
-  const planQuery = `SELECT id FROM plans WHERE id = $1`
+  const planQuery = `SELECT id, name FROM plans WHERE id = $1`
   const planResult = await pool.query(planQuery, [planId])
 
   if (planResult.rows.length === 0) {
     throw new Error('Plan not found')
   }
+  const planName = planResult.rows[0].name
 
   // Check for active subscription
   const activeSubQuery = `
@@ -84,9 +86,37 @@ export async function createSubscription(
   const insertQuery = `
     INSERT INTO subscriptions (member_id, plan_id, start_date)
     VALUES ($1, $2, $3)
+    RETURNING id
   `
 
-  await pool.query(insertQuery, [memberId, planId, startDate])
+  const result = await pool.query<{ id: string }>(insertQuery, [
+    memberId,
+    planId,
+    startDate,
+  ])
+
+  let memberName = 'Unknown'
+  if (memberId === session.member.id) {
+    memberName = `${session.member.firstname} ${session.member.lastname}`
+  } else {
+    const memberRes = await pool.query(
+      'SELECT firstname, lastname FROM members WHERE id = $1',
+      [memberId]
+    )
+    if (memberRes.rows.length > 0) {
+      memberName = `${memberRes.rows[0].firstname} ${memberRes.rows[0].lastname}`
+    }
+  }
+
+  if (session.member) {
+    await createAuditLog({
+      memberId: session.member.id,
+      action: 'CREATE',
+      entityId: result.rows[0].id,
+      entityType: 'subscription',
+      description: `Subscription to ${planName} created for ${memberName}`,
+    })
+  }
 
   updateTag('subscriptions')
   updateTag('members')

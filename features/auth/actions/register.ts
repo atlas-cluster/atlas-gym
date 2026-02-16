@@ -5,6 +5,7 @@ import { updateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { registerSchema } from '@/features/auth/schemas/register'
 import { pool } from '@/features/shared/lib/db'
 
@@ -114,6 +115,24 @@ export async function register(data: z.infer<typeof registerSchema>) {
     )
 
     const sessionId = sessionResult.rows[0].id
+
+    await createAuditLog({
+      client,
+      memberId,
+      action: 'CREATE',
+      entityId: memberId,
+      entityType: 'member',
+      description: `Member registered: ${firstname} ${lastname}`,
+    })
+
+    await createAuditLog({
+      client,
+      memberId,
+      action: 'CREATE',
+      entityId: sessionId,
+      entityType: 'session',
+      description: 'Member logged in (auto)',
+    })
 
     await client.query('COMMIT')
     updateTag('members')

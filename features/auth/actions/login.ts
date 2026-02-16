@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { loginSchema } from '@/features/auth/schemas/login'
 import { LoginError } from '@/features/auth/types'
 import { pool } from '@/features/shared/lib/db'
@@ -22,7 +23,7 @@ export async function login(
   try {
     // 1. Find member
     const result = await pool.query(
-      `SELECT id, password_hash FROM members WHERE email = $1`,
+      `SELECT id, password_hash, firstname, lastname FROM members WHERE email = $1`,
       [email]
     )
 
@@ -31,6 +32,7 @@ export async function login(
     }
 
     const member = result.rows[0]
+    const memberName = `${member.firstname} ${member.lastname}`
 
     // 2. Verify password
     const validPassword = await bcrypt.compare(password, member.password_hash)
@@ -48,6 +50,14 @@ export async function login(
     )
 
     const sessionId = sessionResult.rows[0].id
+
+    await createAuditLog({
+      memberId: member.id,
+      action: 'CREATE',
+      entityId: sessionId,
+      entityType: 'session',
+      description: `Member logged in: ${memberName}`,
+    })
 
     // 4. Set cookie
     const cookieStore = await cookies()

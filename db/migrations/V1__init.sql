@@ -142,7 +142,7 @@ CREATE TABLE audit_logs (
   entity_type VARCHAR(50) NOT NULL,
   action action_type NOT NULL,
   description TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
+  timestamp TIMESTAMPTZ NOT NULL DEFAULT now ()
 );
 
 CREATE INDEX idx_audit_logs_entity ON audit_logs (entity_type, entity_id);

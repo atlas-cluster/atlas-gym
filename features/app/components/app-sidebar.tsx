@@ -3,11 +3,11 @@ import {
   BookCheckIcon,
   CalendarIcon,
   DumbbellIcon,
+  History,
   HomeIcon,
   Layers,
   MapPinIcon,
   Repeat,
-  UserStarIcon,
   UsersIcon,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -40,7 +40,7 @@ const mainNavItems = [
 const trainerNavItems = [
   { title: 'Members', url: '/members', icon: UsersIcon },
   { title: 'Plans', url: '/plans', icon: Layers },
-  { title: 'Trainers', url: '/trainers', icon: UserStarIcon },
+  { title: 'Audit Logs', url: '/audit-logs', icon: History },
 ]
 
 export function AppSidebar() {
