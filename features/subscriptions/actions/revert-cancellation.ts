@@ -2,6 +2,7 @@
 
 import { updateTag } from 'next/cache'
 
+import { createAuditLog } from '@/features/audit-logs'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
@@ -29,8 +30,10 @@ export async function revertCancellation(
 
   // Get subscription details
   const subQuery = `
-    SELECT s.id, s.member_id, s.start_date, s.end_date
+    SELECT s.id, s.member_id, s.start_date, s.end_date, p.name as plan_name, m.firstname, m.lastname
     FROM subscriptions s
+    JOIN plans p ON s.plan_id = p.id
+    JOIN members m ON s.member_id = m.id
     WHERE s.id = $1 AND s.member_id = $2
   `
 
@@ -41,6 +44,8 @@ export async function revertCancellation(
   }
 
   const subscription = subResult.rows[0]
+  const memberName = `${subscription.firstname} ${subscription.lastname}`
+  const planName = subscription.plan_name
 
   if (!subscription.end_date) {
     throw new Error('Subscription is not cancelled')
@@ -72,6 +77,16 @@ export async function revertCancellation(
   `
 
   await pool.query(updateQuery, [subscriptionId, memberId])
+
+  if (session.member) {
+    await createAuditLog({
+      memberId: session.member.id,
+      action: 'Update',
+      entityId: subscriptionId,
+      entityType: 'subscription',
+      description: `Cancellation reverted for ${planName} subscription of ${memberName}`,
+    })
+  }
 
   updateTag('subscriptions')
   updateTag('members')

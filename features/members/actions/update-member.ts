@@ -3,6 +3,8 @@
 import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
+import { createAuditLog } from '@/features/audit-logs'
+import { getSession } from '@/features/auth'
 import { memberDetailsSchema } from '@/features/members/schemas/member-details'
 import { pool } from '@/features/shared/lib/db'
 
@@ -25,6 +27,19 @@ export async function updateMember(
        WHERE id = $8`,
       [firstname, lastname, middlename, email, phone, address, birthdate, id]
     )
+
+    const { member } = await getSession()
+
+    if (member) {
+      await createAuditLog({
+        client,
+        memberId: member.id,
+        action: 'Update',
+        entityId: id,
+        entityType: 'member',
+        description: `Member updated: ${firstname} ${lastname}`,
+      })
+    }
 
     await client.query('COMMIT')
     updateTag('members')
