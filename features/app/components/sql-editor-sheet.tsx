@@ -1,10 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Editor from 'react-simple-code-editor'
-import Prism from 'prismjs'
-import 'prismjs/components/prism-sql'
-import 'prismjs/themes/prism-tomorrow.css'
 
 import { executeSQL } from '@/features/app'
 import { Button } from '@/features/shared/components/ui/button'
@@ -16,38 +12,50 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/features/shared/components/ui/sheet'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/features/shared/components/ui/table'
+import { PostgreSQL, sql } from '@codemirror/lang-sql'
+import { oneDark } from '@codemirror/theme-one-dark'
+import CodeMirror from '@uiw/react-codemirror'
 
 interface SQLEditorSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+interface QueryResult {
+  success: boolean
+  data?: Record<string, unknown>[]
+  rowCount?: number
+  truncated?: boolean
+  error?: string
+}
+
 export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const [code, setCode] = useState(
     '-- Write your SQL query here\nSELECT * FROM members LIMIT 10;'
   )
-  const [result, setResult] = useState<string>('')
+  const [result, setResult] = useState<QueryResult | null>(null)
   const [isExecuting, setIsExecuting] = useState(false)
 
   const handleExecute = async () => {
     setIsExecuting(true)
-    setResult('Executing query...')
-    
+    setResult({ success: false, error: 'Executing query...' })
+
     try {
-      const result = await executeSQL(code)
-      
-      if (result.success) {
-        const truncatedWarning = result.truncated 
-          ? '\n\n⚠️ Warning: Results truncated to 100 rows. Use LIMIT in your query for specific row counts.' 
-          : ''
-        setResult(
-          `Query executed successfully.${truncatedWarning}\n\nRows returned: ${result.rowCount}\n\n${JSON.stringify(result.data, null, 2)}`
-        )
-      } else {
-        setResult(`Error: ${result.error || 'Unknown error'}`)
-      }
+      const queryResult = await executeSQL(code)
+      setResult(queryResult)
     } catch (error) {
-      setResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     } finally {
       setIsExecuting(false)
     }
@@ -55,12 +63,18 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
 
   const handleClear = () => {
     setCode('')
-    setResult('')
+    setResult(null)
   }
+
+  // Get table columns from the first row of data
+  const columns =
+    result?.success && result.data && result.data.length > 0
+      ? Object.keys(result.data[0])
+      : []
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl">
+      <SheetContent side="right" className="w-full sm:max-w-4xl">
         <SheetHeader>
           <SheetTitle>SQL Editor</SheetTitle>
           <SheetDescription>
@@ -71,30 +85,95 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
         <div className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Query</label>
-            <div className="border rounded-md overflow-hidden bg-[#2d2d2d]">
-              <Editor
+            <div className="border rounded-md overflow-hidden">
+              <CodeMirror
                 value={code}
-                onValueChange={setCode}
-                highlight={(code) => Prism.highlight(code, Prism.languages.sql, 'sql')}
-                padding={12}
-                style={{
-                  fontFamily: '"Fira code", "Fira Mono", monospace',
-                  fontSize: 14,
-                  minHeight: '200px',
-                  maxHeight: '300px',
-                  overflow: 'auto',
+                height="200px"
+                theme={oneDark}
+                extensions={[sql({ dialect: PostgreSQL })]}
+                onChange={(value) => setCode(value)}
+                basicSetup={{
+                  lineNumbers: true,
+                  highlightActiveLineGutter: true,
+                  highlightSpecialChars: true,
+                  foldGutter: true,
+                  drawSelection: true,
+                  dropCursor: true,
+                  allowMultipleSelections: true,
+                  indentOnInput: true,
+                  syntaxHighlighting: true,
+                  bracketMatching: true,
+                  closeBrackets: true,
+                  autocompletion: true,
+                  rectangularSelection: true,
+                  crosshairCursor: true,
+                  highlightActiveLine: true,
+                  highlightSelectionMatches: true,
+                  closeBracketsKeymap: true,
+                  searchKeymap: true,
+                  foldKeymap: true,
+                  completionKeymap: true,
+                  lintKeymap: true,
                 }}
-                textareaClassName="focus:outline-none"
               />
             </div>
           </div>
 
           {result && (
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Result</label>
-              <pre className="border rounded-md p-3 bg-muted text-sm overflow-auto max-h-[300px]">
-                {result}
-              </pre>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Result</label>
+                {result.success && result.rowCount !== undefined && (
+                  <span className="text-sm text-muted-foreground">
+                    {result.rowCount} row{result.rowCount !== 1 ? 's' : ''}{' '}
+                    returned
+                    {result.truncated && ' (truncated to 100)'}
+                  </span>
+                )}
+              </div>
+
+              {result.success && result.data && result.data.length > 0 ? (
+                <div className="border rounded-md overflow-auto max-h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {columns.map((column) => (
+                          <TableHead key={column} className="font-semibold">
+                            {column}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {result.data.map((row, index) => (
+                        <TableRow key={index}>
+                          {columns.map((column) => (
+                            <TableCell key={column}>
+                              {formatCellValue(row[column])}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : result.success && result.rowCount !== undefined ? (
+                <div className="border rounded-md p-3 bg-muted text-sm">
+                  Query executed successfully. {result.rowCount} row
+                  {result.rowCount !== 1 ? 's' : ''} affected.
+                </div>
+              ) : (
+                <div className="border rounded-md p-3 bg-destructive/10 text-destructive text-sm">
+                  {result.error || 'An error occurred'}
+                </div>
+              )}
+
+              {result.truncated && (
+                <div className="text-sm text-amber-600 dark:text-amber-500">
+                  ⚠️ Results truncated to 100 rows. Use LIMIT in your query for
+                  specific row counts.
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -104,15 +183,13 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
             <Button
               variant="outline"
               onClick={handleClear}
-              disabled={isExecuting}
-            >
+              disabled={isExecuting}>
               Clear
             </Button>
             <Button
               onClick={handleExecute}
               disabled={isExecuting}
-              className="flex-1"
-            >
+              className="flex-1">
               {isExecuting ? 'Executing...' : 'Execute Query'}
             </Button>
           </div>
@@ -120,4 +197,18 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
       </SheetContent>
     </Sheet>
   )
+}
+
+// Helper function to format cell values for display
+function formatCellValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return 'NULL'
+  }
+  if (typeof value === 'object') {
+    if (value instanceof Date) {
+      return value.toISOString()
+    }
+    return JSON.stringify(value)
+  }
+  return String(value)
 }

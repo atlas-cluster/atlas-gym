@@ -37,18 +37,14 @@ export function AppHeader() {
             variant="ghost"
             size="icon-sm"
             aria-label="Open SQL Editor"
-            onClick={() => setSqlEditorOpen(true)}
-          >
+            onClick={() => setSqlEditorOpen(true)}>
             <SquareTerminalIcon />
           </Button>
         )}
         <ThemeToggle />
       </div>
 
-      <SQLEditorSheet
-        open={sqlEditorOpen}
-        onOpenChange={setSqlEditorOpen}
-      />
+      <SQLEditorSheet open={sqlEditorOpen} onOpenChange={setSqlEditorOpen} />
     </div>
   )
 }
