@@ -34,7 +34,7 @@ export async function getDBSchema(): Promise<TableSchema[]> {
     const result = await pool.query(query)
     return result.rows as TableSchema[]
   } catch (error) {
-    console.error('Error fetching database schema:', error)
+    // Error fetching schema - return empty array to allow editor to still function
     return []
   }
 }

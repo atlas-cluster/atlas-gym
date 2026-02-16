@@ -178,7 +178,6 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
           schemaMap[table.table] = [...table.columns]
         })
         
-        console.log('Schema loaded:', Object.keys(schemaMap))
         setSchema(schemaMap)
       } catch (error) {
         console.error('Failed to load schema:', error)
