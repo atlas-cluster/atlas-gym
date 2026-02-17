@@ -15,6 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/features/shared/components/ui/sheet'
+import { Spinner } from '@/features/shared/components/ui/spinner'
 import {
   Table,
   TableBody,
@@ -74,7 +75,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
 
   const handleExecute = async () => {
     setIsExecuting(true)
-    setResult({ success: false, error: 'Executing query...' })
+    setResult(null) // Clear previous results while executing
 
     try {
       const queryResult = await executeSQL(code)
@@ -155,8 +156,12 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
                   onClick={handleExecute}
                   disabled={isExecuting}
                   className="gap-1.5">
-                  <Zap className="h-4 w-4" />
-                  {isExecuting ? 'Executing...' : 'Execute'}
+                  {isExecuting ? (
+                    <Spinner className="h-4 w-4" />
+                  ) : (
+                    <Zap className="h-4 w-4" />
+                  )}
+                  Execute
                 </Button>
               </div>
             </div>
@@ -194,7 +199,11 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
             </div>
           </div>
 
-          {result && (
+          {isExecuting ? (
+            <div className="flex items-center justify-center py-12">
+              <Spinner className="h-8 w-8" />
+            </div>
+          ) : result ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Result</label>
@@ -250,7 +259,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>
