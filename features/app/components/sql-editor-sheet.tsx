@@ -132,7 +132,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
       description="Write and execute raw SQL queries. Use with caution."
       defaultWidth={600}
       minWidth={400}
-      maxWidth={1200}>
+      maxWidth={1600}>
       <div className="flex flex-col gap-4 py-4 px-6 flex-1">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -151,7 +151,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
                 disabled={isExecuting}
                 className="gap-1.5">
                 <Zap className="h-4 w-4" />
-                {isExecuting ? 'Executing...' : 'Execute'}
+                Execute
               </Button>
             </div>
           </div>
