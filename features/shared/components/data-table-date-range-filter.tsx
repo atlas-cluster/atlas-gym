@@ -126,17 +126,21 @@ export function DataTableDateRangeFilter<TData, TValue>({
           <Field className={'w-fit'}>
             <FieldLabel>Start Time</FieldLabel>
             <Input
-              type="time"
+              type="text"
               value={startTime}
               onChange={(e) => handleTimeChange('start', e.target.value)}
+              placeholder="HH:MM"
+              pattern="[0-2][0-9]:[0-5][0-9]"
             />
           </Field>
           <Field className={'w-fit'}>
             <FieldLabel>End Time</FieldLabel>
             <Input
-              type="time"
+              type="text"
               value={endTime}
               onChange={(e) => handleTimeChange('end', e.target.value)}
+              placeholder="HH:MM"
+              pattern="[0-2][0-9]:[0-5][0-9]"
             />
           </Field>
         </div>
