@@ -12,29 +12,26 @@ export async function deletePlan(id: string) {
   const result = await pool.query('SELECT name FROM plans WHERE id = $1', [id])
   const planName = result.rows[0] ? result.rows[0].name : 'Unknown plan'
 
-  // Get all subscriptions for this plan to log their deletion
+  // Delete all subscriptions for this plan and get their IDs atomically
   const subscriptionsResult = await pool.query(
-    'SELECT id FROM subscriptions WHERE plan_id = $1',
+    'DELETE FROM subscriptions WHERE plan_id = $1 RETURNING id',
     [id]
   )
   const subscriptionIds = subscriptionsResult.rows.map((row) => row.id)
 
-  // Delete all subscriptions for this plan
-  if (subscriptionIds.length > 0) {
-    await pool.query('DELETE FROM subscriptions WHERE plan_id = $1', [id])
-
-    // Create audit logs for deleted subscriptions
-    if (member) {
-      for (const subscriptionId of subscriptionIds) {
-        await createAuditLog({
+  // Create audit logs for deleted subscriptions concurrently
+  if (subscriptionIds.length > 0 && member) {
+    await Promise.all(
+      subscriptionIds.map((subscriptionId) =>
+        createAuditLog({
           memberId: member.id,
           action: 'Delete',
           entityId: subscriptionId,
           entityType: 'subscription',
           description: `Subscription deleted due to plan ${planName} deletion`,
         })
-      }
-    }
+      )
+    )
   }
 
   if (member) {
