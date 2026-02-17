@@ -47,15 +47,13 @@ export async function deleteSubscription(
   await pool.query(deleteQuery, [subscriptionId, targetMemberId])
 
   // Create audit log
-  if (session.member) {
-    await createAuditLog({
-      memberId: session.member.id,
-      action: 'Delete',
-      entityId: subscriptionId,
-      entityType: 'subscription',
-      description: `Subscription to ${planName} forcefully removed by admin for ${memberName}`,
-    })
-  }
+  await createAuditLog({
+    memberId: session.member.id,
+    action: 'Delete',
+    entityId: subscriptionId,
+    entityType: 'subscription',
+    description: `Subscription to ${planName} forcefully removed by admin for ${memberName}`,
+  })
 
   updateTag('subscriptions')
   updateTag('members')

@@ -564,7 +564,9 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveSubscriptionConfirm}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleRemoveSubscriptionConfirm}>
               Remove Subscription
             </AlertDialogAction>
           </AlertDialogFooter>
