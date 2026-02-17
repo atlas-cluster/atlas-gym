@@ -5,7 +5,7 @@ import { pool } from '@/features/shared/lib/db'
 
 interface ExecuteSQLResult {
   success: boolean
-  data?: unknown[]
+  data?: Record<string, unknown>[]
   rowCount?: number
   truncated?: boolean
   error?: string
