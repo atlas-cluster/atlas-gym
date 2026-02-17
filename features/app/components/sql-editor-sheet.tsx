@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { EditorView } from '@codemirror/view'
+import { useTheme } from 'next-themes'
+import { Play, Zap } from 'lucide-react'
 
 import { executeSQL, getDBSchema } from '@/features/app'
+import { lightTheme, darkTheme } from '@/features/app/lib/codemirror-theme'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from '@/features/shared/components/ui/sheet'
@@ -22,7 +24,6 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import { PostgreSQL, sql } from '@codemirror/lang-sql'
-import { materialDark } from '@uiw/codemirror-theme-material'
 import CodeMirror from '@uiw/react-codemirror'
 
 interface SQLEditorSheetProps {
@@ -45,6 +46,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const [result, setResult] = useState<QueryResult | null>(null)
   const [isExecuting, setIsExecuting] = useState(false)
   const [schema, setSchema] = useState<Record<string, readonly string[]> | null>(null)
+  const { theme } = useTheme()
 
   // Fetch database schema for autocomplete
   useEffect(() => {
@@ -114,23 +116,20 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const customTheme = useMemo(() => {
     return EditorView.theme({
       '&': {
-        backgroundColor: 'transparent',
         fontSize: '14px',
       },
       '.cm-scroller': {
         fontFamily: 'var(--font-mono)',
       },
-      '.cm-gutters': {
-        backgroundColor: 'hsl(var(--muted))',
-        color: 'hsl(var(--muted-foreground))',
-        border: 'none',
-      },
     })
   }, [])
 
+  // Select theme based on current mode
+  const editorTheme = theme === 'dark' ? darkTheme : lightTheme
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-6xl overflow-y-auto">
+      <SheetContent side="left" className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>SQL Editor</SheetTitle>
           <SheetDescription>
@@ -140,12 +139,31 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
 
         <div className="flex flex-col gap-4 py-4 px-6">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Query</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Query</label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClear}
+                  disabled={isExecuting}>
+                  Clear
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleExecute}
+                  disabled={isExecuting}
+                  className="gap-1.5">
+                  <Zap className="h-4 w-4" />
+                  {isExecuting ? 'Executing...' : 'Execute'}
+                </Button>
+              </div>
+            </div>
             <div className="rounded-md overflow-hidden border border-border">
               <CodeMirror
                 value={code}
                 height="300px"
-                theme={materialDark}
+                theme={editorTheme}
                 extensions={[sqlExtension, customTheme]}
                 onChange={(value) => setCode(value)}
                 basicSetup={{
@@ -233,23 +251,6 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
             </div>
           )}
         </div>
-
-        <SheetFooter className="px-6">
-          <div className="flex gap-2 w-full">
-            <Button
-              variant="outline"
-              onClick={handleClear}
-              disabled={isExecuting}>
-              Clear
-            </Button>
-            <Button
-              onClick={handleExecute}
-              disabled={isExecuting}
-              className="flex-1">
-              {isExecuting ? 'Executing...' : 'Execute Query'}
-            </Button>
-          </div>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   )

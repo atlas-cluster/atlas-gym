@@ -17,6 +17,7 @@
     "@codemirror/lang-sql": "^6.10.0",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@hookform/resolvers": "^5.2.2",
+    "@lezer/highlight": "^1.2.3",
     "@stepperize/react": "^5.1.9",
     "@tanstack/react-table": "^8.21.3",
     "@types/bcryptjs": "^2.4.6",
@@ -43,6 +44,7 @@
     "react-simple-code-editor": "^0.14.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "thememirror": "^2.0.1",
     "use-mask-input": "^3.5.2",
     "zod": "^4.2.0"
   },
