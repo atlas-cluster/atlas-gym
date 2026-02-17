@@ -351,24 +351,30 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     if (!selectedMember) return
 
     const promise = (async () => {
-      // Determine which subscription to delete (active or future)
-      const subscriptionId =
-        selectedMember.subscriptionId || selectedMember.futureSubscriptionId
+      // Collect all subscription IDs to delete (both active and future)
+      const subscriptionIds = [
+        selectedMember.subscriptionId,
+        selectedMember.futureSubscriptionId,
+      ].filter(Boolean) as string[]
 
-      if (!subscriptionId) {
+      if (subscriptionIds.length === 0) {
         throw new Error('No subscription found to remove')
       }
 
-      await deleteSubscription(subscriptionId, selectedMember.id)
+      // Delete all subscriptions
+      for (const subscriptionId of subscriptionIds) {
+        await deleteSubscription(subscriptionId, selectedMember.id)
+      }
+
       setRemoveSubDialogOpen(false)
       setSelectedMember(null)
       // fetchData() removed - server action updateTag('members') will auto-refresh
     })()
 
     toast.promise(promise, {
-      loading: 'Removing subscription...',
-      success: 'Subscription removed successfully',
-      error: (err) => err?.message || 'Failed to remove subscription',
+      loading: 'Removing subscription(s)...',
+      success: 'Subscription(s) removed successfully',
+      error: (err) => err?.message || 'Failed to remove subscription(s)',
     })
   }
 
