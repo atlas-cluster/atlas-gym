@@ -12,17 +12,29 @@ export async function deletePlan(id: string) {
   const result = await pool.query('SELECT name FROM plans WHERE id = $1', [id])
   const planName = result.rows[0] ? result.rows[0].name : 'Unknown plan'
 
-  // Check if there are any subscriptions for this plan
-  const subscriptionCheck = await pool.query(
-    'SELECT COUNT(*) as count FROM subscriptions WHERE plan_id = $1',
+  // Get all subscriptions for this plan to log their deletion
+  const subscriptionsResult = await pool.query(
+    'SELECT id FROM subscriptions WHERE plan_id = $1',
     [id]
   )
-  const subscriptionCount = parseInt(subscriptionCheck.rows[0].count, 10)
+  const subscriptionIds = subscriptionsResult.rows.map((row) => row.id)
 
-  if (subscriptionCount > 0) {
-    throw new Error(
-      `Cannot delete plan with ${subscriptionCount} existing subscription${subscriptionCount > 1 ? 's' : ''}`
-    )
+  // Delete all subscriptions for this plan
+  if (subscriptionIds.length > 0) {
+    await pool.query('DELETE FROM subscriptions WHERE plan_id = $1', [id])
+
+    // Create audit logs for deleted subscriptions
+    if (member) {
+      for (const subscriptionId of subscriptionIds) {
+        await createAuditLog({
+          memberId: member.id,
+          action: 'Delete',
+          entityId: subscriptionId,
+          entityType: 'subscription',
+          description: `Subscription deleted due to plan ${planName} deletion`,
+        })
+      }
+    }
   }
 
   if (member) {
@@ -37,5 +49,6 @@ export async function deletePlan(id: string) {
 
   await pool.query('DELETE FROM plans WHERE id = $1', [id])
   updateTag('plans')
+  updateTag('subscriptions')
   updateTag('members')
 }
