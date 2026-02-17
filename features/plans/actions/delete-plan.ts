@@ -12,6 +12,19 @@ export async function deletePlan(id: string) {
   const result = await pool.query('SELECT name FROM plans WHERE id = $1', [id])
   const planName = result.rows[0] ? result.rows[0].name : 'Unknown plan'
 
+  // Check if there are any subscriptions for this plan
+  const subscriptionCheck = await pool.query(
+    'SELECT COUNT(*) as count FROM subscriptions WHERE plan_id = $1',
+    [id]
+  )
+  const subscriptionCount = parseInt(subscriptionCheck.rows[0].count, 10)
+
+  if (subscriptionCount > 0) {
+    throw new Error(
+      `Cannot delete plan with ${subscriptionCount} active subscription${subscriptionCount > 1 ? 's' : ''}`
+    )
+  }
+
   if (member) {
     await createAuditLog({
       memberId: member.id,
