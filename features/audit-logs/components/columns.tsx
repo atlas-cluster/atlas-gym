@@ -53,9 +53,7 @@ export const columns: ColumnDef<AuditLog>[] = [
       return (
         <Badge
           variant={action === 'Delete' ? 'destructive' : 'default'}
-          className={
-            action === 'Update' ? 'bg-chart-1 text-secondary-foreground' : ''
-          }>
+          className={action === 'Update' ? 'bg-cyan-400' : ''}>
           {action}
         </Badge>
       )

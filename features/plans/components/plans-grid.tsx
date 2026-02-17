@@ -121,21 +121,19 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const handleDeleteConfirm = async () => {
     if (!planToDelete) return
 
+    // Close dialog immediately to prevent flickering
+    setDeleteDialogOpen(false)
+    setPlanToDelete(null)
+
     const promise = deletePlan(planToDelete.id).then(() => {
       fetchData()
-      setDeleteDialogOpen(false)
-      setPlanToDelete(null)
     })
 
     toast.promise(promise, {
       loading: 'Deleting plan...',
       success: 'Plan deleted successfully',
       error: (err) => {
-        const message = err?.message || 'Error deleting plan'
-        if (message.includes('foreign key')) {
-          return 'Cannot delete plan with active subscriptions'
-        }
-        return message
+        return err?.message || 'Error deleting plan'
       },
     })
   }

@@ -433,6 +433,15 @@ function ActionsCell({
                 </DropdownMenuSub>
               )}
 
+              {/* Admin action - Remove any subscription immediately */}
+              {(member.planName || member.futureSubscriptionName) && (
+                <DropdownMenuItem
+                  onSelect={() => meta?.removeSubscription?.(member)}>
+                  <TrashIcon />
+                  Remove Subscription
+                </DropdownMenuItem>
+              )}
+
               <DropdownMenuItem
                 variant={'destructive'}
                 onSelect={() => meta?.deleteMember?.(member.id)}>

@@ -57,7 +57,7 @@ export async function getAuditLogs(
           } else if (filter.id === 'action') {
             const actionValues = Array.isArray(filter.value)
               ? (filter.value as string[])
-              : [(filter.value as string)]
+              : [filter.value as string]
 
             if (Array.isArray(filter.value)) {
               if (filter.value.length > 0) {

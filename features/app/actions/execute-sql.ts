@@ -59,7 +59,7 @@ export async function executeSQL(query: string): Promise<ExecuteSQLResult> {
     const result = await pool.query(query)
 
     // Limit the number of rows returned to prevent performance issues
-    const maxRows = 100
+    const maxRows = 1000
     const limitedRows = result.rows.slice(0, maxRows)
     const truncated = result.rows.length > maxRows
 
