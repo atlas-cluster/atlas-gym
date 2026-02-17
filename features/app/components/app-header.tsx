@@ -1,15 +1,20 @@
 'use client'
 import { SquareTerminalIcon } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
+import { SQLEditorSheet } from '@/features/app/components/sql-editor-sheet'
 import { ThemeToggle } from '@/features/app/components/theme-toggle'
 import { formatRoute } from '@/features/app/utils/format-route'
+import { useAuth } from '@/features/auth'
 import { Button } from '@/features/shared/components/ui/button'
 import { Separator } from '@/features/shared/components/ui/separator'
 import { SidebarTrigger } from '@/features/shared/components/ui/sidebar'
 
 export function AppHeader() {
   const pathname = usePathname()
+  const { member } = useAuth()
+  const [sqlEditorOpen, setSqlEditorOpen] = useState(false)
 
   return (
     <div
@@ -27,11 +32,19 @@ export function AppHeader() {
         </h1>
       </div>
       <div className={'ml-auto flex items-center gap-2'}>
-        <Button variant="ghost" size="icon-sm" aria-label="Open SQL Editor">
-          <SquareTerminalIcon />
-        </Button>
+        {member?.isTrainer && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Open SQL Editor"
+            onClick={() => setSqlEditorOpen(true)}>
+            <SquareTerminalIcon />
+          </Button>
+        )}
         <ThemeToggle />
       </div>
+
+      <SQLEditorSheet open={sqlEditorOpen} onOpenChange={setSqlEditorOpen} />
     </div>
   )
 }
