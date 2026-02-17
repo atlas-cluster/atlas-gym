@@ -46,7 +46,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const [result, setResult] = useState<QueryResult | null>(null)
   const [isExecuting, setIsExecuting] = useState(false)
   const [schema, setSchema] = useState<Record<string, readonly string[]> | null>(null)
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
 
   // Fetch database schema for autocomplete
   useEffect(() => {
@@ -124,12 +124,13 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     })
   }, [])
 
-  // Select theme based on current mode
-  const editorTheme = theme === 'dark' ? darkTheme : lightTheme
+  // Select theme based on current mode - use resolvedTheme to handle 'system' theme
+  const currentTheme = resolvedTheme || theme
+  const editorTheme = currentTheme === 'dark' ? darkTheme : lightTheme
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>SQL Editor</SheetTitle>
           <SheetDescription>
