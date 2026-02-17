@@ -21,7 +21,7 @@ export async function deletePlan(id: string) {
 
   if (subscriptionCount > 0) {
     throw new Error(
-      `Cannot delete plan with ${subscriptionCount} active subscription${subscriptionCount > 1 ? 's' : ''}`
+      `Cannot delete plan with ${subscriptionCount} existing subscription${subscriptionCount > 1 ? 's' : ''}`
     )
   }
 

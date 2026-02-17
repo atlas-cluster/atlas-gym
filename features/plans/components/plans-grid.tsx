@@ -131,11 +131,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
       loading: 'Deleting plan...',
       success: 'Plan deleted successfully',
       error: (err) => {
-        const message = err?.message || 'Error deleting plan'
-        if (message.includes('foreign key')) {
-          return 'Cannot delete plan with active subscriptions'
-        }
-        return message
+        return err?.message || 'Error deleting plan'
       },
     })
   }
