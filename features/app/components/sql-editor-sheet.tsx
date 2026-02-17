@@ -8,13 +8,7 @@ import { Play, Zap } from 'lucide-react'
 import { executeSQL, getDBSchema } from '@/features/app'
 import { lightTheme, darkTheme } from '@/features/app/lib/codemirror-theme'
 import { Button } from '@/features/shared/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/features/shared/components/ui/sheet'
+import { ResizableSheet } from '@/features/shared/components/ui/resizable-sheet'
 import { Spinner } from '@/features/shared/components/ui/spinner'
 import {
   Table,
@@ -130,139 +124,134 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   const editorTheme = currentTheme === 'dark' ? darkTheme : lightTheme
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>SQL Editor</SheetTitle>
-          <SheetDescription>
-            Write and execute raw SQL queries. Use with caution.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="flex flex-col gap-4 py-4 px-6">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Query</label>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClear}
-                  disabled={isExecuting}>
-                  Clear
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleExecute}
-                  disabled={isExecuting}
-                  className="gap-1.5">
-                  {isExecuting ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <Zap className="h-4 w-4" />
-                  )}
-                  Execute
-                </Button>
-              </div>
-            </div>
-            <div className="rounded-md overflow-hidden border border-border">
-              <CodeMirror
-                value={code}
-                height="300px"
-                theme={editorTheme}
-                extensions={[sqlExtension, customTheme]}
-                onChange={(value) => setCode(value)}
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLineGutter: true,
-                  highlightSpecialChars: true,
-                  foldGutter: true,
-                  drawSelection: true,
-                  dropCursor: true,
-                  allowMultipleSelections: true,
-                  indentOnInput: true,
-                  syntaxHighlighting: true,
-                  bracketMatching: true,
-                  closeBrackets: true,
-                  autocompletion: true,
-                  rectangularSelection: true,
-                  crosshairCursor: true,
-                  highlightActiveLine: true,
-                  highlightSelectionMatches: true,
-                  closeBracketsKeymap: true,
-                  searchKeymap: true,
-                  foldKeymap: true,
-                  completionKeymap: true,
-                  lintKeymap: true,
-                }}
-              />
+    <ResizableSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      side="right"
+      title="SQL Editor"
+      description="Write and execute raw SQL queries. Use with caution."
+      defaultWidth={600}
+      minWidth={400}
+      maxWidth={1200}>
+      <div className="flex flex-col gap-4 py-4 px-6 flex-1">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Query</label>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClear}
+                disabled={isExecuting}>
+                Clear
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleExecute}
+                disabled={isExecuting}
+                className="gap-1.5">
+                <Zap className="h-4 w-4" />
+                {isExecuting ? 'Executing...' : 'Execute'}
+              </Button>
             </div>
           </div>
+          <div className="rounded-md overflow-hidden border border-border">
+            <CodeMirror
+              value={code}
+              height="300px"
+              theme={editorTheme}
+              extensions={[sqlExtension, customTheme]}
+              onChange={(value) => setCode(value)}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: true,
+                highlightSpecialChars: true,
+                foldGutter: true,
+                drawSelection: true,
+                dropCursor: true,
+                allowMultipleSelections: true,
+                indentOnInput: true,
+                syntaxHighlighting: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                rectangularSelection: true,
+                crosshairCursor: true,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                closeBracketsKeymap: true,
+                searchKeymap: true,
+                foldKeymap: true,
+                completionKeymap: true,
+                lintKeymap: true,
+              }}
+            />
+          </div>
+        </div>
 
-          {isExecuting ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner className="h-8 w-8" />
+        {isExecuting ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner className="h-8 w-8" />
+          </div>
+        ) : result ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Result</label>
+              {result.success && result.rowCount !== undefined && (
+                <span className="text-sm text-muted-foreground">
+                  {result.rowCount} row{result.rowCount !== 1 ? 's' : ''}{' '}
+                  returned
+                  {result.truncated && ' (truncated to 100)'}
+                </span>
+              )}
             </div>
-          ) : result ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Result</label>
-                {result.success && result.rowCount !== undefined && (
-                  <span className="text-sm text-muted-foreground">
-                    {result.rowCount} row{result.rowCount !== 1 ? 's' : ''}{' '}
-                    returned
-                    {result.truncated && ' (truncated to 100)'}
-                  </span>
-                )}
-              </div>
 
-              {result.success && result.data && result.data.length > 0 ? (
-                <div className="border rounded-md overflow-auto max-h-[500px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
+            {result.success && result.data && result.data.length > 0 ? (
+              <div className="border rounded-md overflow-auto max-h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {columns.map((column) => (
+                        <TableHead key={column} className="font-semibold">
+                          {column}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {result.data.map((row, index) => (
+                      <TableRow key={index}>
                         {columns.map((column) => (
-                          <TableHead key={column} className="font-semibold">
-                            {column}
-                          </TableHead>
+                          <TableCell key={column}>
+                            {formatCellValue(row[column])}
+                          </TableCell>
                         ))}
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {result.data.map((row, index) => (
-                        <TableRow key={index}>
-                          {columns.map((column) => (
-                            <TableCell key={column}>
-                              {formatCellValue(row[column])}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : result.success && result.rowCount !== undefined ? (
-                <div className="border rounded-md p-3 bg-muted text-sm">
-                  Query executed successfully. {result.rowCount} row
-                  {result.rowCount !== 1 ? 's' : ''} affected.
-                </div>
-              ) : (
-                <div className="border rounded-md p-3 bg-destructive/10 text-destructive text-sm">
-                  {result.error || 'An error occurred'}
-                </div>
-              )}
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : result.success && result.rowCount !== undefined ? (
+              <div className="border rounded-md p-3 bg-muted text-sm">
+                Query executed successfully. {result.rowCount} row
+                {result.rowCount !== 1 ? 's' : ''} affected.
+              </div>
+            ) : (
+              <div className="border rounded-md p-3 bg-destructive/10 text-destructive text-sm">
+                {result.error || 'An error occurred'}
+              </div>
+            )}
 
-              {result.truncated && (
-                <div className="text-sm text-amber-600 dark:text-amber-500">
-                  ⚠️ Results truncated to 100 rows. Use LIMIT in your query for
-                  specific row counts.
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </SheetContent>
-    </Sheet>
+            {result.truncated && (
+              <div className="text-sm text-amber-600 dark:text-amber-500">
+                ⚠️ Results truncated to 100 rows. Use LIMIT in your query for
+                specific row counts.
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </ResizableSheet>
   )
 }
 

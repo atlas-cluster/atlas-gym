@@ -1,13 +1,13 @@
 import { tags as t } from '@lezer/highlight'
 import { createTheme } from 'thememirror'
 
-// Based on Ayu Light and ThemeMirror - using shadcn/ui colors
+// Based on Ayu Light and ThemeMirror - using colorful Tailwind colors for light mode
 export const lightTheme = createTheme({
   variant: 'light',
   settings: {
     background: '#FFFFFF',
     foreground: '#0F172A',
-    caret: '#ffaa33',
+    caret: '#7c3aed', // violet-600
     selection: '#F1F5F9',
     gutterBackground: '#FFFFFF',
     gutterForeground: '#8a919966',
@@ -16,63 +16,63 @@ export const lightTheme = createTheme({
   styles: [
     {
       tag: t.comment,
-      color: '#787b8099',
+      color: '#64748b', // slate-500 - muted gray
     },
     {
       tag: t.string,
-      color: '#86b300',
+      color: '#16a34a', // green-600 - vibrant green for strings
     },
     {
       tag: t.regexp,
-      color: '#4cbf99',
+      color: '#0891b2', // cyan-600 - cyan for regex
     },
     {
       tag: [t.number, t.bool, t.null],
-      color: '#ffaa33',
+      color: '#dc2626', // red-600 - red for numbers/booleans
     },
     {
       tag: t.variableName,
-      color: '#5c6166',
+      color: '#475569', // slate-600 - darker gray for variables
     },
     {
       tag: [t.definitionKeyword, t.modifier],
-      color: '#fa8d3e',
+      color: '#c026d3', // fuchsia-600 - bright pink for modifiers
     },
     {
       tag: [t.keyword, t.special(t.brace)],
-      color: '#fa8d3e',
+      color: '#7c3aed', // violet-600 - purple for keywords
     },
     {
       tag: t.operator,
-      color: '#ed9366',
+      color: '#ea580c', // orange-600 - orange for operators
     },
     {
       tag: t.separator,
-      color: '#5c6166b3',
+      color: '#64748b', // slate-500
     },
     {
       tag: t.punctuation,
-      color: '#5c6166',
+      color: '#64748b', // slate-500
     },
     {
       tag: [t.definition(t.propertyName), t.function(t.variableName)],
-      color: '#f2ae49',
+      color: '#0284c7', // sky-600 - blue for functions
     },
     {
       tag: [t.className, t.definition(t.typeName)],
-      color: '#22a4e6',
+      color: '#0891b2', // cyan-600 - cyan for class names
     },
     {
       tag: [t.tagName, t.typeName, t.self, t.labelName],
-      color: '#55b4d4',
+      color: '#0d9488', // teal-600 - teal for types
     },
     {
       tag: t.angleBracket,
-      color: '#55b4d480',
+      color: '#64748b', // slate-500
     },
     {
       tag: t.attributeName,
-      color: '#f2ae49',
+      color: '#ca8a04', // yellow-600 - yellow for attributes
     },
   ],
 })
