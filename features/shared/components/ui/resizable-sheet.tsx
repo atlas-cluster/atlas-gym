@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   Sheet,
@@ -36,11 +36,27 @@ export function ResizableSheet({
 }: ResizableSheetProps) {
   const [width, setWidth] = useState(defaultWidth)
   const [isResizing, setIsResizing] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
 
+  // Check screen size on mount and resize
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // Tailwind's sm breakpoint is 640px
+      setIsSmallScreen(window.innerWidth < 640)
+    }
+
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // Disable resizing on small screens
+      if (isSmallScreen) return
+
       setIsResizing(true)
       startXRef.current = e.clientX
       startWidthRef.current = width
@@ -66,25 +82,32 @@ export function ResizableSheet({
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
     },
-    [width, side, minWidth, maxWidth]
+    [width, side, minWidth, maxWidth, isSmallScreen]
   )
 
   const handlePosition = side === 'left' ? 'right-0' : 'left-0'
   const borderClass = side === 'left' ? 'border-r' : 'border-l'
+
+  // Use full width on small screens, custom width on larger screens
+  const sheetStyle = isSmallScreen
+    ? {}
+    : { width: `${width}px`, maxWidth: `${width}px` }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={side}
         className="overflow-y-auto p-0"
-        style={{ width: `${width}px`, maxWidth: `${width}px` }}>
-        {/* Resize Handle */}
-        <div
-          className={`absolute ${handlePosition} top-0 h-full w-1 cursor-col-resize hover:bg-primary/20 ${
-            isResizing ? 'bg-primary/20' : ''
-          } z-50`}
-          onMouseDown={handleMouseDown}
-        />
+        style={sheetStyle}>
+        {/* Resize Handle - only show on larger screens */}
+        {!isSmallScreen && (
+          <div
+            className={`absolute ${handlePosition} top-0 h-full w-1 cursor-col-resize hover:bg-primary/20 ${
+              isResizing ? 'bg-primary/20' : ''
+            } z-50`}
+            onMouseDown={handleMouseDown}
+          />
+        )}
 
         {/* Content */}
         <div className="h-full flex flex-col">
