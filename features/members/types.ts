@@ -49,6 +49,7 @@ export interface MembersTableMeta {
   changeSubscription?: (member: MemberDisplay, planId: string) => void
   cancelFutureSubscription?: (member: MemberDisplay) => void
   choosePlan?: (member: MemberDisplay, planId: string) => void
+  removeSubscription?: (member: MemberDisplay) => void
   availablePlans?: {
     id: string
     name: string

@@ -53,6 +53,7 @@ import {
 import {
   cancelSubscription,
   createSubscription,
+  deleteSubscription,
   getAvailablePlans,
   revertCancellation,
 } from '@/features/subscriptions'
@@ -95,6 +96,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const [cancelSubDialogOpen, setCancelSubDialogOpen] = useState(false)
   const [revertCancelDialogOpen, setRevertCancelDialogOpen] = useState(false)
   const [cancelFutureDialogOpen, setCancelFutureDialogOpen] = useState(false)
+  const [removeSubDialogOpen, setRemoveSubDialogOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<MemberDisplay | null>(
     null
   )
@@ -340,6 +342,36 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     })
   }
 
+  const handleRemoveSubscription = (member: MemberDisplay) => {
+    setSelectedMember(member)
+    setRemoveSubDialogOpen(true)
+  }
+
+  const handleRemoveSubscriptionConfirm = async () => {
+    if (!selectedMember) return
+
+    const promise = (async () => {
+      // Determine which subscription to delete (active or future)
+      const subscriptionId =
+        selectedMember.subscriptionId || selectedMember.futureSubscriptionId
+
+      if (!subscriptionId) {
+        throw new Error('No subscription found to remove')
+      }
+
+      await deleteSubscription(subscriptionId, selectedMember.id)
+      setRemoveSubDialogOpen(false)
+      setSelectedMember(null)
+      // fetchData() removed - server action updateTag('members') will auto-refresh
+    })()
+
+    toast.promise(promise, {
+      loading: 'Removing subscription...',
+      success: 'Subscription removed successfully',
+      error: (err) => err?.message || 'Failed to remove subscription',
+    })
+  }
+
   const fetchData = () => {
     startTransition(async () => {
       const result = await getMembers()
@@ -393,6 +425,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       changeSubscription: handleChangeSubscription,
       cancelFutureSubscription: handleCancelFutureSubscription,
       choosePlan: handleChoosePlan,
+      removeSubscription: handleRemoveSubscription,
       availablePlans,
     },
 
@@ -510,6 +543,29 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
             <AlertDialogCancel>Keep Future Subscription</AlertDialogCancel>
             <AlertDialogAction onClick={handleCancelFutureSubscriptionConfirm}>
               Cancel Future Subscription
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Subscription Dialog */}
+      <AlertDialog
+        open={removeSubDialogOpen}
+        onOpenChange={setRemoveSubDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently remove the subscription for{' '}
+              {selectedMember?.firstname} {selectedMember?.lastname}? This will
+              immediately delete the subscription regardless of its status or
+              duration. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveSubscriptionConfirm}>
+              Remove Subscription
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
