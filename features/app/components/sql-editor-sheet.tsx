@@ -1,12 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { EditorView } from '@codemirror/view'
-import { useTheme } from 'next-themes'
 import { Play, Zap } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useEffect, useMemo, useState } from 'react'
 
 import { executeSQL, getDBSchema } from '@/features/app'
-import { lightTheme, darkTheme } from '@/features/app/lib/codemirror-theme'
+import { darkTheme, lightTheme } from '@/features/app/lib/codemirror-theme'
 import { Button } from '@/features/shared/components/ui/button'
 import { ResizableSheet } from '@/features/shared/components/ui/resizable-sheet'
 import { Spinner } from '@/features/shared/components/ui/spinner'
@@ -19,6 +18,7 @@ import {
   TableRow,
 } from '@/features/shared/components/ui/table'
 import { PostgreSQL, sql } from '@codemirror/lang-sql'
+import { EditorView } from '@codemirror/view'
 import CodeMirror from '@uiw/react-codemirror'
 
 interface SQLEditorSheetProps {
@@ -40,7 +40,10 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   )
   const [result, setResult] = useState<QueryResult | null>(null)
   const [isExecuting, setIsExecuting] = useState(false)
-  const [schema, setSchema] = useState<Record<string, readonly string[]> | null>(null)
+  const [schema, setSchema] = useState<Record<
+    string,
+    readonly string[]
+  > | null>(null)
   const { theme, resolvedTheme } = useTheme()
 
   // Fetch database schema for autocomplete
@@ -48,14 +51,14 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     const fetchSchema = async () => {
       try {
         const dbSchema = await getDBSchema()
-        
+
         // Convert to CodeMirror schema format
         const schemaMap: Record<string, readonly string[]> = {}
         dbSchema.forEach((table) => {
           // Make sure columns are properly typed as readonly array
           schemaMap[table.table] = [...table.columns]
         })
-        
+
         setSchema(schemaMap)
       } catch (error) {
         console.error('Failed to load schema:', error)

@@ -1,5 +1,6 @@
-import { tags as t } from '@lezer/highlight'
 import { createTheme } from 'thememirror'
+
+import { tags as t } from '@lezer/highlight'
 
 // Based on Ayu Light and ThemeMirror - using colorful Tailwind colors for light mode
 export const lightTheme = createTheme({
