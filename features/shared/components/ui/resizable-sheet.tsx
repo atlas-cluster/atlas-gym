@@ -90,7 +90,7 @@ export function ResizableSheet({
 
   // Use full width on small screens, custom width on larger screens
   const sheetStyle = isSmallScreen
-    ? {}
+    ? { width: '100%', maxWidth: '100%' }
     : { width: `${width}px`, maxWidth: `${width}px` }
 
   return (
