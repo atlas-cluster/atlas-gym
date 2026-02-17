@@ -77,26 +77,26 @@ export const lightTheme = createTheme({
   ],
 })
 
-// Based on Cool Glow and ThemeMirror - using shadcn/ui colors
+// Based on Cool Glow and ThemeMirror - updated to match shadcn/ui dark theme
 export const darkTheme = createTheme({
   variant: 'dark',
   settings: {
-    background: '#030711',
-    foreground: '#E1E7EF',
-    caret: '#FFFFFFA6',
-    selection: '#0F1629',
-    gutterBackground: '#030711',
-    gutterForeground: '#E1E7EF90',
-    lineHighlight: '#FFFFFF0F',
+    background: '#0a0a0a', // oklch(0.145 0 0) - shadcn dark background
+    foreground: '#fafafa', // oklch(0.985 0 0) - shadcn dark foreground
+    caret: '#fafafa',
+    selection: '#27272a', // darker selection
+    gutterBackground: '#0a0a0a',
+    gutterForeground: '#71717a', // oklch(0.708 0 0) - muted foreground
+    lineHighlight: '#18181b', // subtle line highlight
   },
   styles: [
     {
       tag: t.comment,
-      color: '#AEAEAE',
+      color: '#71717a', // muted foreground
     },
     {
       tag: [t.string, t.special(t.brace), t.regexp],
-      color: '#8DFF8E',
+      color: '#4ade80', // green-400 for strings
     },
     {
       tag: [
@@ -106,35 +106,35 @@ export const darkTheme = createTheme({
         t.function(t.definition(t.variableName)),
         t.definition(t.typeName),
       ],
-      color: '#A3EBFF',
+      color: '#60a5fa', // blue-400 for functions/classes
     },
     {
       tag: [t.number, t.bool, t.null],
-      color: '#62E9BD',
+      color: '#f59e0b', // amber-500 for numbers
     },
     {
       tag: [t.keyword, t.operator],
-      color: '#2BF1DC',
+      color: '#a78bfa', // violet-400 for keywords
     },
     {
       tag: [t.definitionKeyword, t.modifier],
-      color: '#F8FBB1',
+      color: '#f472b6', // pink-400 for definition keywords
     },
     {
       tag: [t.variableName, t.self],
-      color: '#B683CA',
+      color: '#fafafa', // foreground for variables
     },
     {
       tag: [t.angleBracket, t.tagName, t.typeName, t.propertyName],
-      color: '#60A4F1',
+      color: '#fb923c', // orange-400 for tags
     },
     {
       tag: t.derefOperator,
-      color: '#E0E0E0',
+      color: '#fafafa',
     },
     {
       tag: t.attributeName,
-      color: '#7BACCA',
+      color: '#22d3ee', // cyan-400 for attributes
     },
   ],
 })
