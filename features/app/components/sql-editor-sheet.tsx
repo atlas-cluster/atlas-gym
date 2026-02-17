@@ -134,7 +134,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
       title="SQL Editor"
       description="Write and execute raw SQL queries. Use with caution."
       defaultWidth={600}
-      minWidth={400}
+      minWidth={300}
       maxWidth={1600}>
       <div className="flex flex-col gap-4 py-4 px-6 flex-1">
         <div className="flex flex-col gap-2">

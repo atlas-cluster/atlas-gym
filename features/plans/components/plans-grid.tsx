@@ -121,10 +121,12 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
   const handleDeleteConfirm = async () => {
     if (!planToDelete) return
 
+    // Close dialog immediately to prevent flickering
+    setDeleteDialogOpen(false)
+    setPlanToDelete(null)
+
     const promise = deletePlan(planToDelete.id).then(() => {
       fetchData()
-      setDeleteDialogOpen(false)
-      setPlanToDelete(null)
     })
 
     toast.promise(promise, {
