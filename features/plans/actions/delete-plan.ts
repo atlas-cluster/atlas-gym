@@ -2,50 +2,77 @@
 
 import { updateTag } from 'next/cache'
 
-import { createAuditLog } from '@/features/audit-logs'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
-export async function deletePlan(id: string) {
-  const { member } = await getSession()
+export async function deletePlan(id: string): Promise<{
+  success: boolean
+  message: string
+  errorType?: 'AUTH' | 'NOT_FOUND' | 'UNKNOWN'
+}> {
+  try {
+    const { member } = await getSession()
 
-  const result = await pool.query('SELECT name FROM plans WHERE id = $1', [id])
-  const planName = result.rows[0] ? result.rows[0].name : 'Unknown plan'
+    if (!member) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'Unauthorized. Please log in to delete a plan.',
+      }
+    }
 
-  // Delete all subscriptions for this plan and get their IDs atomically
-  const subscriptionsResult = await pool.query(
-    'DELETE FROM subscriptions WHERE plan_id = $1 RETURNING id',
-    [id]
-  )
-  const subscriptionIds = subscriptionsResult.rows.map((row) => row.id)
-
-  // Create audit logs for deleted subscriptions concurrently
-  if (subscriptionIds.length > 0 && member) {
-    await Promise.all(
-      subscriptionIds.map((subscriptionId) =>
-        createAuditLog({
-          memberId: member.id,
-          action: 'Delete',
-          entityId: subscriptionId,
-          entityType: 'subscription',
-          description: `Subscription deleted due to plan ${planName} deletion`,
-        })
+    const planDeleteResult = await pool.query(
+      `WITH target_plan AS (
+         SELECT name FROM plans WHERE id = $1
+      ),
+      target_subscriptions AS (
+         SELECT s.id, m.firstname, m.lastname
+         FROM subscriptions s
+         JOIN members m ON s.member_id = m.id
+         WHERE s.plan_id = $1
+      ),
+      deleted_plan AS (
+         DELETE FROM plans
+         WHERE id = $1
+         RETURNING id, name
+      ),
+      log_plan AS (
+         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+         SELECT $2, 'Delete'::action_type, id, 'plan', 'Plan ' || name || ' deleted'
+         FROM deleted_plan 
+      ),
+      log_subs AS (
+         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+         SELECT $2, 'Delete'::action_type, id, 'subscription',
+              'Subscription for ' || firstname || ' ' || lastname || ' deleted (cascade) due to deletion of plan ' || (SELECT name FROM target_plan)
+         FROM target_subscriptions
       )
+      SELECT id FROM deleted_plan`,
+      [id, member.id]
     )
-  }
 
-  if (member) {
-    await createAuditLog({
-      memberId: member.id,
-      action: 'Delete',
-      entityId: id,
-      entityType: 'plan',
-      description: `Plan ${planName} deleted`,
-    })
-  }
+    if (planDeleteResult.rowCount === 0) {
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Plan not found.',
+      }
+    }
 
-  await pool.query('DELETE FROM plans WHERE id = $1', [id])
-  updateTag('plans')
-  updateTag('subscriptions')
-  updateTag('members')
+    updateTag('plans')
+    updateTag('subscriptions')
+    updateTag('members')
+
+    return {
+      success: true,
+      message: 'Plan and associated subscriptions deleted successfully.',
+    }
+  } catch (error: unknown) {
+    console.error('[DELETE_PLAN_ERROR]:', error)
+    return {
+      success: false,
+      errorType: 'UNKNOWN',
+      message: 'An error occurred while deleting the plan.',
+    }
+  }
 }

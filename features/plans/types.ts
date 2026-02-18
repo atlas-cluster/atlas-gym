@@ -8,12 +8,14 @@ export interface Plan {
   price: number
   minDurationMonths: number
   description?: string
-  createdAt: Date
-  updatedAt: Date
-  subscriptionCount?: number
+  // Timestamps are ISO strings for lossless serialization, needed for optimistic updates
+  createdAt: string
+  updatedAt: string
 }
 
-export type PlanDisplay = Plan
+export type PlanDisplay = Plan & {
+  subscriptionCount?: number
+}
 
 export interface PlansTableMeta {
   updatePlan: (id: string, data: z.infer<typeof planDetailsSchema>) => void

@@ -7,7 +7,7 @@ import { pool } from '@/features/shared/lib/db'
 
 const getPlansCached = unstable_cache(
   async (): Promise<PlanDisplay[]> => {
-    const query = `
+    const plansResponse = await pool.query(`
       SELECT p.id,
              p.name,
              p.price,
@@ -20,16 +20,16 @@ const getPlansCached = unstable_cache(
              LEFT JOIN subscriptions s ON p.id = s.plan_id
       GROUP BY p.id
       ORDER BY p.name
-    `
-
-    const result = await pool.query(query)
-    return result.rows.map((row) => ({
+    `)
+    return plansResponse.rows.map((row) => ({
       ...row,
       price: parseFloat(row.price),
-      subscriptionCount: parseInt(row.subscriptionCount) || 0,
+      subscriptionCount: parseInt(row.subscriptionCount, 10),
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
     }))
   },
-  ['plans-list'],
+  ['get-plans'],
   { revalidate: 3600, tags: ['plans'] }
 )
 

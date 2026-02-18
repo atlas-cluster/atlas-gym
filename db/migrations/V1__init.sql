@@ -69,7 +69,7 @@ CREATE TABLE plans (
 CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
   member_id UUID NOT NULL REFERENCES members (id) ON DELETE CASCADE,
-  plan_id UUID NOT NULL REFERENCES plans (id) ON DELETE RESTRICT,
+  plan_id UUID NOT NULL REFERENCES plans (id) ON DELETE CASCADE,
   start_date DATE NOT NULL DEFAULT CURRENT_DATE,
   end_date DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now (),
