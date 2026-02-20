@@ -8,8 +8,8 @@ export interface Subscription {
   planDescription?: string
   startDate: Date
   endDate?: Date
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   status: 'active' | 'cancelled' | 'ended' | 'future'
   cancelledAt?: Date
 }

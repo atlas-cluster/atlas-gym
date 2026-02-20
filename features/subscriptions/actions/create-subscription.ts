@@ -2,122 +2,200 @@
 
 import { updateTag } from 'next/cache'
 
-import { createAuditLog } from '@/features/audit-logs'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
 export async function createSubscription(
   planId: string,
   targetMemberId?: string
-): Promise<void> {
-  const session = await getSession()
-  if (!session.authenticated || !session.member) {
-    throw new Error('Unauthorized')
-  }
-
-  // If targetMemberId is provided, verify the user is a trainer
-  let memberId: string
-  if (targetMemberId) {
-    if (!session.member.isTrainer) {
-      throw new Error(
-        'Only trainers can create subscriptions for other members'
-      )
+): Promise<{
+  success: boolean
+  message: string
+  errorType?:
+    | 'AUTH'
+    | 'NOT_FOUND'
+    | 'ALREADY_ACTIVE'
+    | 'FUTURE_EXISTS'
+    | 'CANCELLED_PENDING'
+    | 'UNKNOWN'
+}> {
+  const client = await pool.connect()
+  try {
+    const session = await getSession()
+    if (!session || !session.member) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'Unauthorized. Please log in to create a subscription.',
+      }
     }
-    memberId = targetMemberId
-  } else {
-    memberId = session.member.id
-  }
 
-  // Check if plan exists
-  const planQuery = `SELECT id, name FROM plans WHERE id = $1`
-  const planResult = await pool.query(planQuery, [planId])
+    let memberId: string
+    if (targetMemberId) {
+      if (!session.member.isTrainer) {
+        return {
+          success: false,
+          errorType: 'AUTH',
+          message: 'Only trainers can create subscriptions for other members',
+        }
+      }
+      memberId = targetMemberId
+    } else {
+      memberId = session.member.id
+    }
 
-  if (planResult.rows.length === 0) {
-    throw new Error('Plan not found')
-  }
-  const planName = planResult.rows[0].name
+    await client.query('BEGIN')
 
-  // Check for active subscription
-  const activeSubQuery = `
-    SELECT id FROM subscriptions
-    WHERE member_id = $1 AND end_date IS NULL
-  `
-  const activeSubResult = await pool.query(activeSubQuery, [memberId])
+    // Check if plan exists
+    const planQuery = await client.query(
+      `
+      SELECT id, name, min_duration_months
+      FROM plans 
+      WHERE id = $1
+    `,
+      [planId]
+    )
 
-  if (activeSubResult.rows.length > 0) {
-    throw new Error('You already have an active subscription')
-  }
+    if (planQuery.rows.length === 0) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Plan not found.',
+      }
+    }
 
-  // Check for future subscription
-  const futureSubQuery = `
-    SELECT id FROM subscriptions
-    WHERE member_id = $1 AND start_date > CURRENT_DATE
-  `
-  const futureSubResult = await pool.query(futureSubQuery, [memberId])
+    const planName = planQuery.rows[0].name
 
-  if (futureSubResult.rows.length > 0) {
-    throw new Error('You already have a future subscription scheduled')
-  }
-
-  // Check for cancelled subscription that hasn't ended yet
-  const cancelledSubQuery = `
-    SELECT id, end_date FROM subscriptions
-    WHERE member_id = $1 
-      AND end_date IS NOT NULL 
-      AND end_date >= CURRENT_DATE
-    ORDER BY end_date DESC
-    LIMIT 1
-  `
-  const cancelledSubResult = await pool.query(cancelledSubQuery, [memberId])
-
-  let startDate: Date | string
-  if (cancelledSubResult.rows.length > 0) {
-    // Start the day after the cancelled subscription ends
-    const cancelledEndDate = new Date(cancelledSubResult.rows[0].end_date)
-    startDate = new Date(cancelledEndDate)
-    startDate.setDate(startDate.getDate() + 1)
-  } else {
-    // Start immediately
-    startDate = new Date()
-    startDate.setHours(0, 0, 0, 0)
-  }
-
-  // Create new subscription
-  const insertQuery = `
-    INSERT INTO subscriptions (member_id, plan_id, start_date)
-    VALUES ($1, $2, $3)
-    RETURNING id
-  `
-
-  const result = await pool.query<{ id: string }>(insertQuery, [
-    memberId,
-    planId,
-    startDate,
-  ])
-
-  let memberName = 'Unknown'
-  if (memberId === session.member.id) {
-    memberName = `${session.member.firstname} ${session.member.lastname}`
-  } else {
-    const memberRes = await pool.query(
-      'SELECT firstname, lastname FROM members WHERE id = $1',
+    // Check for active subscription
+    const activeSubQuery = await client.query(
+      `
+      SELECT id 
+      FROM subscriptions
+      WHERE member_id = $1 AND end_date IS NULL
+    `,
       [memberId]
     )
-    if (memberRes.rows.length > 0) {
-      memberName = `${memberRes.rows[0].firstname} ${memberRes.rows[0].lastname}`
+
+    if (activeSubQuery.rows.length > 0) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'ALREADY_ACTIVE',
+        message: 'You already have an active subscription.',
+      }
     }
-  }
 
-  if (session.member) {
-    await createAuditLog({
-      memberId: session.member.id,
-      action: 'Create',
-      entityId: result.rows[0].id,
-      entityType: 'subscription',
-      description: `Subscription to ${planName} created for ${memberName}`,
-    })
-  }
+    // Check for future subscription
+    const futureSubQuery = await client.query(
+      `
+      SELECT id 
+      FROM subscriptions
+      WHERE member_id = $1 AND start_date > CURRENT_DATE
+    `,
+      [memberId]
+    )
 
-  updateTag('subscriptions')
-  updateTag('members')
+    if (futureSubQuery.rows.length > 0) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'FUTURE_EXISTS',
+        message: 'You already have a future subscription scheduled.',
+      }
+    }
+
+    // Check for cancelled subscription that hasn't ended yet
+    const cancelledSubQuery = await client.query(
+      `
+      SELECT id, end_date, firstname, lastname
+      FROM subscriptions s
+      JOIN members m ON s.member_id = m.id
+      WHERE s.member_id = $1 
+        AND end_date IS NOT NULL 
+        AND end_date >= CURRENT_DATE
+      ORDER BY end_date DESC
+      LIMIT 1
+    `,
+      [memberId]
+    )
+
+    let startDate: Date
+    let memberName: string
+
+    if (cancelledSubQuery.rows.length > 0) {
+      // Start the day after the cancelled subscription ends
+      const cancelledEndDate = new Date(cancelledSubQuery.rows[0].end_date)
+      startDate = new Date(cancelledEndDate)
+      startDate.setDate(startDate.getDate() + 1)
+      memberName = `${cancelledSubQuery.rows[0].firstname} ${cancelledSubQuery.rows[0].lastname}`
+    } else {
+      // Start immediately
+      startDate = new Date()
+      startDate.setHours(0, 0, 0, 0)
+
+      // Get member name
+      const memberQuery = await client.query(
+        `
+        SELECT firstname, lastname 
+        FROM members 
+        WHERE id = $1
+      `,
+        [memberId]
+      )
+
+      memberName =
+        memberQuery.rows.length > 0
+          ? `${memberQuery.rows[0].firstname} ${memberQuery.rows[0].lastname}`
+          : 'Unknown'
+    }
+
+    // Create new subscription
+    const insertQuery = await client.query(
+      `
+      WITH new_sub AS (
+        INSERT INTO subscriptions (member_id, plan_id, start_date)
+        VALUES ($1, $2, $3)
+        RETURNING id
+      ),
+      log_sub AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT $4, 'Create'::action_type, id, 'subscription',
+              'Subscription to ${planName} created for ${memberName} by ${session.member.firstname} ${session.member.lastname}'
+        FROM new_sub
+      )
+      SELECT id FROM new_sub
+    `,
+      [memberId, planId, startDate, session.member.id]
+    )
+
+    if (insertQuery.rowCount === 0) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'UNKNOWN',
+        message: 'Failed to create subscription.',
+      }
+    }
+
+    await client.query('COMMIT')
+
+    updateTag('subscriptions')
+    updateTag('members')
+
+    return {
+      success: true,
+      message: 'Subscription created successfully.',
+    }
+  } catch (error: unknown) {
+    await client.query('ROLLBACK').catch(() => {})
+    console.error('[CREATE_SUBSCRIPTION_ERROR]:', error)
+    return {
+      success: false,
+      errorType: 'UNKNOWN',
+      message: 'An error occurred while creating the subscription.',
+    }
+  } finally {
+    client.release()
+  }
 }
