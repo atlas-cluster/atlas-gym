@@ -27,6 +27,14 @@ export async function createPlan(
       }
     }
 
+    if (!member.isTrainer) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'Only trainers can create plans.',
+      }
+    }
+
     await pool.query(
       `WITH inserted_plan AS (
           INSERT INTO plans (name, price, min_duration_months, description)
@@ -40,7 +48,7 @@ export async function createPlan(
         validated.name,
         validated.price,
         validated.minDurationMonths,
-        validated.description || null,
+        validated.description ?? null,
         member.id,
       ]
     )

@@ -137,7 +137,7 @@ CREATE INDEX idx_course_bookings_member ON course_bookings (member_id);
 
 CREATE TABLE audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-  member_id UUID NOT NULL REFERENCES members (id) ON DELETE SET NULL,
+  member_id UUID REFERENCES members (id) ON DELETE SET NULL,
   entity_id UUID NOT NULL,
   entity_type VARCHAR(50) NOT NULL,
   action action_type NOT NULL,

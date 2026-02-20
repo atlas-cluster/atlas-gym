@@ -21,6 +21,14 @@ export async function deletePlan(id: string): Promise<{
       }
     }
 
+    if (!member.isTrainer) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'Only trainers can delete plans.',
+      }
+    }
+
     const planDeleteResult = await pool.query(
       `WITH target_plan AS (
          SELECT name FROM plans WHERE id = $1

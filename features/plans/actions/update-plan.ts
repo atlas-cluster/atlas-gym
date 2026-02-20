@@ -34,6 +34,14 @@ export async function updatePlan(
       }
     }
 
+    if (!member.isTrainer) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'Only trainers can update plans.',
+      }
+    }
+
     const result = await pool.query(
       `WITH updated_plan AS (
         UPDATE plans
@@ -49,7 +57,7 @@ export async function updatePlan(
         validated.name,
         validated.price,
         validated.minDurationMonths,
-        validated.description || null,
+        validated.description ?? null,
         id,
         lastUpdatedAt,
         member.id,
@@ -80,6 +88,13 @@ export async function updatePlan(
         success: false,
         errorType: 'NAME_COLLISION',
         message: 'A plan with this name already exists.',
+      }
+    }
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        errorType: 'VALIDATION',
+        message: 'Invalid input data. Please check the form and try again.',
       }
     }
     console.error('[UPDATE_PLAN_ERROR]:', error)
