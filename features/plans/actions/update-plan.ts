@@ -38,7 +38,7 @@ export async function updatePlan(
       `WITH updated_plan AS (
         UPDATE plans
           SET name = $1, price = $2, min_duration_months = $3, description = $4, updated_at = NOW()
-          WHERE id = $5 AND updated_at = $6::timestamptz
+          WHERE id = $5 AND date_trunc('milliseconds', updated_at) = $6::timestamptz
           RETURNING id, name
       )
        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)

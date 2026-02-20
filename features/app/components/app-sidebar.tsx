@@ -73,7 +73,8 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === item.url}
-                  tooltip={item.title}>
+                  tooltip={item.title}
+                  suppressHydrationWarning>
                   <Link href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -92,7 +93,8 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    tooltip={item.title}>
+                    tooltip={item.title}
+                    suppressHydrationWarning>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

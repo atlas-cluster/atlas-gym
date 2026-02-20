@@ -25,11 +25,18 @@ import { Input } from '@/features/shared/components/ui/input'
 import { Textarea } from '@/features/shared/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+const PLAN_DEFAULT_VALUES = {
+  name: '',
+  price: 0,
+  minDurationMonths: 1,
+  description: '',
+}
+
 interface PlanDetailsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   plan?: PlanDisplay | null
-  onSubmit: (data: z.infer<typeof planDetailsSchema>) => void
+  onSubmit: (data: z.infer<typeof planDetailsSchema>) => Promise<void>
 }
 
 export function PlanDetailsDialog({
@@ -42,15 +49,11 @@ export function PlanDetailsDialog({
 
   const form = useForm<z.infer<typeof planDetailsSchema>>({
     resolver: zodResolver(planDetailsSchema),
-    defaultValues: {
-      name: '',
-      price: 0,
-      minDurationMonths: 1,
-      description: '',
-    },
+    defaultValues: PLAN_DEFAULT_VALUES,
   })
 
   useEffect(() => {
+    if (!open) return
     if (plan) {
       form.reset({
         name: plan.name,
@@ -59,19 +62,14 @@ export function PlanDetailsDialog({
         description: plan.description || '',
       })
     } else {
-      form.reset({
-        name: '',
-        price: 0,
-        minDurationMonths: 1,
-        description: '',
-      })
+      form.reset(PLAN_DEFAULT_VALUES)
     }
-  }, [plan, form])
+  }, [open, plan, form])
 
   const handleSubmit = form.handleSubmit(
-    (data: z.infer<typeof planDetailsSchema>) => {
-      onSubmit(data)
+    async (data: z.infer<typeof planDetailsSchema>) => {
       onOpenChange(false)
+      await onSubmit(data)
     }
   )
 

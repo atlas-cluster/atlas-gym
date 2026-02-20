@@ -81,12 +81,12 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
     'name' | 'price' | 'minDuration' | 'subscriptionCount'
   >('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  const [durationRange, setDurationRange] = useState<[number, number]>([0, 36])
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
+  const [durationRange, setDurationRange] = useState<[number, number]>([0, 24])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500])
 
   // Calculate min/max values from data
   const minPrice = Math.min(...plansData.map((p) => p.price), 0)
-  const maxPrice = Math.max(...plansData.map((p) => p.price), 200)
+  const maxPrice = Math.max(...plansData.map((p) => p.price), 500)
 
   useEffect(() => {
     setPlansData(initialData)
@@ -125,42 +125,41 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
     setDeleteDialogOpen(false)
     setPlanToDelete(null)
 
-    const promise = deletePlan(planToDelete.id).then(() => {
-      fetchData()
-    })
-
-    toast.promise(promise, {
-      loading: 'Deleting plan...',
-      success: 'Plan deleted successfully',
-      error: (err) => {
-        return err?.message || 'Error deleting plan'
-      },
-    })
+    const toastId = toast.loading('Deleting plan...')
+    const result = await deletePlan(planToDelete.id)
+    if (!result.success) {
+      toast.error(result.message, { id: toastId })
+      return
+    }
+    await fetchData()
+    toast.success(result.message, { id: toastId })
   }
 
-  const handleSubmit = (data: z.infer<typeof planDetailsSchema>) => {
+  const handleSubmit = async (data: z.infer<typeof planDetailsSchema>) => {
     if (selectedPlan) {
       // Update existing plan
-      const promise = updatePlan(selectedPlan.id, data).then(() => {
-        fetchData()
-      })
-
-      toast.promise(promise, {
-        loading: 'Updating plan...',
-        success: 'Plan updated successfully',
-        error: 'Error updating plan',
-      })
+      const toastId = toast.loading('Updating plan...')
+      const result = await updatePlan(
+        selectedPlan.id,
+        data,
+        selectedPlan.updatedAt
+      )
+      if (!result.success) {
+        toast.error(result.message, { id: toastId })
+        return
+      }
+      await fetchData()
+      toast.success(result.message, { id: toastId })
     } else {
       // Create new plan
-      const promise = createPlan(data).then(() => {
-        fetchData()
-      })
-
-      toast.promise(promise, {
-        loading: 'Creating plan...',
-        success: 'Plan created successfully',
-        error: 'Error creating plan',
-      })
+      const toastId = toast.loading('Creating plan...')
+      const result = await createPlan(data)
+      if (!result.success) {
+        toast.error(result.message, { id: toastId })
+        return
+      }
+      await fetchData()
+      toast.success(result.message, { id: toastId })
     }
   }
 
@@ -362,7 +361,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
           <DataTableRangeFilter
             title="Duration"
             min={0}
-            max={36}
+            max={24}
             value={durationRange}
             onChange={setDurationRange}
             formatValue={(v) => `${v}mo`}
@@ -381,7 +380,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
 
           {(searchQuery ||
             durationRange[0] !== 0 ||
-            durationRange[1] !== 36 ||
+            durationRange[1] !== 24 ||
             priceRange[0] !== minPrice ||
             priceRange[1] !== maxPrice) && (
             <Button
@@ -389,7 +388,7 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
               size={'icon'}
               onClick={() => {
                 setSearchQuery('')
-                setDurationRange([0, 36])
+                setDurationRange([0, 24])
                 setPriceRange([minPrice, maxPrice])
               }}
               suppressHydrationWarning>
@@ -570,7 +569,9 @@ export function PlansGrid({ initialData }: { initialData: PlanDisplay[] }) {
                   setPageSize(Number(value))
                   setCurrentPage(0)
                 }}>
-                <SelectTrigger className="h-8 w-[70px]">
+                <SelectTrigger
+                  className="h-8 w-[70px]"
+                  suppressHydrationWarning>
                   <SelectValue placeholder={pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
