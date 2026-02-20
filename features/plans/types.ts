@@ -8,9 +8,8 @@ export interface Plan {
   price: number
   minDurationMonths: number
   description?: string
-  // Timestamps are ISO strings for lossless serialization, needed for optimistic updates
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type PlanDisplay = Plan & {

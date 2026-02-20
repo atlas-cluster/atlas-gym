@@ -26,10 +26,25 @@ export async function deletePlan(id: string): Promise<{
          SELECT name FROM plans WHERE id = $1
       ),
       target_subscriptions AS (
-         SELECT s.id, m.firstname, m.lastname
+         SELECT s.id, s.start_date, s.end_date, m.firstname, m.lastname
          FROM subscriptions s
          JOIN members m ON s.member_id = m.id
          WHERE s.plan_id = $1
+           AND (
+             s.start_date > CURRENT_DATE
+             OR (s.start_date <= CURRENT_DATE AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE))
+           )
+      ),
+      log_subs AS (
+         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+         SELECT $2, 'Delete'::action_type, ts.id, 'subscription',
+              CASE
+                WHEN ts.start_date > CURRENT_DATE THEN
+                  'Future subscription for ' || ts.firstname || ' ' || ts.lastname || ' canceled (cascade) due to deletion of plan ' || (SELECT name FROM target_plan)
+                ELSE
+                  'Active subscription for ' || ts.firstname || ' ' || ts.lastname || ' removed (cascade) due to deletion of plan ' || (SELECT name FROM target_plan)
+              END
+         FROM target_subscriptions ts
       ),
       deleted_plan AS (
          DELETE FROM plans
@@ -40,12 +55,6 @@ export async function deletePlan(id: string): Promise<{
          INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
          SELECT $2, 'Delete'::action_type, id, 'plan', 'Plan ' || name || ' deleted'
          FROM deleted_plan 
-      ),
-      log_subs AS (
-         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-         SELECT $2, 'Delete'::action_type, id, 'subscription',
-              'Subscription for ' || firstname || ' ' || lastname || ' deleted (cascade) due to deletion of plan ' || (SELECT name FROM target_plan)
-         FROM target_subscriptions
       )
       SELECT id FROM deleted_plan`,
       [id, member.id]

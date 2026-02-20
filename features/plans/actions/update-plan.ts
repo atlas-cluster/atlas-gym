@@ -11,7 +11,7 @@ import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 export async function updatePlan(
   id: string,
   data: z.infer<typeof planDetailsSchema>,
-  lastUpdatedAt: string
+  lastUpdatedAt: Date
 ): Promise<{
   success: boolean
   message: string
