@@ -10,10 +10,11 @@ export interface Plan {
   description?: string
   createdAt: Date
   updatedAt: Date
-  subscriptionCount?: number
 }
 
-export type PlanDisplay = Plan
+export type PlanDisplay = Plan & {
+  subscriptionCount?: number
+}
 
 export interface PlansTableMeta {
   updatePlan: (id: string, data: z.infer<typeof planDetailsSchema>) => void

@@ -184,6 +184,7 @@ export function SidebarMemberDetails() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
+              suppressHydrationWarning
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <MemberDetails
                 memberExists={memberExists}
