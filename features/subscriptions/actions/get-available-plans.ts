@@ -20,7 +20,7 @@ const getAvailablePlansCached = unstable_cache(
         COUNT(s.id) FILTER (WHERE s.end_date IS NULL) as "subscriptionCount"
       FROM plans p
       LEFT JOIN subscriptions s ON p.id = s.plan_id
-      GROUP BY p.id
+      GROUP BY p.id, p.name, p.price, p.min_duration_months, p.description, p.created_at, p.updated_at
       ORDER BY p.name
     `
 

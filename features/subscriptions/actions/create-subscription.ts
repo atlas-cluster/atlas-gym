@@ -108,7 +108,7 @@ export async function createSubscription(
     // Check for cancelled subscription that hasn't ended yet
     const cancelledSubQuery = await client.query(
       `
-      SELECT id, end_date, firstname, lastname
+      SELECT s.id, s.end_date, m.firstname, m.lastname
       FROM subscriptions s
       JOIN members m ON s.member_id = m.id
       WHERE s.member_id = $1 
@@ -151,6 +151,7 @@ export async function createSubscription(
     }
 
     // Create new subscription
+    const createDescription = `Subscription to ${planName} created for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
     const insertQuery = await client.query(
       `
       WITH new_sub AS (
@@ -160,13 +161,12 @@ export async function createSubscription(
       ),
       log_sub AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $4, 'Create'::action_type, id, 'subscription',
-              'Subscription to ${planName} created for ${memberName} by ${session.member.firstname} ${session.member.lastname}'
+        SELECT $4, 'Create'::action_type, id, 'subscription', $5
         FROM new_sub
       )
       SELECT id FROM new_sub
     `,
-      [memberId, planId, startDate, session.member.id]
+      [memberId, planId, startDate, session.member.id, createDescription]
     )
 
     if (insertQuery.rowCount === 0) {

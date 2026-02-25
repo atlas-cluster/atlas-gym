@@ -61,6 +61,7 @@ export async function deleteSubscription(
     const planName = subscription.plan_name
 
     // Delete the subscription immediately, no matter the status or runtime
+    const deleteDescription = `Subscription to ${planName} forcefully removed by admin for ${memberName}`
     const deleteQuery = await client.query(
       `
       WITH deleted_sub AS (
@@ -70,13 +71,12 @@ export async function deleteSubscription(
       ),
       log_sub AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $3, 'Delete'::action_type, id, 'subscription',
-              'Subscription to ${planName} forcefully removed by admin for ${memberName}'
+        SELECT $3, 'Delete'::action_type, id, 'subscription', $4
         FROM deleted_sub
       )
       SELECT 1
     `,
-      [subscriptionId, targetMemberId, session.member.id]
+      [subscriptionId, targetMemberId, session.member.id, deleteDescription]
     )
 
     if (deleteQuery.rowCount === 0) {

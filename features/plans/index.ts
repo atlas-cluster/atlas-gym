@@ -5,4 +5,4 @@ export * from '@/features/plans/actions/create-plan'
 export * from '@/features/plans/actions/update-plan'
 export * from '@/features/plans/actions/delete-plan'
 
-export { PlansGrid } from '@/features/plans/components/plans-grid'
+export { TableClient as PlansTableClient } from '@/features/plans/components/client'

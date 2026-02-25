@@ -11,26 +11,32 @@ import {
 } from '@/features/shared/components/ui/popover'
 import { Separator } from '@/features/shared/components/ui/separator'
 import { Slider } from '@/features/shared/components/ui/slider'
+import type { Column } from '@tanstack/react-table'
 
-interface DataTableRangeFilterProps {
+interface DataTableRangeFilterProps<TData> {
+  column?: Column<TData, unknown>
   title: string
-  min: number
-  max: number
-  value: [number, number]
-  onChange: (value: [number, number]) => void
+  min?: number
+  max?: number
   formatValue?: (value: number) => string
   step?: number
 }
 
-export function DataTableRangeFilter({
+export function DataTableRangeFilter<TData>({
+  column,
   title,
-  min,
-  max,
-  value,
-  onChange,
+  min: minProp,
+  max: maxProp,
   formatValue = (v) => String(v),
   step = 1,
-}: DataTableRangeFilterProps) {
+}: DataTableRangeFilterProps<TData>) {
+  const facetedMinMax = column?.getFacetedMinMaxValues()
+  const min = minProp ?? facetedMinMax?.[0] ?? 0
+  const max = maxProp ?? facetedMinMax?.[1] ?? 100
+
+  const filterValue = column?.getFilterValue() as [number, number] | undefined
+  const value: [number, number] = filterValue ?? [min, max]
+
   const [localMin, setLocalMin] = useState(String(value[0]))
   const [localMax, setLocalMax] = useState(String(value[1]))
   const [open, setOpen] = useState(false)
@@ -40,11 +46,17 @@ export function DataTableRangeFilter({
   const handleApply = () => {
     const newMin = Math.max(min, Math.min(parseFloat(localMin) || min, max))
     const newMax = Math.max(min, Math.min(parseFloat(localMax) || max, max))
-    onChange([Math.min(newMin, newMax), Math.max(newMin, newMax)])
+    const range: [number, number] = [
+      Math.min(newMin, newMax),
+      Math.max(newMin, newMax),
+    ]
+    column?.setFilterValue(
+      range[0] === min && range[1] === max ? undefined : range
+    )
   }
 
   const handleReset = () => {
-    onChange([min, max])
+    column?.setFilterValue(undefined)
     setLocalMin(String(min))
     setLocalMax(String(max))
   }
@@ -53,7 +65,9 @@ export function DataTableRangeFilter({
     const [newMin, newMax] = newValue as [number, number]
     setLocalMin(String(newMin))
     setLocalMax(String(newMax))
-    onChange([newMin, newMax])
+    column?.setFilterValue(
+      newMin === min && newMax === max ? undefined : [newMin, newMax]
+    )
   }
 
   return (

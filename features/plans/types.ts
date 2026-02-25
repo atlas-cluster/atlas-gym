@@ -17,8 +17,12 @@ export type PlanDisplay = Plan & {
 }
 
 export interface PlansTableMeta {
-  updatePlan: (id: string, data: z.infer<typeof planDetailsSchema>) => void
-  openPlanDetails: (plan: PlanDisplay | null) => void
-  deletePlan: (id: string) => void
+  createPlan: (data: z.infer<typeof planDetailsSchema>) => Promise<void>
+  updatePlan: (
+    id: string,
+    data: z.infer<typeof planDetailsSchema>,
+    lastUpdatedAt: Date
+  ) => Promise<void>
+  deletePlan: (id: string) => Promise<void>
   refreshPlans: () => void
 }

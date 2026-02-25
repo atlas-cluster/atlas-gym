@@ -1,7 +1,6 @@
 'use client'
 
 import { GraduationCap, RefreshCwIcon, UserIcon, XIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -244,21 +243,27 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const handleCancelSubscriptionConfirm = async () => {
     if (!selectedMember) return
 
+    setCancelSubDialogOpen(false)
+
     const promise = (async () => {
       if (!selectedMember.subscriptionId) {
         throw new Error('No active subscription found')
       }
 
-      await cancelSubscription(selectedMember.subscriptionId, selectedMember.id)
-      setCancelSubDialogOpen(false)
+      const result = await cancelSubscription(
+        selectedMember.subscriptionId,
+        selectedMember.id
+      )
+      if (!result.success) throw new Error(result.message)
       setSelectedMember(null)
-      // fetchData() removed - server action updateTag('members') will auto-refresh
+      fetchData()
+      return result.message
     })()
 
     toast.promise(promise, {
       loading: 'Cancelling subscription...',
-      success: 'Subscription cancelled successfully',
-      error: (err) => err?.message || 'Failed to cancel subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to cancel subscription',
     })
   }
 
@@ -270,21 +275,27 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const handleRevertCancellationConfirm = async () => {
     if (!selectedMember) return
 
+    setRevertCancelDialogOpen(false)
+
     const promise = (async () => {
       if (!selectedMember.subscriptionId) {
         throw new Error('No cancelled subscription found')
       }
 
-      await revertCancellation(selectedMember.subscriptionId, selectedMember.id)
-      setRevertCancelDialogOpen(false)
+      const result = await revertCancellation(
+        selectedMember.subscriptionId,
+        selectedMember.id
+      )
+      if (!result.success) throw new Error(result.message)
       setSelectedMember(null)
-      // fetchData() removed - server action updateTag('members') will auto-refresh
+      fetchData()
+      return result.message
     })()
 
     toast.promise(promise, {
       loading: 'Reverting cancellation...',
-      success: 'Cancellation reverted successfully',
-      error: (err) => err?.message || 'Failed to revert cancellation',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to revert cancellation',
     })
   }
 
@@ -292,13 +303,16 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     member: MemberDisplay,
     planId: string
   ) => {
-    const promise = createSubscription(planId, member.id)
-    // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
+    const promise = createSubscription(planId, member.id).then((result) => {
+      if (!result.success) throw new Error(result.message)
+      fetchData()
+      return result.message
+    })
 
     toast.promise(promise, {
       loading: 'Creating future subscription...',
-      success: 'Future subscription created successfully',
-      error: (err) => err?.message || 'Failed to create future subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to create future subscription',
     })
   }
 
@@ -310,35 +324,41 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const handleCancelFutureSubscriptionConfirm = async () => {
     if (!selectedMember) return
 
+    setCancelFutureDialogOpen(false)
+
     const promise = (async () => {
       if (!selectedMember.futureSubscriptionId) {
         throw new Error('No future subscription found')
       }
 
-      await cancelSubscription(
+      const result = await cancelSubscription(
         selectedMember.futureSubscriptionId,
         selectedMember.id
       )
-      setCancelFutureDialogOpen(false)
+      if (!result.success) throw new Error(result.message)
       setSelectedMember(null)
-      // fetchData() removed - server action updateTag('members') will auto-refresh
+      fetchData()
+      return result.message
     })()
 
     toast.promise(promise, {
       loading: 'Cancelling future subscription...',
-      success: 'Future subscription cancelled successfully',
-      error: (err) => err?.message || 'Failed to cancel future subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to cancel future subscription',
     })
   }
 
   const handleChoosePlan = async (member: MemberDisplay, planId: string) => {
-    const promise = createSubscription(planId, member.id)
-    // .then(() => fetchData()) removed - server action updateTag('members') will auto-refresh
+    const promise = createSubscription(planId, member.id).then((result) => {
+      if (!result.success) throw new Error(result.message)
+      fetchData()
+      return result.message
+    })
 
     toast.promise(promise, {
       loading: 'Creating subscription...',
-      success: 'Subscription created successfully',
-      error: (err) => err?.message || 'Failed to create subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to create subscription',
     })
   }
 
@@ -350,8 +370,9 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   const handleRemoveSubscriptionConfirm = async () => {
     if (!selectedMember) return
 
+    setRemoveSubDialogOpen(false)
+
     const promise = (async () => {
-      // Collect all subscription IDs to delete (both active and future)
       const subscriptionIds = [
         selectedMember.subscriptionId,
         selectedMember.futureSubscriptionId,
@@ -361,20 +382,25 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
         throw new Error('No subscription found to remove')
       }
 
-      // Delete all subscriptions
       for (const subscriptionId of subscriptionIds) {
-        await deleteSubscription(subscriptionId, selectedMember.id)
+        const result = await deleteSubscription(
+          subscriptionId,
+          selectedMember.id
+        )
+        if (!result.success) throw new Error(result.message)
       }
 
-      setRemoveSubDialogOpen(false)
       setSelectedMember(null)
-      // fetchData() removed - server action updateTag('members') will auto-refresh
+      fetchData()
+      return subscriptionIds.length > 1
+        ? 'Subscriptions removed successfully'
+        : 'Subscription removed successfully'
     })()
 
     toast.promise(promise, {
       loading: 'Removing subscription(s)...',
-      success: 'Subscription(s) removed successfully',
-      error: (err) => err?.message || 'Failed to remove subscription(s)',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Failed to remove subscription(s)',
     })
   }
 
@@ -490,7 +516,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       {/* Cancel Subscription Dialog */}
       <AlertDialog
         open={cancelSubDialogOpen}
-        onOpenChange={setCancelSubDialogOpen}>
+        onOpenChange={(open) => {
+          setCancelSubDialogOpen(open)
+          if (!open) setSelectedMember(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
@@ -513,7 +542,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       {/* Revert Cancellation Dialog */}
       <AlertDialog
         open={revertCancelDialogOpen}
-        onOpenChange={setRevertCancelDialogOpen}>
+        onOpenChange={(open) => {
+          setRevertCancelDialogOpen(open)
+          if (!open) setSelectedMember(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revert Cancellation?</AlertDialogTitle>
@@ -535,7 +567,10 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
       {/* Cancel Future Subscription Dialog */}
       <AlertDialog
         open={cancelFutureDialogOpen}
-        onOpenChange={setCancelFutureDialogOpen}>
+        onOpenChange={(open) => {
+          setCancelFutureDialogOpen(open)
+          if (!open) setSelectedMember(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Future Subscription?</AlertDialogTitle>
