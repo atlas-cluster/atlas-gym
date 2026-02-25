@@ -42,34 +42,34 @@ export function PlanDetailsDialog({
   const isEditing = !!plan
 
   const form = useForm({
-  resolver: zodResolver(planDetailsSchema),
-  defaultValues: {
-    name: '',
-    price: 0,
-    minDurationMonths: 1,
-    description: ''
-  }
-})
+    resolver: zodResolver(planDetailsSchema),
+    defaultValues: {
+      name: '',
+      price: 0,
+      minDurationMonths: 1,
+      description: '',
+    },
+  })
 
-useEffect(() => {
-  if (open) {
-    form.reset(
-      plan
-        ? {
-            name: plan.name,
-            price: plan.price,
-            minDurationMonths: plan.minDurationMonths,
-            description: plan.description ?? '',
-          }
-        : {
-            name: '',
-            price: 0,
-            minDurationMonths: 1,
-            description: '',
-          }
-    )
-  }
-}, [open, plan, form])
+  useEffect(() => {
+    if (open) {
+      form.reset(
+        plan
+          ? {
+              name: plan.name,
+              price: plan.price,
+              minDurationMonths: plan.minDurationMonths,
+              description: plan.description ?? '',
+            }
+          : {
+              name: '',
+              price: 0,
+              minDurationMonths: 1,
+              description: '',
+            }
+      )
+    }
+  }, [open, plan, form])
 
   function onCreate(data: z.infer<typeof planDetailsSchema>) {
     const promise = createPlan(data).then((result) => {
@@ -169,7 +169,7 @@ useEffect(() => {
                       fixedDecimalScale
                       suffix="€"
                       allowNegative={false}
-                      isAllowed={(values) => (values.floatValue ?? 0) <= 500}
+                      isAllowed={(values) => (values.floatValue ?? 0) <= 1000}
                       value={field.value ?? 0}
                       onValueChange={(values) => {
                         field.onChange(values.floatValue ?? 0)

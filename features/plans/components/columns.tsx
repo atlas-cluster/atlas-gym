@@ -12,15 +12,13 @@ export const columns: ColumnDef<PlanDisplay>[] = [
     accessorKey: 'price',
     enableSorting: true,
     enableHiding: false,
-    enableGlobalFilter: true,
+    enableGlobalFilter: false,
   },
   {
     accessorKey: 'minDurationMonths',
     enableSorting: true,
     enableHiding: false,
-    enableGlobalFilter: true,
-    minSize: 1,
-    maxSize: 24,
+    enableGlobalFilter: false,
   },
   {
     accessorKey: 'description',
@@ -32,6 +30,6 @@ export const columns: ColumnDef<PlanDisplay>[] = [
     accessorKey: 'subscriptionCount',
     enableSorting: true,
     enableHiding: false,
-    enableGlobalFilter: true,
+    enableGlobalFilter: false,
   },
 ]

@@ -16,7 +16,6 @@ export async function createPlan(
   errorType?: 'AUTH' | 'NAME_COLLISION' | 'VALIDATION' | 'UNKNOWN'
 }> {
   try {
-    const validated = planDetailsSchema.parse(data)
     const { member } = await getSession()
 
     if (!member) {
@@ -34,6 +33,8 @@ export async function createPlan(
         message: 'Only trainers can create plans.',
       }
     }
+
+    const validated = planDetailsSchema.parse(data)
 
     await pool.query(
       `WITH inserted_plan AS (

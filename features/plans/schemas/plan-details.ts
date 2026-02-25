@@ -8,7 +8,7 @@ export const planDetailsSchema = z.object({
   price: z
     .number()
     .min(0, 'Price must be non-negative')
-    .max(500, 'Price must be at most 500.00€'),
+    .max(1000, 'Price must be at most 1000.00€'),
   minDurationMonths: z
     .number()
     .int()

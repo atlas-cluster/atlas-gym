@@ -2,7 +2,6 @@
 
 import { unstable_cache } from 'next/cache'
 
-import { getSession } from '@/features/auth'
 import { PlanDisplay } from '@/features/plans/types'
 import { pool } from '@/features/shared/lib/db'
 
