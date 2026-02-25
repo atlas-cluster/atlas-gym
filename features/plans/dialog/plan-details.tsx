@@ -41,30 +41,35 @@ export function PlanDetailsDialog({
 }: PlanDetailsDialogProps) {
   const isEditing = !!plan
 
-  const form = useForm<z.infer<typeof planDetailsSchema>>({
-    resolver: zodResolver(planDetailsSchema),
-    defaultValues: {
-      name: '',
-      price: 0,
-      minDurationMonths: 1,
-      description: '',
-    },
-  })
+  const form = useForm({
+  resolver: zodResolver(planDetailsSchema),
+  defaultValues: {
+    name: '',
+    price: 0,
+    minDurationMonths: 1,
+    description: ''
+  }
+})
 
-  useEffect(() => {
-    if (open) {
-      if (plan) {
-        form.reset({
-          name: plan.name,
-          price: plan.price,
-          minDurationMonths: plan.minDurationMonths,
-          description: plan.description ?? '',
-        })
-      } else {
-        form.reset()
-      }
-    }
-  }, [plan, form, open])
+useEffect(() => {
+  if (open) {
+    form.reset(
+      plan
+        ? {
+            name: plan.name,
+            price: plan.price,
+            minDurationMonths: plan.minDurationMonths,
+            description: plan.description ?? '',
+          }
+        : {
+            name: '',
+            price: 0,
+            minDurationMonths: 1,
+            description: '',
+          }
+    )
+  }
+}, [open, plan, form])
 
   function onCreate(data: z.infer<typeof planDetailsSchema>) {
     const promise = createPlan(data).then((result) => {
@@ -136,7 +141,7 @@ export function PlanDetailsDialog({
                     id="name"
                     placeholder="e.g., Premium"
                     {...field}
-                    value={field.value ?? ''}
+                    value={field.value}
                     aria-invalid={fieldState.invalid}
                     autoComplete={'off'}
                   />
@@ -190,7 +195,6 @@ export function PlanDetailsDialog({
                     </FieldLabel>
                     <NumberInput
                       {...field}
-                      disabled={field.value === null}
                       min={1}
                       max={24}
                       className="w-full"
@@ -214,7 +218,7 @@ export function PlanDetailsDialog({
                     id="description"
                     {...field}
                     placeholder="Describe what's included in this plan..."
-                    value={field.value ?? ''}
+                    value={field.value}
                     aria-invalid={fieldState.invalid}
                     autoComplete={'off'}
                     rows={3}
