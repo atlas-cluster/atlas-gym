@@ -23,7 +23,6 @@ export async function updatePlan(
     | 'UNKNOWN'
 }> {
   try {
-    const validated = planDetailsSchema.parse(data)
     const { member } = await getSession()
 
     if (!member) {
@@ -41,6 +40,8 @@ export async function updatePlan(
         message: 'Only trainers can update plans.',
       }
     }
+
+    const validated = planDetailsSchema.parse(data)
 
     const result = await pool.query(
       `WITH updated_plan AS (
