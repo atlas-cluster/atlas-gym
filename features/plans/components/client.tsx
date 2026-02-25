@@ -37,6 +37,7 @@ export function TableClient({ data }: { data: PlanDisplay[] }) {
       />
 
       <PlanDetailsDialog
+        key={selectedPlan?.id ?? 'create'}
         plan={selectedPlan}
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
