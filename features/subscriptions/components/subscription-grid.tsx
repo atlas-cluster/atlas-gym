@@ -24,7 +24,6 @@ import { PlanDisplay } from '@/features/plans'
 import { DataTableRangeFilter } from '@/features/shared/components/data-table-range-filter'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -155,15 +154,21 @@ export function SubscriptionGrid({
   const handleCancelConfirm = async () => {
     if (!subscriptionToCancel) return
 
-    const promise = cancelSubscription(subscriptionToCancel.id).then(() => {
-      setCancelDialogOpen(false)
-      setSubscriptionToCancel(null)
-    })
+    setCancelDialogOpen(false)
+    setSubscriptionToCancel(null)
+
+    const promise = cancelSubscription(subscriptionToCancel.id).then(
+      (result) => {
+        if (!result.success) throw new Error(result.message)
+        fetchData()
+        return result.message
+      }
+    )
 
     toast.promise(promise, {
       loading: 'Cancelling subscription...',
-      success: 'Subscription cancelled successfully',
-      error: (err) => err?.message || 'Error cancelling subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Error cancelling subscription',
     })
   }
 
@@ -175,15 +180,19 @@ export function SubscriptionGrid({
   const handleChooseConfirm = async () => {
     if (!planToChoose) return
 
-    const promise = createSubscription(planToChoose.id).then(() => {
-      setChooseDialogOpen(false)
-      setPlanToChoose(null)
+    setChooseDialogOpen(false)
+    setPlanToChoose(null)
+
+    const promise = createSubscription(planToChoose.id).then((result) => {
+      if (!result.success) throw new Error(result.message)
+      fetchData()
+      return result.message
     })
 
     toast.promise(promise, {
       loading: 'Creating subscription...',
-      success: 'Subscription created successfully',
-      error: (err) => err?.message || 'Error creating subscription',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Error creating subscription',
     })
   }
 
@@ -195,15 +204,21 @@ export function SubscriptionGrid({
   const handleRevertConfirm = async () => {
     if (!subscriptionToRevert) return
 
-    const promise = revertCancellation(subscriptionToRevert.id).then(() => {
-      setRevertDialogOpen(false)
-      setSubscriptionToRevert(null)
-    })
+    setRevertDialogOpen(false)
+    setSubscriptionToRevert(null)
+
+    const promise = revertCancellation(subscriptionToRevert.id).then(
+      (result) => {
+        if (!result.success) throw new Error(result.message)
+        fetchData()
+        return result.message
+      }
+    )
 
     toast.promise(promise, {
       loading: 'Reverting cancellation...',
-      success: 'Cancellation reverted successfully',
-      error: (err) => err?.message || 'Error reverting cancellation',
+      success: (msg) => msg,
+      error: (err) => err?.message ?? 'Error reverting cancellation',
     })
   }
 
@@ -337,7 +352,12 @@ export function SubscriptionGrid({
   return (
     <div className="w-full space-y-3">
       {/* Cancel Subscription Dialog */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialog
+        open={cancelDialogOpen}
+        onOpenChange={(open) => {
+          setCancelDialogOpen(open)
+          if (!open) setSubscriptionToCancel(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
@@ -359,15 +379,18 @@ export function SubscriptionGrid({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelConfirm}>
-              Cancel Subscription
-            </AlertDialogAction>
+            <Button onClick={handleCancelConfirm}>Cancel Subscription</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Choose Plan Dialog */}
-      <AlertDialog open={chooseDialogOpen} onOpenChange={setChooseDialogOpen}>
+      <AlertDialog
+        open={chooseDialogOpen}
+        onOpenChange={(open) => {
+          setChooseDialogOpen(open)
+          if (!open) setPlanToChoose(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Choose Plan?</AlertDialogTitle>
@@ -390,15 +413,18 @@ export function SubscriptionGrid({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleChooseConfirm}>
-              Choose Plan
-            </AlertDialogAction>
+            <Button onClick={handleChooseConfirm}>Choose Plan</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Revert Cancellation Dialog */}
-      <AlertDialog open={revertDialogOpen} onOpenChange={setRevertDialogOpen}>
+      <AlertDialog
+        open={revertDialogOpen}
+        onOpenChange={(open) => {
+          setRevertDialogOpen(open)
+          if (!open) setSubscriptionToRevert(null)
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revert Cancellation?</AlertDialogTitle>
@@ -418,9 +444,7 @@ export function SubscriptionGrid({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRevertConfirm}>
-              Revert Cancellation
-            </AlertDialogAction>
+            <Button onClick={handleRevertConfirm}>Revert Cancellation</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

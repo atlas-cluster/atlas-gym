@@ -10,8 +10,8 @@ const getMembersCached = unstable_cache(
     const query = `
       SELECT m.id,
              m.email,
-             m.created_at,
-             m.updated_at,
+             m.created_at as "createdAt",
+             m.updated_at as "updatedAt",
              m.firstname,
              m.lastname,
              m.middlename,
@@ -52,7 +52,10 @@ const getMembersCached = unstable_cache(
     `
 
     const result = await pool.query(query)
-    return result.rows
+    return result.rows.map((row) => ({
+      ...row,
+      birthdate: new Date(row.birthdate),
+    }))
   },
   ['members-list'],
   { revalidate: 3600, tags: ['members'] }

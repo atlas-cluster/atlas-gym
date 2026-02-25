@@ -94,15 +94,48 @@ export async function revertCancellation(
     }
 
     // Delete any future subscription FIRST (before updating to avoid constraint violation)
-    const deleteFutureQuery = await client.query(
+    await client.query(
       `
-      DELETE FROM subscriptions
-      WHERE member_id = $1 AND start_date > $2
+      WITH deleted_future AS (
+        DELETE FROM subscriptions
+        WHERE member_id = $1 AND start_date > $2
+        RETURNING id
+      ),
+      log_future AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT $3, 'Delete'::action_type, id, 'subscription', $4
+        FROM deleted_future
+      )
+      SELECT id FROM deleted_future
     `,
-      [memberId, subscription.start_date]
+      [
+        memberId,
+        subscription.start_date,
+        session.member.id,
+        `Future subscription deleted due to cancellation revert for ${memberName} by ${session.member.firstname} ${session.member.lastname}`,
+      ]
     )
 
+    // Check for another already-active subscription (no end_date, different id)
+    const activeConflictQuery = await client.query(
+      `
+      SELECT id FROM subscriptions
+      WHERE member_id = $1 AND end_date IS NULL AND id <> $2
+    `,
+      [memberId, subscriptionId]
+    )
+
+    if (activeConflictQuery.rows.length > 0) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'UNKNOWN',
+        message: 'Member already has another active subscription.',
+      }
+    }
+
     // Now remove the end_date to revert the cancellation
+    const revertDescription = `Cancellation reverted for ${planName} subscription of ${memberName} by ${session.member.firstname} ${session.member.lastname}`
     const updateQuery = await client.query(
       `
       WITH updated_sub AS (
@@ -113,13 +146,12 @@ export async function revertCancellation(
       ),
       log_sub AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $3, 'Update'::action_type, id, 'subscription',
-              'Cancellation reverted for ${planName} subscription of ${memberName} by ${session.member.firstname} ${session.member.lastname}'
+        SELECT $3, 'Update'::action_type, id, 'subscription', $4
         FROM updated_sub
       )
       SELECT 1
     `,
-      [subscriptionId, memberId, session.member.id]
+      [subscriptionId, memberId, session.member.id, revertDescription]
     )
 
     if (updateQuery.rowCount === 0) {

@@ -19,10 +19,12 @@ import type { Table } from '@tanstack/react-table'
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
+  pageSizes?: number[]
 }
 
 export function DataTablePagination<TData>({
   table,
+  pageSizes = [10, 15, 25, 50],
 }: DataTablePaginationProps<TData>) {
   return (
     <div
@@ -30,11 +32,11 @@ export function DataTablePagination<TData>({
       suppressHydrationWarning>
       <div className="text-muted-foreground text-sm hidden md:flex md:flex-1">
         Showing {table.getPaginationRowModel().rows.length} of{' '}
-        {table.getRowCount()} row(s).
+        {table.getRowCount()} items.
       </div>
       <div className="flex items-center gap-4 lg:gap-8 flex-1 md:justify-end justify-center">
         <div className="flex items-center gap-2 mr-auto md:mr-0">
-          <p className="hidden text-sm font-medium md:flex">Rows per page</p>
+          <p className="hidden text-sm font-medium md:flex">Items per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(v) => table.setPageSize(Number(v))}>
@@ -44,9 +46,9 @@ export function DataTablePagination<TData>({
             <SelectContent side="top">
               <SelectGroup>
                 <SelectLabel className={'flex md:hidden'}>
-                  Rows per page
+                  Items per page
                 </SelectLabel>
-                {[10, 15, 25, 50].map((pageSize) => (
+                {pageSizes.map((pageSize) => (
                   <SelectItem key={pageSize} value={`${pageSize}`}>
                     {pageSize}
                   </SelectItem>

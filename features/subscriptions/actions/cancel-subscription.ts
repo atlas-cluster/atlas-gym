@@ -8,7 +8,6 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function cancelSubscription(
   subscriptionId: string,
-  lastUpdatedAt: string,
   targetMemberId?: string
 ): Promise<{
   success: boolean
@@ -85,21 +84,22 @@ export async function cancelSubscription(
     today.setHours(0, 0, 0, 0)
 
     if (startDate > today) {
+      const deleteDescription = `Future subscription to ${planName} deleted for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
       const deleteQuery = await client.query(
         `
         WITH deleted_sub AS (
           DELETE FROM subscriptions
-          WHERE id = $1 AND member_id = $2 AND updated_at = $4
+          WHERE id = $1 AND member_id = $2
           RETURNING id
         ),
         log_sub AS (
           INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-          SELECT $3, 'Delete'::action_type, id, 'subscription',
-                'Future subscription to ${planName} deleted for ${memberName} by ${session.member.firstname} ${session.member.lastname}'
+          SELECT $3, 'Delete'::action_type, id, 'subscription', $4
           FROM deleted_sub
         )
+        SELECT id FROM deleted_sub
       `,
-        [subscriptionId, memberId, session.member.id, lastUpdatedAt]
+        [subscriptionId, memberId, session.member.id, deleteDescription]
       )
 
       if (deleteQuery.rowCount === 0) {
@@ -139,6 +139,7 @@ export async function cancelSubscription(
           ? endOfCurrentMonth
           : minDurationEndDate
 
+      const updateDescription = `Subscription to ${planName} cancelled for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
       const updateQuery = await client.query(
         `
         WITH updated_sub AS (
@@ -149,12 +150,18 @@ export async function cancelSubscription(
         ),
         log_sub AS (
           INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-          SELECT $4, 'Update'::action_type, id, 'subscription',
-                'Subscription to ${planName} cancelled for ${memberName} by ${session.member.firstname} ${session.member.lastname}'
+          SELECT $4, 'Update'::action_type, id, 'subscription', $5
           FROM updated_sub
         )
+        SELECT id FROM updated_sub
       `,
-        [endDate, subscriptionId, memberId, session.member.id]
+        [
+          endDate,
+          subscriptionId,
+          memberId,
+          session.member.id,
+          updateDescription,
+        ]
       )
 
       if (updateQuery.rowCount === 0) {

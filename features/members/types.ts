@@ -8,8 +8,8 @@ export type PaymentType = 'credit_card' | 'iban'
 export interface Member {
   id: string
   email: string
-  created_at: Date
-  updated_at: Date
+  createdAt: Date
+  updatedAt: Date
   firstname: string
   lastname: string
   middlename?: string
@@ -20,9 +20,9 @@ export interface Member {
   paymentType?: PaymentType
 }
 
-export type SessionMember = Omit<Member, 'created_at' | 'updated_at'>
+export type SessionMember = Omit<Member, 'createdAt' | 'updatedAt'>
 
-export type MemberDisplay = Omit<Member, 'created_at' | 'updated_at'> & {
+export type MemberDisplay = Omit<Member, 'createdAt' | 'updatedAt'> & {
   planName?: string
   subscriptionId?: string
   isCancelled?: boolean
