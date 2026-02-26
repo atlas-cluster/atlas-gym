@@ -11,5 +11,14 @@
   ],
   "importOrder": ["^[A-Za-z]$", "^[@/]"],
   "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "importOrderSortSpecifiers": true,
+  "overrides": [
+    {
+      "files": "*.sql",
+      "options": {
+        "language": "postgresql",
+        "keywordCase": "upper"
+      }
+    }
+  ]
 }

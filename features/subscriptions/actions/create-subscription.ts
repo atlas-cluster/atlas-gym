@@ -4,6 +4,7 @@ import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
+import { PG_EXCLUSION_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
 export async function createSubscription(
   planId: string,
@@ -188,6 +189,19 @@ export async function createSubscription(
       message: 'Subscription created successfully.',
     }
   } catch (error: unknown) {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === PG_EXCLUSION_VIOLATION
+    ) {
+      await client.query('ROLLBACK').catch(() => {})
+      return {
+        success: false,
+        errorType: 'ALREADY_ACTIVE',
+        message: 'You already have an active subscription during this period.',
+      }
+    }
     await client.query('ROLLBACK').catch(() => {})
     console.error('[CREATE_SUBSCRIPTION_ERROR]:', error)
     return {
