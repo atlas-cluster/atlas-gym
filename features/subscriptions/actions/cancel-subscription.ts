@@ -50,13 +50,14 @@ export async function cancelSubscription(
 
     const subQuery = await client.query(
       `
-      SELECT s.id, s.member_id, s.start_date, s.end_date, p.min_duration_months, p.name as plan_name, m.firstname, m.lastname, s.updated_at
+      SELECT s.id, s.member_id, s.start_date, s.end_date, p.min_duration_months, p.name as plan_name, m.firstname, m.lastname, s.updated_at,
+             (date_trunc('milliseconds', s.updated_at) = $3::timestamptz) AS version_match
       FROM subscriptions s
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
     `,
-      [subscriptionId, memberId]
+      [subscriptionId, memberId, lastUpdatedAt]
     )
 
     if (subQuery.rows.length === 0) {
@@ -72,9 +73,7 @@ export async function cancelSubscription(
     const memberName = `${subscription.firstname} ${subscription.lastname}`
     const planName = subscription.plan_name
 
-    const dbUpdatedAt = new Date(subscription.updated_at).getTime()
-    const clientUpdatedAt = new Date(lastUpdatedAt).getTime()
-    if (dbUpdatedAt !== clientUpdatedAt) {
+    if (!subscription.version_match) {
       await client.query('ROLLBACK')
       return {
         success: false,
@@ -202,7 +201,7 @@ export async function cancelSubscription(
     return {
       success: false,
       errorType: 'UNKNOWN',
-      message: 'An error occurred while deleting the plan.',
+      message: 'An error occurred while cancelling the subscription.',
     }
   } finally {
     client.release()
