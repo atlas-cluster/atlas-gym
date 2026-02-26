@@ -17,6 +17,7 @@ export async function updatePlan(
   message: string
   errorType?:
     | 'AUTH'
+    | 'NOT_FOUND'
     | 'VERSION_MISMATCH'
     | 'NAME_COLLISION'
     | 'VALIDATION'
@@ -44,16 +45,27 @@ export async function updatePlan(
     const validated = planDetailsSchema.parse(data)
 
     const result = await pool.query(
-      `WITH updated_plan AS (
+      `WITH target_plan AS (
+        SELECT id,
+               (date_trunc('milliseconds', updated_at) = $6::timestamptz) AS version_match
+        FROM plans WHERE id = $5
+      ),
+      updated_plan AS (
         UPDATE plans
           SET name = $1, price = $2, min_duration_months = $3, description = $4, updated_at = NOW()
-          WHERE id = $5 AND date_trunc('milliseconds', updated_at) = $6::timestamptz
+          WHERE id = $5
+            AND (SELECT version_match FROM target_plan) = true
           RETURNING id, name
+      ),
+      log_plan AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT $7, 'Update'::action_type, id, 'plan', 'Plan updated: ' || name
+        FROM updated_plan
       )
-       INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-       SELECT $7, 'Update'::action_type, id, 'plan', 'Plan updated: ' || name
-       FROM updated_plan
-       RETURNING entity_id`,
+      SELECT
+        (SELECT COUNT(*) FROM target_plan) AS found,
+        (SELECT version_match FROM target_plan) AS version_match,
+        (SELECT id FROM updated_plan) AS updated_id`,
       [
         validated.name,
         validated.price,
@@ -65,7 +77,17 @@ export async function updatePlan(
       ]
     )
 
-    if (result.rowCount === 0) {
+    const row = result.rows[0]
+
+    if (parseInt(row.found) === 0) {
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Plan not found.',
+      }
+    }
+
+    if (!row.version_match) {
       return {
         success: false,
         errorType: 'VERSION_MISMATCH',

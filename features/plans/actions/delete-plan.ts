@@ -11,7 +11,7 @@ export async function deletePlan(
 ): Promise<{
   success: boolean
   message: string
-  errorType?: 'AUTH' | 'VERSION_MISMATCH' | 'UNKNOWN'
+  errorType?: 'AUTH' | 'NOT_FOUND' | 'VERSION_MISMATCH' | 'UNKNOWN'
 }> {
   try {
     const { member } = await getSession()
@@ -32,15 +32,18 @@ export async function deletePlan(
       }
     }
 
-    const planDeleteResult = await pool.query(
+    const result = await pool.query(
       `WITH target_plan AS (
-         SELECT name FROM plans WHERE id = $1
+         SELECT id, name,
+                (date_trunc('milliseconds', updated_at) = $3::timestamptz) AS version_match
+         FROM plans WHERE id = $1
       ),
       target_subscriptions AS (
          SELECT s.id, s.start_date, s.end_date, m.firstname, m.lastname
          FROM subscriptions s
          JOIN members m ON s.member_id = m.id
          WHERE s.plan_id = $1
+           AND (SELECT version_match FROM target_plan) = true
            AND (
              s.start_date > CURRENT_DATE
              OR (s.start_date <= CURRENT_DATE AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE))
@@ -59,7 +62,8 @@ export async function deletePlan(
       ),
       deleted_plan AS (
          DELETE FROM plans
-         WHERE id = $1 AND date_trunc('milliseconds', updated_at) = $3::timestamptz
+         WHERE id = $1
+           AND (SELECT version_match FROM target_plan) = true
          RETURNING id, name
       ),
       log_plan AS (
@@ -67,11 +71,24 @@ export async function deletePlan(
          SELECT $2, 'Delete'::action_type, id, 'plan', 'Plan ' || name || ' deleted'
          FROM deleted_plan 
       )
-      SELECT id FROM deleted_plan`,
+      SELECT
+        (SELECT COUNT(*) FROM target_plan) AS found,
+        (SELECT version_match FROM target_plan) AS version_match,
+        (SELECT id FROM deleted_plan) AS deleted_id`,
       [id, member.id, lastUpdatedAt]
     )
 
-    if (planDeleteResult.rowCount === 0) {
+    const row = result.rows[0]
+
+    if (parseInt(row.found) === 0) {
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Plan not found.',
+      }
+    }
+
+    if (!row.version_match) {
       return {
         success: false,
         errorType: 'VERSION_MISMATCH',
