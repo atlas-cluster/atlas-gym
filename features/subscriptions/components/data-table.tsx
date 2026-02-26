@@ -1,17 +1,16 @@
-'use client'
-
+import { format } from 'date-fns'
 import {
-  PencilIcon,
+  Calendar,
+  Check,
   PlusIcon,
   RefreshCwIcon,
-  TrashIcon,
-  UsersIcon,
+  RotateCcw,
+  Trash,
+  X,
   XIcon,
 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 
-import { PlanDisplay, getPlans } from '@/features/plans'
-import { columns } from '@/features/plans/components/columns'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableRangeFilter } from '@/features/shared/components/data-table-range-filter'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
@@ -27,6 +26,9 @@ import {
   CardTitle,
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
+import { SubscriptionDisplay } from '@/features/subscriptions'
+import { getSubscriptions } from '@/features/subscriptions/actions/get-subscriptions'
+import { columns } from '@/features/subscriptions/components/columns'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -43,20 +45,20 @@ import {
 } from '@tanstack/table-core'
 
 interface DataTableProps {
-  data: PlanDisplay[]
-  onCreate: () => void
-  onEdit: (plan: PlanDisplay) => void
-  onDelete: (plan: PlanDisplay) => void
+  data: SubscriptionDisplay[]
+  onCreate: (subscription: SubscriptionDisplay) => void
+  onCancel: (subscription: SubscriptionDisplay) => void
+  onRevertCancel: (subscription: SubscriptionDisplay) => void
 }
 
 export function DataTable({
   data,
   onCreate,
-  onEdit,
-  onDelete,
+  onCancel,
+  onRevertCancel,
 }: DataTableProps) {
   const [isPending, startTransition] = useTransition()
-  const [tableData, setTableData] = useState<PlanDisplay[]>(data)
+  const [tableData, setTableData] = useState<SubscriptionDisplay[]>(data)
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -68,9 +70,9 @@ export function DataTable({
     setTableData(data)
   }, [data])
 
-  const onRefreshPlans = () => {
+  const onRefreshSubscriptions = () => {
     startTransition(async () => {
-      const result = await getPlans()
+      const result = await getSubscriptions()
       setTableData(result)
     })
   }
@@ -116,6 +118,10 @@ export function DataTable({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [globalFilter, columnFilters])
 
+  const canCreate =
+    !tableData.some((s) => s.isActive || s.isFuture) ||
+    (tableData.some((s) => s.isCancelled) && !tableData.some((s) => s.isFuture))
+
   return (
     <div className="w-full space-y-3">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
@@ -124,7 +130,7 @@ export function DataTable({
             {/* Desktop: Show input only */}
             <Input
               className={'hidden md:flex'}
-              placeholder="Search plans..."
+              placeholder="Search subscriptions..."
               value={globalFilter}
               onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
@@ -132,7 +138,7 @@ export function DataTable({
             <div className={'flex w-full gap-2 md:hidden'}>
               <ButtonGroup className="flex-1">
                 <Input
-                  placeholder="Search plans..."
+                  placeholder="Search subscriptions..."
                   value={globalFilter}
                   onChange={(e) =>
                     table.setGlobalFilter(String(e.target.value))
@@ -143,26 +149,18 @@ export function DataTable({
                   align="start"
                   items={sortItems}
                 />
+
                 <Button
                   variant="outline"
                   size="icon"
                   type="button"
                   disabled={isPending}
                   suppressHydrationWarning
-                  onClick={onRefreshPlans}>
+                  onClick={onRefreshSubscriptions}>
                   <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
                   <span className={'sr-only'}>Refresh Data</span>
                 </Button>
               </ButtonGroup>
-              <Button
-                variant="default"
-                size="icon"
-                type="button"
-                suppressHydrationWarning
-                onClick={onCreate}>
-                <PlusIcon />
-                <span className="sr-only">Create Plan</span>
-              </Button>
             </div>
           </div>
 
@@ -215,76 +213,100 @@ export function DataTable({
               type="button"
               disabled={isPending}
               suppressHydrationWarning
-              onClick={onRefreshPlans}>
+              onClick={onRefreshSubscriptions}>
               <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
               <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
-          <Button
-            variant="default"
-            size="default"
-            type="button"
-            suppressHydrationWarning
-            onClick={onCreate}>
-            <PlusIcon />
-            <span className="hidden md:inline">Create Plan</span>
-          </Button>
         </div>
       </div>
 
-      {/* Plans Grid */}
+      {/* Subscriptions Grid */}
       {table.getRowModel().rows.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {table.getRowModel().rows.map((plan) => (
-            <Card key={plan.id}>
+          {table.getRowModel().rows.map((subscription) => (
+            <Card key={subscription.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
-                      {plan.original.name}
-                      <Badge variant="secondary" className="text-xs">
-                        <UsersIcon className="w-3 h-3" />
-                        {plan.original.subscriptionCount || 0}
-                      </Badge>
+                      {subscription.original.name}
+                      {subscription.original.isActive &&
+                        !subscription.original.isCancelled && (
+                          <Badge>
+                            <Check />
+                            Active
+                          </Badge>
+                        )}
+                      {subscription.original.isCancelled && (
+                        <Badge variant="destructive">
+                          <X />
+                          Cancelled{' '}
+                          {format(subscription.original.endDate!, 'dd.MM')}
+                        </Badge>
+                      )}
+                      {subscription.original.isFuture && (
+                        <Badge variant={'secondary'}>
+                          <Calendar />
+                          Starts at{' '}
+                          {format(subscription.original.startDate!, 'dd.MM')}
+                        </Badge>
+                      )}
                     </CardTitle>
                     <CardDescription className="mt-2">
-                      {plan.original.description || 'No description'}
+                      {subscription.original.description || 'No description'}
                     </CardDescription>
                   </div>
                 </div>
                 <CardAction>
                   <ButtonGroup>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onEdit(plan.original)}>
-                      <PencilIcon />
-                      <span className="sr-only">Edit plan</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onDelete(plan.original)}>
-                      <TrashIcon />
-                      <span className="sr-only">Delete plan</span>
-                    </Button>
+                    {(subscription.original.isActive ||
+                      subscription.original.isFuture) &&
+                      !subscription.original.isCancelled && (
+                        <Button
+                          variant={'ghost'}
+                          size={'icon'}
+                          suppressHydrationWarning
+                          onClick={() => onCancel(subscription.original)}>
+                          <Trash />
+                        </Button>
+                      )}
+                    {subscription.original.isCancelled && (
+                      <Button
+                        variant={'ghost'}
+                        size={'icon'}
+                        suppressHydrationWarning
+                        onClick={() => onRevertCancel(subscription.original)}>
+                        <RotateCcw />
+                      </Button>
+                    )}
+                    {!subscription.original.isActive &&
+                      !subscription.original.isFuture &&
+                      canCreate && (
+                        <Button
+                          size={'icon'}
+                          suppressHydrationWarning
+                          onClick={() => onCreate(subscription.original)}>
+                          <PlusIcon />
+                        </Button>
+                      )}
                   </ButtonGroup>
                 </CardAction>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-3xl font-bold">
-                    €{plan.original.price.toFixed(2)}
+                    €{subscription.original.price.toFixed(2)}
                   </p>
                   <p className="text-sm text-muted-foreground">per month</p>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">Min. Duration:</span>
                   <span className="font-medium">
-                    {plan.original.minDurationMonths}{' '}
-                    {plan.original.minDurationMonths === 1 ? 'month' : 'months'}
+                    {subscription.original.minDurationMonths}{' '}
+                    {subscription.original.minDurationMonths === 1
+                      ? 'month'
+                      : 'months'}
                   </span>
                 </div>
               </CardContent>
@@ -295,8 +317,8 @@ export function DataTable({
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">
             {globalFilter
-              ? 'No plans found matching your search.'
-              : 'No plans available.'}
+              ? 'No subscriptions found matching your search.'
+              : 'No subscriptions available.'}
           </p>
         </div>
       )}

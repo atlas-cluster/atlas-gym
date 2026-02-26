@@ -1,5 +1,5 @@
 export * from '@/features/subscriptions/types'
-export * from '@/features/subscriptions/actions/get-member-subscriptions'
+export * from '@/features/subscriptions/actions/get-subscriptions'
 export * from '@/features/subscriptions/actions/get-subscriptions-by-member'
 export * from '@/features/subscriptions/actions/get-available-plans'
 export * from '@/features/subscriptions/actions/cancel-subscription'
@@ -7,4 +7,4 @@ export * from '@/features/subscriptions/actions/create-subscription'
 export * from '@/features/subscriptions/actions/revert-cancellation'
 export * from '@/features/subscriptions/actions/delete-subscription'
 
-export { SubscriptionGrid } from '@/features/subscriptions/components/subscription-grid'
+export { TableClient as SubscriptionsTableClient } from '@/features/subscriptions/components/client'

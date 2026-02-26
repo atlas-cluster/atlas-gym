@@ -1,21 +1,12 @@
 import {
-  SubscriptionGrid,
-  getAvailablePlans,
-  getMemberSubscriptions,
+  SubscriptionsTableClient,
+  getSubscriptions,
 } from '@/features/subscriptions'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SubscriptionPage() {
-  const [subscriptions, plans] = await Promise.all([
-    getMemberSubscriptions(),
-    getAvailablePlans(),
-  ])
+  const plans = await getSubscriptions()
 
-  return (
-    <SubscriptionGrid
-      initialSubscriptions={subscriptions}
-      initialPlans={plans}
-    />
-  )
+  return <SubscriptionsTableClient data={plans} />
 }
