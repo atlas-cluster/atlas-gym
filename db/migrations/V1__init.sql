@@ -5,6 +5,8 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE TYPE payment_type AS ENUM('credit_card', 'iban');
 
 CREATE TYPE action_type AS ENUM('Create', 'Update', 'Delete');

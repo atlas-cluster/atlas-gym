@@ -6,17 +6,10 @@ import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 import { SubscriptionDisplay } from '@/features/subscriptions'
 
-export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
-  const { member } = await getSession()
-
-  if (!member) {
-    return []
-  }
-
-  const getCached = unstable_cache(
-    async (memberId: string): Promise<SubscriptionDisplay[]> => {
-      const result = await pool.query(
-        `SELECT p.id                  AS "planId",
+const getSubscriptionsCached = unstable_cache(
+  async (memberId: string): Promise<SubscriptionDisplay[]> => {
+    const result = await pool.query(
+      `SELECT p.id                  AS "planId",
                 p.name,
                 p.price,
                 p.min_duration_months AS "minDurationMonths",
@@ -59,29 +52,36 @@ export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
                       ELSE 3
                       END,
                   p.name`,
-        [memberId]
-      )
+      [memberId]
+    )
 
-      return result.rows.map((row) => ({
-        id: row.id ?? undefined,
-        planId: row.planId,
-        name: row.name,
-        price: parseFloat(row.price),
-        minDurationMonths: row.minDurationMonths,
-        description: row.description ?? undefined,
-        planCreatedAt: new Date(row.planCreatedAt),
-        planUpdatedAt: new Date(row.planUpdatedAt),
-        updatedAt: row.updatedAt ? new Date(row.updatedAt) : undefined,
-        startDate: row.startDate ? new Date(row.startDate) : undefined,
-        endDate: row.endDate ? new Date(row.endDate) : undefined,
-        isActive: row.isActive || undefined,
-        isCancelled: row.isCancelled || undefined,
-        isFuture: row.isFuture || undefined,
-      }))
-    },
-    ['get-subscriptions'],
-    { revalidate: 3600, tags: ['subscriptions', 'plans'] }
-  )
+    return result.rows.map((row) => ({
+      id: row.id ?? undefined,
+      planId: row.planId,
+      name: row.name,
+      price: parseFloat(row.price),
+      minDurationMonths: row.minDurationMonths,
+      description: row.description ?? undefined,
+      planCreatedAt: new Date(row.planCreatedAt),
+      planUpdatedAt: new Date(row.planUpdatedAt),
+      updatedAt: row.updatedAt ? new Date(row.updatedAt) : undefined,
+      startDate: row.startDate ? new Date(row.startDate) : undefined,
+      endDate: row.endDate ? new Date(row.endDate) : undefined,
+      isActive: row.isActive || undefined,
+      isCancelled: row.isCancelled || undefined,
+      isFuture: row.isFuture || undefined,
+    }))
+  },
+  ['get-subscriptions'],
+  { revalidate: 3600, tags: ['subscriptions', 'plans'] }
+)
 
-  return getCached(member.id)
+export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
+  const { member } = await getSession()
+
+  if (!member) {
+    return []
+  }
+
+  return getSubscriptionsCached(member.id)
 }
