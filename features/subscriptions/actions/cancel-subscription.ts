@@ -1,6 +1,5 @@
 'use server'
 
-import { endOfMonth } from 'date-fns'
 import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
@@ -124,56 +123,39 @@ export async function cancelSubscription(
         }
       }
     } else {
-      // For active subscriptions, calculate end date
-      // End date is the later of: end of current month OR end of minimum duration
-      const endOfCurrentMonth = endOfMonth(today)
-
-      // Calculate minimum duration end date
-      // Example: started Jan 13 + 6 months = Jul 13
-      // Then get the last day of the month before that (Jun 30)
-      // This ensures the subscription runs for the full minimum number of months
-      const minDurationDate = new Date(startDate)
-      minDurationDate.setMonth(
-        minDurationDate.getMonth() + subscription.min_duration_months
-      )
-
-      // Get the last day of the month BEFORE the calculated date
-      // E.g., if minDurationDate is Jul 13, we want Jun 30
-      const lastMonthStart = new Date(
-        minDurationDate.getFullYear(),
-        minDurationDate.getMonth() - 1,
-        1
-      )
-      const minDurationEndDate = endOfMonth(lastMonthStart)
-
-      // Use whichever is later
-      const endDate =
-        endOfCurrentMonth > minDurationEndDate
-          ? endOfCurrentMonth
-          : minDurationEndDate
-
       const updateDescription = `Subscription to ${planName} cancelled for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
       const updateQuery = await client.query(
         `
-        WITH updated_sub AS (
+        WITH calc_dates AS (
+          SELECT
+            (date_trunc('month', CURRENT_DATE) + interval '1 month' - interval '1 day')::date AS end_of_today_month,
+            (date_trunc('month', ($5::date + ($6 || ' months')::interval) - interval '1 month') + interval '1 month' - interval '1 day')::date AS min_duration_end_date
+        ),
+        final_date AS (
+          SELECT GREATEST(end_of_today_month, min_duration_end_date) as final_end_date
+          FROM calc_dates
+        ),
+        updated_sub AS (
           UPDATE subscriptions
-          SET end_date = $1, updated_at = NOW()
-          WHERE id = $2 AND member_id = $3
+          SET end_date = (SELECT final_end_date FROM final_date), 
+              updated_at = NOW()
+          WHERE id = $1 AND member_id = $2
           RETURNING id
         ),
         log_sub AS (
           INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-          SELECT $4, 'Update'::action_type, id, 'subscription', $5
+          SELECT $3, 'Update'::action_type, id, 'subscription', $4
           FROM updated_sub
         )
         SELECT id FROM updated_sub
       `,
         [
-          endDate,
           subscriptionId,
           memberId,
           session.member.id,
           updateDescription,
+          startDate,
+          subscription.min_duration_months,
         ]
       )
 
