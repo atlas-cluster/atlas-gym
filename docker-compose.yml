@@ -1,11 +1,19 @@
 services:
   postgres:
-    image: postgres:18
+    build:
+      context: .
+      dockerfile: Dockerfile.Postgres
     container_name: atlas-gym-postgres-dev
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    command:
+      - 'postgres'
+      - '-c'
+      - 'shared_preload_libraries=pg_cron'
+      - '-c'
+      - 'cron.database_name=${DB_NAME}'
     ports:
       - '5432:5432'
     volumes:
