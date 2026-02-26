@@ -14,10 +14,25 @@ jobs:
     name: Run Tests
     uses: ./.github/workflows/test.yml
 
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      db: ${{ steps.filter.outputs.db }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            db:
+              - 'Dockerfile.Postgres'
+
   build:
     name: Build Image
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, changes]
     permissions:
       contents: read
       packages: write
@@ -65,6 +80,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and Push Postgres image
+        if: needs.changes.outputs.db == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -77,7 +93,8 @@ jobs:
 
   deploy-db:
     name: Update Database Container
-    needs: build
+    needs: [build, changes]
+    if: needs.changes.outputs.db == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Update Postgres via SSH
@@ -124,6 +141,7 @@ jobs:
   migrate:
     name: Run Database Migrations
     needs: deploy-db
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
