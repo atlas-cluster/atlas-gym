@@ -305,18 +305,78 @@ FROM
         CURRENT_DATE - INTERVAL '5 months'
       ), -- Frank: Gym + Courses 3M, ended 5 months ago
       -- Future subscriptions (start_date in the future, will begin later)
-      (10, 12, CURRENT_DATE + INTERVAL '1 month', NULL), -- Lea: All-In 12M future subscription (after current ends)
-      (12, 6, CURRENT_DATE + INTERVAL '1 month', NULL), -- Juliane: Gym Basic 12M future subscription
-      (14, 9, CURRENT_DATE + INTERVAL '1 month', NULL), -- Emily: Gym + Courses 12M future subscription
-      (18, 11, CURRENT_DATE + INTERVAL '2 months', NULL), -- Sarah: All-In 6M future subscription
-      (20, 4, CURRENT_DATE + INTERVAL '1 month', NULL), -- Mila: Gym Basic 3M future subscription
-      (22, 11, CURRENT_DATE + INTERVAL '1 month', NULL), -- Nora: All-In 6M future subscription
-      (24, 5, CURRENT_DATE + INTERVAL '1 month', NULL), -- Clara: Gym Basic 6M future subscription
-      (29, 9, CURRENT_DATE + INTERVAL '2 months', NULL), -- David: Gym + Courses 12M future subscription
-      (33, 12, CURRENT_DATE + INTERVAL '4 months', NULL), -- Alexander: All-In 12M future subscription
-      (37, 6, CURRENT_DATE + INTERVAL '3 months', NULL), -- Sebastian: Gym Basic 12M future subscription
-      (41, 11, CURRENT_DATE + INTERVAL '2 months', NULL), -- Moritz: All-In 6M future subscription
-      (45, 9, CURRENT_DATE + INTERVAL '3 months', NULL) -- Chris: Gym + Courses 12M future subscription
+      (
+        10,
+        12,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Lea: All-In 12M future subscription (after current ends)
+      (
+        12,
+        6,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Juliane: Gym Basic 12M future subscription
+      (
+        14,
+        9,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Emily: Gym + Courses 12M future subscription
+      (
+        18,
+        11,
+        CURRENT_DATE + INTERVAL '2 months' + INTERVAL '1 day',
+        NULL
+      ), -- Sarah: All-In 6M future subscription
+      (
+        20,
+        4,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Mila: Gym Basic 3M future subscription
+      (
+        22,
+        11,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Nora: All-In 6M future subscription
+      (
+        24,
+        5,
+        CURRENT_DATE + INTERVAL '1 month' + INTERVAL '1 day',
+        NULL
+      ), -- Clara: Gym Basic 6M future subscription
+      (
+        29,
+        9,
+        CURRENT_DATE + INTERVAL '2 months' + INTERVAL '1 day',
+        NULL
+      ), -- David: Gym + Courses 12M future subscription
+      (
+        33,
+        12,
+        CURRENT_DATE + INTERVAL '4 months' + INTERVAL '1 day',
+        NULL
+      ), -- Alexander: All-In 12M future subscription
+      (
+        37,
+        6,
+        CURRENT_DATE + INTERVAL '3 months' + INTERVAL '1 day',
+        NULL
+      ), -- Sebastian: Gym Basic 12M future subscription
+      (
+        41,
+        11,
+        CURRENT_DATE + INTERVAL '2 months' + INTERVAL '1 day',
+        NULL
+      ), -- Moritz: All-In 6M future subscription
+      (
+        45,
+        9,
+        CURRENT_DATE + INTERVAL '3 months' + INTERVAL '1 day',
+        NULL
+      ) -- Chris: Gym + Courses 12M future subscription
   ) AS data (member_id, plan_id, start_date, end_date)
   CROSS JOIN LATERAL (
     SELECT
