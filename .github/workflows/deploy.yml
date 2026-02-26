@@ -43,20 +43,88 @@ jobs:
             type=raw,value=${{ github.sha }}
             type=raw,value=latest
 
+      - name: Extract metadata (Postgres)
+        id: meta-db
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-db
+          tags: |
+            type=raw,value=${{ github.sha }}
+            type=raw,value=latest
+
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile
+          file: Dockerfile.App
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build and Push Postgres image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.Postgres
+          push: true
+          tags: ${{ steps.meta-db.outputs.tags }}
+          labels: ${{ steps.meta-db.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-db:
+    name: Update Database Container
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Postgres via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ github.repository }}
+          IMAGE_TAG: ${{ github.sha }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.actor }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          proxy_host: ${{ secrets.JUMP_HOST }}
+          proxy_username: ${{ secrets.JUMP_USER }}
+          proxy_key: ${{ secrets.JUMP_SSH_KEY }}
+          proxy_port: ${{ secrets.JUMP_PORT || 22 }}
+          envs: REGISTRY,IMAGE_NAME,IMAGE_TAG,DB_USER,DB_PASSWORD,DB_NAME,REGISTRY_TOKEN,USERNAME
+          script: |
+            FULL_DB_IMAGE=$(echo "$REGISTRY/$IMAGE_NAME-db" | tr '[:upper:]' '[:lower:]')
+            echo "$REGISTRY_TOKEN" | docker login $REGISTRY -u $USERNAME --password-stdin
+            docker pull $FULL_DB_IMAGE:$IMAGE_TAG
+
+            docker stop atlas-gym-postgres || true
+            docker rm atlas-gym-postgres || true
+            docker run -d \
+              --name atlas-gym-postgres \
+              --restart unless-stopped \
+              --network host \
+              -v postgres_data_prod:/var/lib/postgresql \
+              -e POSTGRES_USER="$DB_USER" \
+              -e POSTGRES_PASSWORD="$DB_PASSWORD" \
+              -e POSTGRES_DB="$DB_NAME" \
+              $FULL_DB_IMAGE:$IMAGE_TAG \
+              postgres -c shared_preload_libraries=pg_cron -c cron.database_name="$DB_NAME"
+            docker image prune -a -f
+
+            # Warten, bis DB bereit für Flyway ist
+            sleep 10
+
   migrate:
     name: Run Database Migrations
-    needs: build
+    needs: deploy-db
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -107,7 +175,7 @@ jobs:
               -locations=filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/seeds \
               migrate
 
-  deploy:
+  deploy-app:
     name: Deploy Application
     needs: migrate
     runs-on: ubuntu-latest
@@ -136,10 +204,10 @@ jobs:
           proxy_port: ${{ secrets.JUMP_PORT || 22 }}
           envs: REGISTRY,IMAGE_NAME,CONTAINER_NAME,IMAGE_TAG,DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,REGISTRY_TOKEN,USERNAME
           script: |
-            FULL_IMAGE_NAME=$(echo "$REGISTRY/$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
-
+            FULL_APP_IMAGE=$(echo "$REGISTRY/$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
             echo "$REGISTRY_TOKEN" | docker login $REGISTRY -u $USERNAME --password-stdin
-            docker pull $FULL_IMAGE_NAME:$IMAGE_TAG
+            docker pull $FULL_APP_IMAGE:$IMAGE_TAG
+
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
             docker run -d \
@@ -151,5 +219,5 @@ jobs:
               -e DB_PASSWORD="$DB_PASSWORD" \
               -e DB_NAME="$DB_NAME" \
               -e NODE_ENV=production \
-              $FULL_IMAGE_NAME:$IMAGE_TAG
+              $FULL_APP_IMAGE:$IMAGE_TAG
             docker image prune -a -f
