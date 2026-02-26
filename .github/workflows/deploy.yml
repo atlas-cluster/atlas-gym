@@ -6,7 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  CONTAINER_NAME: atlas-gym-app
+  APP_CONTAINER_NAME: atlas-gym-app
+  DB_CONTAINER_NAME: atlas-gym-postgres
 
 jobs:
   test:
@@ -83,6 +84,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           REGISTRY: ${{ env.REGISTRY }}
+          DB_CONTAINER_NAME: ${{ env.DB_CONTAINER_NAME }}
           IMAGE_NAME: ${{ github.repository }}
           IMAGE_TAG: ${{ github.sha }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -99,16 +101,16 @@ jobs:
           proxy_username: ${{ secrets.JUMP_USER }}
           proxy_key: ${{ secrets.JUMP_SSH_KEY }}
           proxy_port: ${{ secrets.JUMP_PORT || 22 }}
-          envs: REGISTRY,IMAGE_NAME,IMAGE_TAG,DB_USER,DB_PASSWORD,DB_NAME,REGISTRY_TOKEN,USERNAME
+          envs: REGISTRY,DB_CONTAINER_NAME,IMAGE_NAME,IMAGE_TAG,DB_USER,DB_PASSWORD,DB_NAME,REGISTRY_TOKEN,USERNAME
           script: |
             FULL_DB_IMAGE=$(echo "$REGISTRY/$IMAGE_NAME-db" | tr '[:upper:]' '[:lower:]')
             echo "$REGISTRY_TOKEN" | docker login $REGISTRY -u $USERNAME --password-stdin
             docker pull $FULL_DB_IMAGE:$IMAGE_TAG
 
-            docker stop atlas-gym-postgres || true
-            docker rm atlas-gym-postgres || true
+            docker stop $DB_CONTAINER_NAME || true
+            docker rm $DB_CONTAINER_NAME || true
             docker run -d \
-              --name atlas-gym-postgres \
+              --name $DB_CONTAINER_NAME \
               --restart unless-stopped \
               --network host \
               -v postgres_data_prod:/var/lib/postgresql \
@@ -185,7 +187,7 @@ jobs:
         env:
           REGISTRY: ${{ env.REGISTRY }}
           IMAGE_NAME: ${{ github.repository }}
-          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          APP_CONTAINER_NAME: ${{ env.APP_CONTAINER_NAME }}
           IMAGE_TAG: ${{ github.sha }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -202,16 +204,16 @@ jobs:
           proxy_username: ${{ secrets.JUMP_USER }}
           proxy_key: ${{ secrets.JUMP_SSH_KEY }}
           proxy_port: ${{ secrets.JUMP_PORT || 22 }}
-          envs: REGISTRY,IMAGE_NAME,CONTAINER_NAME,IMAGE_TAG,DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,REGISTRY_TOKEN,USERNAME
+          envs: REGISTRY,IMAGE_NAME,APP_CONTAINER_NAME,IMAGE_TAG,DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,REGISTRY_TOKEN,USERNAME
           script: |
             FULL_APP_IMAGE=$(echo "$REGISTRY/$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
             echo "$REGISTRY_TOKEN" | docker login $REGISTRY -u $USERNAME --password-stdin
             docker pull $FULL_APP_IMAGE:$IMAGE_TAG
 
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
+            docker stop $APP_CONTAINER_NAME || true
+            docker rm $APP_CONTAINER_NAME || true
             docker run -d \
-              --name $CONTAINER_NAME \
+              --name $APP_CONTAINER_NAME \
               --restart unless-stopped \
               --network host \
               -e DB_HOST="$DB_HOST" \
