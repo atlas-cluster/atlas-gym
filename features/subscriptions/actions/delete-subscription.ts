@@ -73,7 +73,7 @@ export async function deleteSubscription(
     }
 
     // Delete the subscription immediately, no matter the status or runtime
-    const deleteDescription = `Subscription to ${planName} forcefully removed by admin for ${memberName}`
+    const deleteDescription = `Subscription to ${planName} forcefully removed for ${memberName}`
     const deleteQuery = await client.query(
       `
       WITH deleted_sub AS (

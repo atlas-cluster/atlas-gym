@@ -123,7 +123,13 @@ export async function cancelSubscription(
         }
       }
     } else {
-      const updateDescription = `Subscription to ${planName} cancelled for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
+      let updateDescription: string
+      if (memberId === session.member.id) {
+        updateDescription = `Subscription to ${planName} cancelled`
+      } else {
+        updateDescription = `Subscription to ${planName} cancelled for ${memberName}`
+      }
+
       const updateQuery = await client.query(
         `
         WITH calc_dates AS (

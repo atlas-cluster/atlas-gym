@@ -152,7 +152,13 @@ export async function createSubscription(
     }
 
     // Create new subscription
-    const createDescription = `Subscription to ${planName} created for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
+    let createDescription: string
+    if (memberId === session.member.id) {
+      createDescription = `Subscription to ${planName} created`
+    } else {
+      createDescription = `Subscription to ${planName} created for ${memberName}`
+    }
+
     const insertQuery = await client.query(
       `
       WITH new_sub AS (

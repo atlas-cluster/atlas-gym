@@ -43,7 +43,7 @@ export async function createPlan(
               RETURNING id, name
       )
        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-       SELECT $5, 'Create'::action_type, id, 'plan', 'Plan created: ' || name
+       SELECT $5, 'Create'::action_type, id, 'plan', 'Plan ' || name || ' created'
        FROM inserted_plan`,
       [
         validated.name,

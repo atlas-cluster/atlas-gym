@@ -128,6 +128,13 @@ export async function revertCancellation(
     }
 
     // Delete any future subscription FIRST (before updating to avoid constraint violation)
+    let futureDeleteDescription: string
+    if (memberId === session.member.id) {
+      futureDeleteDescription = `Future subscription deleted due to cancellation revert of ${planName}`
+    } else {
+      futureDeleteDescription = `Future subscription deleted due to cancellation revert of ${planName} for ${memberName}`
+    }
+
     await client.query(
       `
       WITH deleted_future AS (
@@ -146,7 +153,7 @@ export async function revertCancellation(
         memberId,
         subscription.start_date,
         session.member.id,
-        `Future subscription deleted due to cancellation revert for ${memberName} by ${session.member.firstname} ${session.member.lastname}`,
+        futureDeleteDescription,
       ]
     )
 
@@ -169,7 +176,13 @@ export async function revertCancellation(
     }
 
     // Now remove the end_date to revert the cancellation
-    const revertDescription = `Cancellation reverted for ${planName} subscription of ${memberName} by ${session.member.firstname} ${session.member.lastname}`
+    let revertDescription: string
+    if (memberId === session.member.id) {
+      revertDescription = `Cancellation reverted for ${planName}`
+    } else {
+      revertDescription = `Cancellation reverted for ${planName} of ${memberName}`
+    }
+
     const updateQuery = await client.query(
       `
       WITH updated_sub AS (

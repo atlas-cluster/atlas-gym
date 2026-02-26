@@ -59,7 +59,7 @@ export async function updatePlan(
       ),
       log_plan AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $7, 'Update'::action_type, id, 'plan', 'Plan updated: ' || name
+        SELECT $7, 'Update'::action_type, id, 'plan', 'Plan ' || name || ' updated'
         FROM updated_plan
       )
       SELECT
