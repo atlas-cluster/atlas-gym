@@ -23,8 +23,8 @@ export function PlanDeleteDialog({
   open,
   onOpenChange: setOpen,
 }: PlanDeleteDialogProps) {
-  function onDelete(id: string) {
-    const promise = deletePlan(id).then((result) => {
+  function onDelete(id: string, updatedAt: Date) {
+    const promise = deletePlan(id, updatedAt).then((result) => {
       if (!result.success) {
         throw new Error(result.message || 'Failed to delete plan')
       }
@@ -41,7 +41,7 @@ export function PlanDeleteDialog({
 
   const onSubmit = () => {
     if (plan) {
-      onDelete(plan?.id)
+      onDelete(plan.id, plan.updatedAt)
     }
   }
 

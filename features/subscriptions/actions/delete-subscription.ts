@@ -7,11 +7,12 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function deleteSubscription(
   subscriptionId: string,
-  targetMemberId: string
+  targetMemberId: string,
+  lastUpdatedAt: Date
 ): Promise<{
   success: boolean
   message: string
-  errorType?: 'AUTH' | 'NOT_FOUND' | 'UNKNOWN'
+  errorType?: 'AUTH' | 'NOT_FOUND' | 'VERSION_MISMATCH' | 'UNKNOWN'
 }> {
   const client = await pool.connect()
   try {
@@ -38,7 +39,7 @@ export async function deleteSubscription(
     // Get subscription details before deleting
     const subQuery = await client.query(
       `
-      SELECT s.id, s.member_id, s.start_date, s.end_date, p.name as plan_name, m.firstname, m.lastname
+      SELECT s.id, s.member_id, s.start_date, s.end_date, s.updated_at, p.name as plan_name, m.firstname, m.lastname
       FROM subscriptions s
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
@@ -59,6 +60,18 @@ export async function deleteSubscription(
     const subscription = subQuery.rows[0]
     const memberName = `${subscription.firstname} ${subscription.lastname}`
     const planName = subscription.plan_name
+
+    const dbUpdatedAt = new Date(subscription.updated_at).getTime()
+    const clientUpdatedAt = new Date(lastUpdatedAt).getTime()
+    if (dbUpdatedAt !== clientUpdatedAt) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'VERSION_MISMATCH',
+        message:
+          'Subscription was modified by another user. Please refresh and try again.',
+      }
+    }
 
     // Delete the subscription immediately, no matter the status or runtime
     const deleteDescription = `Subscription to ${planName} forcefully removed by admin for ${memberName}`

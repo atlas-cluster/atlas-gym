@@ -22,10 +22,12 @@ const getMembersCached = unstable_cache(
              CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
              -- Current/cancelled subscription
              current_s.id as "subscriptionId",
+             current_s.updated_at as "subscriptionUpdatedAt",
              current_p.name as "planName",
              CASE WHEN current_s.end_date IS NOT NULL THEN true ELSE false END as "isCancelled",
              -- Future subscription
              future_s.id as "futureSubscriptionId",
+             future_s.updated_at as "futureSubscriptionUpdatedAt",
              future_p.name as "futureSubscriptionName"
       FROM members m
              LEFT JOIN trainers t ON m.id = t.member_id
@@ -55,6 +57,12 @@ const getMembersCached = unstable_cache(
     return result.rows.map((row) => ({
       ...row,
       birthdate: new Date(row.birthdate),
+      subscriptionUpdatedAt: row.subscriptionUpdatedAt
+        ? new Date(row.subscriptionUpdatedAt)
+        : undefined,
+      futureSubscriptionUpdatedAt: row.futureSubscriptionUpdatedAt
+        ? new Date(row.futureSubscriptionUpdatedAt)
+        : undefined,
     }))
   },
   ['members-list'],

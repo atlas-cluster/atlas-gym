@@ -5,10 +5,13 @@ import { updateTag } from 'next/cache'
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
-export async function deletePlan(id: string): Promise<{
+export async function deletePlan(
+  id: string,
+  lastUpdatedAt: Date
+): Promise<{
   success: boolean
   message: string
-  errorType?: 'AUTH' | 'NOT_FOUND' | 'UNKNOWN'
+  errorType?: 'AUTH' | 'VERSION_MISMATCH' | 'UNKNOWN'
 }> {
   try {
     const { member } = await getSession()
@@ -56,7 +59,7 @@ export async function deletePlan(id: string): Promise<{
       ),
       deleted_plan AS (
          DELETE FROM plans
-         WHERE id = $1
+         WHERE id = $1 AND date_trunc('milliseconds', updated_at) = $3::timestamptz
          RETURNING id, name
       ),
       log_plan AS (
@@ -65,14 +68,15 @@ export async function deletePlan(id: string): Promise<{
          FROM deleted_plan 
       )
       SELECT id FROM deleted_plan`,
-      [id, member.id]
+      [id, member.id, lastUpdatedAt]
     )
 
     if (planDeleteResult.rowCount === 0) {
       return {
         success: false,
-        errorType: 'NOT_FOUND',
-        message: 'Plan not found.',
+        errorType: 'VERSION_MISMATCH',
+        message:
+          'Plan was modified by another user. Please refresh and try again.',
       }
     }
 

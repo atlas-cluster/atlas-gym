@@ -53,6 +53,7 @@ export function TableClient({ data }: { data: SubscriptionDisplay[] }) {
 
       <SubscriptionRevertCancelDialog
         subscription={selectedSubscription}
+        hasFutureSubscription={data.some((s) => s.isFuture)}
         open={revertCancelOpen}
         onOpenChange={setRevertCancelOpen}
       />

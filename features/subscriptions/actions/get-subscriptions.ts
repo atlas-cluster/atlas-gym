@@ -16,16 +16,17 @@ export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
   const getCached = unstable_cache(
     async (memberId: string): Promise<SubscriptionDisplay[]> => {
       const result = await pool.query(
-        `SELECT p.id,
+        `SELECT p.id                  AS "planId",
                 p.name,
                 p.price,
                 p.min_duration_months AS "minDurationMonths",
                 p.description,
-                p.created_at          AS "createdAt",
-                p.updated_at          AS "updatedAt",
-                s.id                  AS "subscriptionId",
+                p.created_at          AS "planCreatedAt",
+                p.updated_at          AS "planUpdatedAt",
+                s.id                  AS "id",
                 s.start_date          AS "startDate",
                 s.end_date            AS "endDate",
+                s.updated_at          AS "updatedAt",
                 CASE
                     WHEN s.id IS NOT NULL AND s.start_date <= CURRENT_DATE
                         AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE)
@@ -62,14 +63,15 @@ export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
       )
 
       return result.rows.map((row) => ({
-        id: row.id,
+        id: row.id ?? undefined,
+        planId: row.planId,
         name: row.name,
         price: parseFloat(row.price),
         minDurationMonths: row.minDurationMonths,
         description: row.description ?? undefined,
-        createdAt: new Date(row.createdAt),
-        updatedAt: new Date(row.updatedAt),
-        subscriptionId: row.subscriptionId ?? undefined,
+        planCreatedAt: new Date(row.planCreatedAt),
+        planUpdatedAt: new Date(row.planUpdatedAt),
+        updatedAt: row.updatedAt ? new Date(row.updatedAt) : undefined,
         startDate: row.startDate ? new Date(row.startDate) : undefined,
         endDate: row.endDate ? new Date(row.endDate) : undefined,
         isActive: row.isActive || undefined,
