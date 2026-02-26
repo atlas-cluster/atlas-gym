@@ -17,17 +17,23 @@ import {
 
 interface SubscriptionRevertCancelDialogProps {
   subscription: SubscriptionDisplay | null
+  hasFutureSubscription: boolean
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 export function SubscriptionRevertCancelDialog({
   subscription,
+  hasFutureSubscription,
   open,
   onOpenChange: setOpen,
 }: SubscriptionRevertCancelDialogProps) {
   function onRevert(subscriptionId: string) {
-    const promise = revertCancellation(subscriptionId).then((result) => {
+    const promise = revertCancellation(
+      subscriptionId,
+      subscription!.updatedAt!,
+      hasFutureSubscription
+    ).then((result) => {
       if (!result.success) {
         throw new Error(result.message || 'Failed to revert cancellation')
       }
@@ -43,8 +49,8 @@ export function SubscriptionRevertCancelDialog({
   }
 
   const onSubmit = () => {
-    if (subscription?.subscriptionId) {
-      onRevert(subscription.subscriptionId)
+    if (subscription?.id) {
+      onRevert(subscription.id)
     }
   }
 

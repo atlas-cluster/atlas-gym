@@ -44,7 +44,7 @@ export function SubscriptionCreateDialog({
 
   const onSubmit = () => {
     if (subscription) {
-      onCreate(subscription.id)
+      onCreate(subscription.planId)
     }
   }
 

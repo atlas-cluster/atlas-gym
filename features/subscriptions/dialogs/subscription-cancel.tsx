@@ -27,7 +27,10 @@ export function SubscriptionCancelDialog({
   onOpenChange: setOpen,
 }: SubscriptionCancelDialogProps) {
   function onCancel(subscriptionId: string) {
-    const promise = cancelSubscription(subscriptionId).then((result) => {
+    const promise = cancelSubscription(
+      subscriptionId,
+      subscription!.updatedAt!
+    ).then((result) => {
       if (!result.success) {
         throw new Error(result.message || 'Failed to cancel subscription')
       }
@@ -43,8 +46,8 @@ export function SubscriptionCancelDialog({
   }
 
   const onSubmit = () => {
-    if (subscription?.subscriptionId) {
-      onCancel(subscription.subscriptionId)
+    if (subscription?.id) {
+      onCancel(subscription.id)
     }
   }
 

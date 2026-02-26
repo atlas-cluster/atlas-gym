@@ -252,6 +252,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
       const result = await cancelSubscription(
         selectedMember.subscriptionId,
+        selectedMember.subscriptionUpdatedAt!,
         selectedMember.id
       )
       if (!result.success) throw new Error(result.message)
@@ -284,6 +285,8 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
       const result = await revertCancellation(
         selectedMember.subscriptionId,
+        selectedMember.subscriptionUpdatedAt!,
+        !!selectedMember.futureSubscriptionId,
         selectedMember.id
       )
       if (!result.success) throw new Error(result.message)
@@ -333,6 +336,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
 
       const result = await cancelSubscription(
         selectedMember.futureSubscriptionId,
+        selectedMember.futureSubscriptionUpdatedAt!,
         selectedMember.id
       )
       if (!result.success) throw new Error(result.message)
@@ -373,26 +377,33 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     setRemoveSubDialogOpen(false)
 
     const promise = (async () => {
-      const subscriptionIds = [
-        selectedMember.subscriptionId,
-        selectedMember.futureSubscriptionId,
-      ].filter(Boolean) as string[]
+      const subscriptions = [
+        {
+          id: selectedMember.subscriptionId,
+          updatedAt: selectedMember.subscriptionUpdatedAt,
+        },
+        {
+          id: selectedMember.futureSubscriptionId,
+          updatedAt: selectedMember.futureSubscriptionUpdatedAt,
+        },
+      ].filter((s) => s.id && s.updatedAt) as { id: string; updatedAt: Date }[]
 
-      if (subscriptionIds.length === 0) {
+      if (subscriptions.length === 0) {
         throw new Error('No subscription found to remove')
       }
 
-      for (const subscriptionId of subscriptionIds) {
+      for (const sub of subscriptions) {
         const result = await deleteSubscription(
-          subscriptionId,
-          selectedMember.id
+          sub.id,
+          selectedMember.id,
+          sub.updatedAt
         )
         if (!result.success) throw new Error(result.message)
       }
 
       setSelectedMember(null)
       fetchData()
-      return subscriptionIds.length > 1
+      return subscriptions.length > 1
         ? 'Subscriptions removed successfully'
         : 'Subscription removed successfully'
     })()

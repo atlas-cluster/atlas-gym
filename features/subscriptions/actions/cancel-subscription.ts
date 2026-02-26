@@ -8,6 +8,7 @@ import { pool } from '@/features/shared/lib/db'
 
 export async function cancelSubscription(
   subscriptionId: string,
+  lastUpdatedAt: Date,
   targetMemberId?: string
 ): Promise<{
   success: boolean
@@ -16,6 +17,7 @@ export async function cancelSubscription(
     | 'AUTH'
     | 'NOT_FOUND'
     | 'ALREADY_CANCELLED'
+    | 'VERSION_MISMATCH'
     | 'VALIDATION'
     | 'UNKNOWN'
 }> {
@@ -69,6 +71,18 @@ export async function cancelSubscription(
     const subscription = subQuery.rows[0]
     const memberName = `${subscription.firstname} ${subscription.lastname}`
     const planName = subscription.plan_name
+
+    const dbUpdatedAt = new Date(subscription.updated_at).getTime()
+    const clientUpdatedAt = new Date(lastUpdatedAt).getTime()
+    if (dbUpdatedAt !== clientUpdatedAt) {
+      await client.query('ROLLBACK')
+      return {
+        success: false,
+        errorType: 'VERSION_MISMATCH',
+        message:
+          'Subscription was modified by another user. Please refresh and try again.',
+      }
+    }
 
     if (subscription.end_date) {
       await client.query('ROLLBACK')
