@@ -3,16 +3,14 @@
 import { toast } from 'sonner'
 
 import { PlanDisplay, deletePlan } from '@/features/plans'
+import { Button } from '@/features/shared/components/ui/button'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/features/shared/components/ui/alert-dialog'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/features/shared/components/ui/dialog'
 
 interface PlanDeleteDialogProps {
   plan: PlanDisplay | null
@@ -23,14 +21,14 @@ interface PlanDeleteDialogProps {
 export function PlanDeleteDialog({
   plan,
   open,
-  onOpenChange,
+  onOpenChange: setOpen,
 }: PlanDeleteDialogProps) {
   function onDelete(id: string) {
     const promise = deletePlan(id).then((result) => {
       if (!result.success) {
         throw new Error(result.message || 'Failed to delete plan')
       }
-      onOpenChange(false)
+      setOpen(false)
       return result
     })
 
@@ -48,24 +46,27 @@ export function PlanDeleteDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            Are you sure you want to delete this plan?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Are you sure you want to delete this plan?</DialogTitle>
+          <DialogDescription>
             This action cannot be undone. All subscriptions associated with this
             plan will also be deleted.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onSubmit}>
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4 flex justify-end gap-3">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" type="button" onClick={onSubmit}>
             Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

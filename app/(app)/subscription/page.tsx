@@ -6,7 +6,7 @@ import {
 export const dynamic = 'force-dynamic'
 
 export default async function SubscriptionPage() {
-  const plans = await getSubscriptions()
+  const subscriptions = await getSubscriptions()
 
-  return <SubscriptionsTableClient data={plans} />
+  return <SubscriptionsTableClient data={subscriptions} />
 }
