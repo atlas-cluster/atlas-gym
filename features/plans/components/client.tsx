@@ -4,8 +4,8 @@ import { useState } from 'react'
 
 import { PlanDisplay } from '@/features/plans'
 import { DataTable } from '@/features/plans/components/data-table'
-import { PlanDeleteDialog } from '@/features/plans/dialog/plan-delete'
-import { PlanDetailsDialog } from '@/features/plans/dialog/plan-details'
+import { PlanDeleteDialog } from '@/features/plans/dialogs/plan-delete'
+import { PlanDetailsDialog } from '@/features/plans/dialogs/plan-details'
 
 export function TableClient({ data }: { data: PlanDisplay[] }) {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)

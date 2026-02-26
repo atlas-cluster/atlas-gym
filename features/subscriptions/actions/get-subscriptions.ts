@@ -23,6 +23,7 @@ export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
                 p.description,
                 p.created_at          AS "createdAt",
                 p.updated_at          AS "updatedAt",
+                s.id                  AS "subscriptionId",
                 s.start_date          AS "startDate",
                 s.end_date            AS "endDate",
                 CASE
@@ -68,6 +69,7 @@ export async function getSubscriptions(): Promise<SubscriptionDisplay[]> {
         description: row.description ?? undefined,
         createdAt: new Date(row.createdAt),
         updatedAt: new Date(row.updatedAt),
+        subscriptionId: row.subscriptionId ?? undefined,
         startDate: row.startDate ? new Date(row.startDate) : undefined,
         endDate: row.endDate ? new Date(row.endDate) : undefined,
         isActive: row.isActive || undefined,
