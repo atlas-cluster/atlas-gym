@@ -1,20 +1,20 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { MemberDisplay } from '@/features/members'
-import { changePasswordSchema } from '@/features/members/schemas/change-password'
+import { updateMemberPassword } from '@/features/members/actions/update-member-password'
+import { memberPasswordSchema } from '@/features/members/schemas/member-password'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/features/shared/components/ui/dialog'
 import {
   Field,
@@ -25,56 +25,67 @@ import {
 import { Input } from '@/features/shared/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-interface ChangePasswordDialogProps {
-  member?: MemberDisplay
-  trigger?: ReactNode
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSubmit?: (
-    data: z.infer<typeof changePasswordSchema>
-  ) => Promise<unknown> | unknown
+interface UpdateMemberPasswordDialogProps {
+  member: MemberDisplay | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
-export function ChangePasswordDialog({
+export function UpdateMemberPasswordDialog({
   member,
-  trigger,
-  open: controlledOpen,
-  onOpenChange: setControlledOpen,
-  onSubmit,
-}: ChangePasswordDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
-
-  const open = controlledOpen ?? internalOpen
-  const setOpen = setControlledOpen ?? setInternalOpen
-
-  const form = useForm<z.infer<typeof changePasswordSchema>>({
-    resolver: zodResolver(changePasswordSchema),
+  open,
+  onOpenChange: setOpen,
+  onSuccess,
+}: UpdateMemberPasswordDialogProps) {
+  const form = useForm<z.infer<typeof memberPasswordSchema>>({
+    resolver: zodResolver(memberPasswordSchema),
     defaultValues: {
       password: '',
       confirmPassword: '',
     },
   })
 
-  // Reset form when dialog opens/closes or member changes
-  // Although typically for password change we just want a blank form
-  const { reset } = form
+  useEffect(() => {
+    if (open && member) {
+      form.reset({
+        password: '',
+        confirmPassword: '',
+      })
+    }
+  }, [member, form, open])
 
-  // We might want to reset when the dialog opens.
-  // Using useEffect or just letting it remain blank.
-  // Since it's a new password everytime, blank is good.
+  function onUpdate(data: z.infer<typeof memberPasswordSchema>) {
+    if (!member) {
+      toast.error('No member selected for password update')
+      return
+    }
 
-  async function handleSubmit(data: z.infer<typeof changePasswordSchema>) {
-    await onSubmit?.(data)
-    setOpen(false)
-    reset()
+    const promise = updateMemberPassword(member.id, data).then((result) => {
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update password')
+      }
+      setOpen(false)
+      onSuccess?.()
+      return result
+    })
+
+    toast.promise(promise, {
+      loading: 'Updating password...',
+      success: (result) => result.message,
+      error: (err) => err?.message || 'Failed to update password',
+    })
+  }
+
+  const handleSubmit = (data: z.infer<typeof memberPasswordSchema>) => {
+    onUpdate(data)
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle>Update Password</DialogTitle>
           <DialogDescription>
             Enter a new password for {member?.firstname} {member?.lastname}.
           </DialogDescription>
@@ -133,11 +144,16 @@ export function ChangePasswordDialog({
                 </Field>
               )}
             />
-
-            <DialogFooter>
-              <Button type="submit">Change Password</Button>
-            </DialogFooter>
           </FieldGroup>
+          <div className="mt-4 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              type={'button'}
+              onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Update password</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

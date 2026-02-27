@@ -55,6 +55,7 @@ export async function cancelSubscription(
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
+      FOR UPDATE
     `,
       [subscriptionId, memberId, lastUpdatedAt]
     )
@@ -123,7 +124,13 @@ export async function cancelSubscription(
         }
       }
     } else {
-      const updateDescription = `Subscription to ${planName} cancelled for ${memberName} by ${session.member.firstname} ${session.member.lastname}`
+      let updateDescription: string
+      if (memberId === session.member.id) {
+        updateDescription = `Subscription to ${planName} cancelled`
+      } else {
+        updateDescription = `Subscription to ${planName} cancelled for ${memberName}`
+      }
+
       const updateQuery = await client.query(
         `
         WITH calc_dates AS (
@@ -171,7 +178,6 @@ export async function cancelSubscription(
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

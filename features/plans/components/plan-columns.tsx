@@ -1,7 +1,7 @@
-import { SubscriptionDisplay } from '@/features/subscriptions'
+import { PlanDisplay } from '@/features/plans'
 import { ColumnDef } from '@tanstack/table-core'
 
-export const columns: ColumnDef<SubscriptionDisplay>[] = [
+export const planColumns: ColumnDef<PlanDisplay>[] = [
   {
     accessorKey: 'name',
     enableSorting: true,
@@ -27,20 +27,8 @@ export const columns: ColumnDef<SubscriptionDisplay>[] = [
     enableGlobalFilter: true,
   },
   {
-    accessorKey: 'startDate',
+    accessorKey: 'subscriptionCount',
     enableSorting: true,
-    enableHiding: false,
-    enableGlobalFilter: false,
-  },
-  {
-    accessorKey: 'endDate',
-    enableSorting: true,
-    enableHiding: false,
-    enableGlobalFilter: false,
-  },
-  {
-    accessorKey: 'status',
-    enableSorting: false,
     enableHiding: false,
     enableGlobalFilter: false,
   },

@@ -6,11 +6,17 @@ import {
   GetAuditLogsParams,
   GetAuditLogsResponse,
 } from '@/features/audit-logs/types'
+import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
 
 export async function getAuditLogs(
   params?: Partial<GetAuditLogsParams>
 ): Promise<GetAuditLogsResponse> {
+  const { member } = await getSession()
+  if (!member?.isTrainer) {
+    throw new Error('Unauthorized')
+  }
+
   const {
     pageIndex = 0,
     pageSize = 15,
@@ -21,7 +27,6 @@ export async function getAuditLogs(
   const client = await pool.connect()
 
   try {
-    // Helper to build WHERE clause
     const buildWhereClause = (excludeFilterId?: string) => {
       let clause = 'WHERE 1=1'
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,22 +97,7 @@ export async function getAuditLogs(
             }
             if (dateRange?.to) {
               clause += ` AND al.timestamp <= $${pIndex}`
-              // Determine if 'to' has time component or if we should set it to end of day.
-              // For simplicity, if we receive a date string/object, we can assume it's a date selection
-              // and we want to include the whole day.
-              // However, since we transport this over the wire, let's see.
-              // We can cast to date and set time to 23:59:59.999 if it looks like midnight?
-              // OR, simpler: add 1 day and use <
               const toDate = new Date(dateRange.to)
-              // Since the filter component now sends explicit time (defaulting to 23:59 if not changed),
-              // we can trust the time component.
-              // BUT, if the filter was set programmatically or via just date picker without time logic (legacy?),
-              // we might want safety.
-              // Given the new component defaults to 23:59, we are good.
-              // Removing the override to respect user input (e.g. user selected 12:00 explicitly).
-              // if (toDate.getHours() === 0 && toDate.getMinutes() === 0 && toDate.getSeconds() === 0) {
-              //   toDate.setHours(23, 59, 59, 999)
-              // }
               clauseValues.push(toDate.toISOString())
               pIndex++
             }
@@ -163,17 +153,10 @@ export async function getAuditLogs(
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `
 
-    // Create query to fetch facets
-
-    // For member facet filter context (excludes member filter itself)
     const memberFacet = buildWhereClause('member')
-    // For action facet filter context (excludes action filter itself)
     const actionFacet = buildWhereClause('action')
-    // For entity facet filter context (excludes entity filter itself)
     const entityFacet = buildWhereClause('entity')
 
-    // For member facet: Get ALL members, left join with filtered logs
-    // We use a CTE for filtered logs to count matches
     const memberFacetQuery = `
       WITH filtered_logs AS (
         SELECT al.member_id
@@ -190,8 +173,6 @@ export async function getAuditLogs(
       ORDER BY count DESC, name ASC
     `
 
-    // For action facet: We need all possible actions (from full table)
-    // Left join with filtered logs
     const actionFacetQuery = `
       WITH all_actions AS (
         SELECT DISTINCT action FROM audit_logs
@@ -211,8 +192,6 @@ export async function getAuditLogs(
       ORDER BY count DESC, aa.action ASC
     `
 
-    // For entity facet: We need all possible entities (from full table)
-    // Left join with filtered logs
     const entityFacetQuery = `
       WITH all_entities AS (
         SELECT DISTINCT entity_type FROM audit_logs

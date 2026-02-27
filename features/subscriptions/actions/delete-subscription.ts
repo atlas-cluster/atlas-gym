@@ -45,6 +45,7 @@ export async function deleteSubscription(
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
+      FOR UPDATE OF s
     `,
       [subscriptionId, targetMemberId, lastUpdatedAt]
     )
@@ -73,7 +74,7 @@ export async function deleteSubscription(
     }
 
     // Delete the subscription immediately, no matter the status or runtime
-    const deleteDescription = `Subscription to ${planName} forcefully removed by admin for ${memberName}`
+    const deleteDescription = `Subscription to ${planName} forcefully removed for ${memberName}`
     const deleteQuery = await client.query(
       `
       WITH deleted_sub AS (
@@ -86,12 +87,12 @@ export async function deleteSubscription(
         SELECT $3, 'Delete'::action_type, id, 'subscription', $4
         FROM deleted_sub
       )
-      SELECT 1
+      SELECT id FROM deleted_sub
     `,
       [subscriptionId, targetMemberId, session.member.id, deleteDescription]
     )
 
-    if (deleteQuery.rowCount === 0) {
+    if (deleteQuery.rows.length === 0) {
       await client.query('ROLLBACK')
       return {
         success: false,
@@ -100,10 +101,36 @@ export async function deleteSubscription(
       }
     }
 
+    // Also delete any future subscription for this member
+    await client.query(
+      `
+      WITH future_subs AS (
+        SELECT s.id, p.name as plan_name
+        FROM subscriptions s
+        JOIN plans p ON s.plan_id = p.id
+        WHERE s.member_id = $1 AND s.start_date > CURRENT_DATE
+        FOR UPDATE OF s
+      ),
+      deleted_future AS (
+        DELETE FROM subscriptions
+        WHERE id IN (SELECT id FROM future_subs)
+        RETURNING id
+      ),
+      log_future AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT $2, 'Delete'::action_type, fs.id, 'subscription',
+          'Future subscription to ' || fs.plan_name || ' forcefully removed for ' || $3
+        FROM future_subs fs
+        WHERE fs.id IN (SELECT id FROM deleted_future)
+      )
+      SELECT COUNT(*) FROM deleted_future
+    `,
+      [targetMemberId, session.member.id, memberName]
+    )
+
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

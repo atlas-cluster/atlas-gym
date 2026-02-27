@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const changePasswordSchema = z
+export const memberPasswordSchema = z
   .object({
     password: z.string().min(4, 'Password must be at least 4 characters'),
     confirmPassword: z.string(),

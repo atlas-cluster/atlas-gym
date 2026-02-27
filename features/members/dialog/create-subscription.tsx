@@ -2,6 +2,8 @@
 
 import { toast } from 'sonner'
 
+import { MemberDisplay } from '@/features/members'
+import { PlanDisplayMinimal } from '@/features/plans'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Dialog,
@@ -10,24 +12,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
-import {
-  SubscriptionDisplay,
-  createSubscription,
-} from '@/features/subscriptions'
+import { createSubscription } from '@/features/subscriptions'
 
-interface SubscriptionCreateDialogProps {
-  subscription: SubscriptionDisplay | null
+interface CreateSubscriptionDialogProps {
+  member: MemberDisplay | null
+  plan: PlanDisplayMinimal | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function SubscriptionCreateDialog({
-  subscription,
+export function CreateSubscriptionDialog({
+  member,
+  plan,
   open,
   onOpenChange: setOpen,
-}: SubscriptionCreateDialogProps) {
-  function onCreate(planId: string) {
-    const promise = createSubscription(planId).then((result) => {
+}: CreateSubscriptionDialogProps) {
+  function onCreate(planId: string, memberId: string) {
+    const promise = createSubscription(planId, memberId).then((result) => {
       if (!result.success) {
         throw new Error(result.message || 'Failed to create subscription')
       }
@@ -43,8 +44,8 @@ export function SubscriptionCreateDialog({
   }
 
   const onSubmit = () => {
-    if (subscription) {
-      onCreate(subscription.planId)
+    if (member && plan) {
+      onCreate(plan.id, member.id)
     }
   }
 
@@ -52,15 +53,20 @@ export function SubscriptionCreateDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Subscribe to {subscription?.name}?</DialogTitle>
+          <DialogTitle>
+            Subscribe {member?.firstname} {member?.lastname} to {plan?.name}?
+          </DialogTitle>
           <DialogDescription>
-            You are about to subscribe to the{' '}
-            <strong>{subscription?.name}</strong> plan at{' '}
-            <strong>€{subscription?.price?.toFixed(2)}/month</strong> with a
+            This will create a subscription to the <strong>{plan?.name}</strong>{' '}
+            plan at <strong>€{plan?.price?.toFixed(2)}/month</strong> with a
             minimum duration of{' '}
             <strong>
-              {subscription?.minDurationMonths}{' '}
-              {subscription?.minDurationMonths === 1 ? 'month' : 'months'}
+              {plan?.minDurationMonths}{' '}
+              {plan?.minDurationMonths === 1 ? 'month' : 'months'}
+            </strong>{' '}
+            for{' '}
+            <strong>
+              {member?.firstname} {member?.lastname}
             </strong>
             .
           </DialogDescription>

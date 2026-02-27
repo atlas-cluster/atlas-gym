@@ -3,11 +3,11 @@
 import { useState } from 'react'
 
 import { PlanDisplay } from '@/features/plans'
-import { DataTable } from '@/features/plans/components/data-table'
-import { PlanDeleteDialog } from '@/features/plans/dialogs/plan-delete'
-import { PlanDetailsDialog } from '@/features/plans/dialogs/plan-details'
+import { PlansDataTable } from '@/features/plans/components/plans-data-table'
+import { DeletePlanDialog } from '@/features/plans/dialogs/delete-plan'
+import { UpdatePlanDetailsDialog } from '@/features/plans/dialogs/update-plan-details'
 
-export function TableClient({ data }: { data: PlanDisplay[] }) {
+export function PlansController({ data }: { data: PlanDisplay[] }) {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null)
@@ -29,21 +29,21 @@ export function TableClient({ data }: { data: PlanDisplay[] }) {
 
   return (
     <>
-      <DataTable
+      <PlansDataTable
         data={data}
         onCreate={openCreateDialog}
         onEdit={openEditDialog}
         onDelete={openDeleteDialog}
       />
 
-      <PlanDetailsDialog
+      <UpdatePlanDetailsDialog
         key={selectedPlan?.id ?? 'create'}
         plan={selectedPlan}
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
       />
 
-      <PlanDeleteDialog
+      <DeletePlanDialog
         plan={selectedPlan}
         open={confirmDeleteDialogOpen}
         onOpenChange={setConfirmDeleteDialogOpen}

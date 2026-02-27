@@ -2,73 +2,118 @@
 
 import { unstable_cache } from 'next/cache'
 
+import { getSession } from '@/features/auth'
 import { MemberDisplay } from '@/features/members/types'
 import { pool } from '@/features/shared/lib/db'
+import { SubscriptionDisplay } from '@/features/subscriptions'
 
 const getMembersCached = unstable_cache(
   async (): Promise<MemberDisplay[]> => {
-    const query = `
-      SELECT m.id,
-             m.email,
-             m.created_at as "createdAt",
-             m.updated_at as "updatedAt",
-             m.firstname,
-             m.lastname,
-             m.middlename,
-             m.address,
-             m.birthdate,
-             m.phone,
-             m.payment_type as "paymentType",
-             CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
-             -- Current/cancelled subscription
-             current_s.id as "subscriptionId",
-             current_s.updated_at as "subscriptionUpdatedAt",
-             current_p.name as "planName",
-             CASE WHEN current_s.end_date IS NOT NULL THEN true ELSE false END as "isCancelled",
-             -- Future subscription
-             future_s.id as "futureSubscriptionId",
-             future_s.updated_at as "futureSubscriptionUpdatedAt",
-             future_p.name as "futureSubscriptionName"
-      FROM members m
-             LEFT JOIN trainers t ON m.id = t.member_id
-             -- Current or cancelled subscription (where end_date is NULL or in the future)
-             LEFT JOIN LATERAL (
-               SELECT * FROM subscriptions 
-               WHERE member_id = m.id 
-                 AND (end_date IS NULL OR end_date >= CURRENT_DATE)
-                 AND start_date <= CURRENT_DATE
-               ORDER BY start_date DESC
-               LIMIT 1
-             ) current_s ON true
-             LEFT JOIN plans current_p ON current_s.plan_id = current_p.id
-             -- Future subscription (where start_date is in the future)
-             LEFT JOIN LATERAL (
-               SELECT * FROM subscriptions 
-               WHERE member_id = m.id 
-                 AND start_date > CURRENT_DATE
-               ORDER BY start_date ASC
-               LIMIT 1
-             ) future_s ON true
-             LEFT JOIN plans future_p ON future_s.plan_id = future_p.id
-      ORDER BY m.lastname, m.firstname
-    `
+    const result = await pool.query(`
+        SELECT
+            m.id,
+            m.email,
+            m.firstname,
+            m.lastname,
+            m.middlename,
+            m.address,
+            m.birthdate,
+            m.phone,
+            m.payment_type as "paymentType",
+            m.created_at as "createdAt",
+            m.updated_at as "updatedAt",
+            CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as "isTrainer",
+            s.id as subscription_id,
+            s.plan_id as "planId",
+            p.name as "planName",
+            p.price as "planPrice",
+            p.min_duration_months as "planMinDurationMonths",
+            p.description as "planDescription",
+            s.start_date as "startDate",
+            s.end_date as "endDate",
+            s.updated_at as "subUpdatedAt",
+            CASE
+                WHEN s.start_date <= CURRENT_DATE AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE) THEN true
+                ELSE false
+            END as "isActive",
+            CASE
+                WHEN s.start_date > CURRENT_DATE THEN true
+                ELSE false
+            END as "isFuture",
+             CASE
+                WHEN s.start_date <= CURRENT_DATE AND s.end_date IS NOT NULL AND s.end_date >= CURRENT_DATE THEN true
+                ELSE false
+            END as "isCancelled"
+        FROM members m
+                 LEFT JOIN trainers t ON m.id = t.member_id
+                 LEFT JOIN subscriptions s ON m.id = s.member_id
+                 LEFT JOIN plans p ON s.plan_id = p.id
+        WHERE (s.start_date > CURRENT_DATE
+           OR (s.start_date <= CURRENT_DATE AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE)))
+           OR s.id IS NULL
+        ORDER BY m.lastname, m.firstname, s.start_date ASC
+    `)
 
-    const result = await pool.query(query)
-    return result.rows.map((row) => ({
-      ...row,
-      birthdate: new Date(row.birthdate),
-      subscriptionUpdatedAt: row.subscriptionUpdatedAt
-        ? new Date(row.subscriptionUpdatedAt)
-        : undefined,
-      futureSubscriptionUpdatedAt: row.futureSubscriptionUpdatedAt
-        ? new Date(row.futureSubscriptionUpdatedAt)
-        : undefined,
-    }))
+    const membersMap = new Map<string, MemberDisplay>()
+
+    for (const row of result.rows) {
+      if (!membersMap.has(row.id)) {
+        membersMap.set(row.id, {
+          id: row.id,
+          email: row.email,
+          createdAt: new Date(row.createdAt),
+          updatedAt: new Date(row.updatedAt),
+          firstname: row.firstname,
+          lastname: row.lastname,
+          middlename: row.middlename || undefined,
+          address: row.address || undefined,
+          birthdate: new Date(row.birthdate),
+          phone: row.phone || undefined,
+          paymentType: row.paymentType || undefined,
+          isTrainer: row.isTrainer,
+          currentSubscription: undefined,
+          futureSubscription: undefined,
+        })
+      }
+
+      const member = membersMap.get(row.id)!
+
+      if (row.subscription_id) {
+        const subDisplay: SubscriptionDisplay = {
+          id: row.subscription_id,
+          planId: row.planId,
+          name: row.planName,
+          price: parseFloat(row.planPrice),
+          minDurationMonths: row.planMinDurationMonths,
+          description: row.planDescription || undefined,
+          updatedAt: new Date(row.subUpdatedAt),
+          startDate: new Date(row.startDate),
+          endDate: row.endDate ? new Date(row.endDate) : undefined,
+          isActive: row.isActive,
+          isFuture: row.isFuture,
+          isCancelled: row.isCancelled,
+        }
+
+        if (subDisplay.isFuture && !member.futureSubscription) {
+          member.futureSubscription = subDisplay
+        } else if (subDisplay.isActive) {
+          member.currentSubscription = subDisplay
+        }
+      }
+    }
+
+    return Array.from(membersMap.values())
   },
-  ['members-list'],
-  { revalidate: 3600, tags: ['members'] }
+  ['get-members'],
+  { revalidate: 3600, tags: ['members', 'subscriptions', 'plans'] }
 )
 
 export async function getMembers(): Promise<MemberDisplay[]> {
+  const { member } = await getSession()
+
+  if (!member || !member.isTrainer) {
+    return []
+  }
+
   return getMembersCached()
 }

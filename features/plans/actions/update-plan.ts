@@ -49,6 +49,7 @@ export async function updatePlan(
         SELECT id,
                (date_trunc('milliseconds', updated_at) = $6::timestamptz) AS version_match
         FROM plans WHERE id = $5
+        FOR UPDATE
       ),
       updated_plan AS (
         UPDATE plans
@@ -59,7 +60,7 @@ export async function updatePlan(
       ),
       log_plan AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $7, 'Update'::action_type, id, 'plan', 'Plan updated: ' || name
+        SELECT $7, 'Update'::action_type, id, 'plan', 'Plan ' || name || ' updated'
         FROM updated_plan
       )
       SELECT
@@ -97,7 +98,6 @@ export async function updatePlan(
     }
 
     updateTag('plans')
-    updateTag('members')
 
     return { success: true, message: 'Plan updated successfully.' }
   } catch (error: unknown) {

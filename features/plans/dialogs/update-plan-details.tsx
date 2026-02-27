@@ -28,17 +28,17 @@ import { Input } from '@/features/shared/components/ui/input'
 import { Textarea } from '@/features/shared/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-interface PlanDetailsDialogProps {
+interface UpdatePlanDetailsDialogProps {
   plan: PlanDisplay | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function PlanDetailsDialog({
+export function UpdatePlanDetailsDialog({
   plan,
-  open: open,
+  open,
   onOpenChange: setOpen,
-}: PlanDetailsDialogProps) {
+}: UpdatePlanDetailsDialogProps) {
   const isEditing = !!plan
 
   const form = useForm({

@@ -3,13 +3,13 @@
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 
-import { SessionMember } from '@/features/members'
+import { Member } from '@/features/members'
 import { pool } from '@/features/shared/lib/db'
 
 export const getSession = cache(
   async (): Promise<{
     authenticated: boolean
-    member: SessionMember | null
+    member: Member | null
   }> => {
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('session')?.value
@@ -30,6 +30,8 @@ export const getSession = cache(
          m.birthdate,
          m.phone,
          m.payment_type,
+         m.created_at,
+         m.updated_at,
         CASE WHEN t.member_id IS NOT NULL THEN true ELSE false END as is_trainer
        FROM sessions s
        JOIN members m ON s.member_id = m.id
@@ -45,7 +47,7 @@ export const getSession = cache(
 
       const row = result.rows[0]
 
-      const member: SessionMember = {
+      const member: Member = {
         id: row.id,
         email: row.email,
         firstname: row.firstname,
@@ -55,6 +57,8 @@ export const getSession = cache(
         birthdate: row.birthdate,
         phone: row.phone || undefined,
         paymentType: row.payment_type || undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
         isTrainer: row.is_trainer,
       }
 
