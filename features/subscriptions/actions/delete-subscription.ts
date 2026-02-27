@@ -101,6 +101,33 @@ export async function deleteSubscription(
       }
     }
 
+    // Also delete any future subscription for this member
+    await client.query(
+      `
+      WITH future_subs AS (
+        SELECT s.id, p.name as plan_name
+        FROM subscriptions s
+        JOIN plans p ON s.plan_id = p.id
+        WHERE s.member_id = $1 AND s.start_date > CURRENT_DATE
+        FOR UPDATE OF s
+      ),
+      deleted_future AS (
+        DELETE FROM subscriptions
+        WHERE id IN (SELECT id FROM future_subs)
+        RETURNING id
+      ),
+      log_future AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT $2, 'Delete'::action_type, fs.id, 'subscription',
+          'Future subscription to ' || fs.plan_name || ' forcefully removed for ' || $3
+        FROM future_subs fs
+        WHERE fs.id IN (SELECT id FROM deleted_future)
+      )
+      SELECT COUNT(*) FROM deleted_future
+    `,
+      [targetMemberId, session.member.id, memberName]
+    )
+
     await client.query('COMMIT')
 
     updateTag('subscriptions')

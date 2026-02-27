@@ -6,4 +6,4 @@ export * from '@/features/plans/actions/create-plan'
 export * from '@/features/plans/actions/update-plan'
 export * from '@/features/plans/actions/delete-plan'
 
-export { Controller as PlansTableClient } from '@/features/plans/components/controller'
+export { PlansController as PlansTableClient } from '@/features/plans/components/plans-controller'

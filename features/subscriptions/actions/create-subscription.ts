@@ -65,7 +65,7 @@ export async function createSubscription(
       active_sub AS (
         SELECT id
         FROM subscriptions
-        WHERE member_id = $2 AND end_date IS NULL
+        WHERE member_id = $2 AND end_date IS NULL AND start_date <= CURRENT_DATE
         FOR UPDATE
       ),
       future_sub AS (

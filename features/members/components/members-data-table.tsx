@@ -5,11 +5,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 
 import { MemberDisplay, getMembers } from '@/features/members'
 import { memberColumns } from '@/features/members/components/member-columns'
-import {
-  PlanDisplay,
-  PlanDisplayMinimal,
-  getPlansMinimal,
-} from '@/features/plans'
+import { PlanDisplayMinimal, getPlansMinimal } from '@/features/plans'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'

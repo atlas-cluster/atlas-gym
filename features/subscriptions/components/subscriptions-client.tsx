@@ -3,12 +3,12 @@
 import { useState } from 'react'
 
 import { SubscriptionDisplay } from '@/features/subscriptions'
-import { DataTable } from '@/features/subscriptions/components/data-table'
-import { SubscriptionCancelDialog } from '@/features/subscriptions/dialogs/subscription-cancel'
-import { SubscriptionCreateDialog } from '@/features/subscriptions/dialogs/subscription-create'
-import { SubscriptionRevertCancelDialog } from '@/features/subscriptions/dialogs/subscription-revert-cancel'
+import { SubscriptionsDataTable } from '@/features/subscriptions/components/subscriptions-data-table'
+import { CancelSubscriptionDialog } from '@/features/subscriptions/dialogs/cancel-subscription'
+import { CreateSubscriptionDialog } from '@/features/subscriptions/dialogs/create-subscription'
+import { SubscriptionRevertCancelDialog } from '@/features/subscriptions/dialogs/revert-cancel-subscription'
 
-export function TableClient({ data }: { data: SubscriptionDisplay[] }) {
+export function SubscriptionsClient({ data }: { data: SubscriptionDisplay[] }) {
   const [selectedSubscription, setSelectedSubscription] =
     useState<SubscriptionDisplay | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
@@ -32,20 +32,20 @@ export function TableClient({ data }: { data: SubscriptionDisplay[] }) {
 
   return (
     <>
-      <DataTable
+      <SubscriptionsDataTable
         data={data}
         onCreate={createSubscription}
         onCancel={cancelSubscription}
         onRevertCancel={revertCancelSubscription}
       />
 
-      <SubscriptionCreateDialog
+      <CreateSubscriptionDialog
         subscription={selectedSubscription}
         open={createOpen}
         onOpenChange={setCreateOpen}
       />
 
-      <SubscriptionCancelDialog
+      <CancelSubscriptionDialog
         subscription={selectedSubscription}
         open={cancelOpen}
         onOpenChange={setCancelOpen}

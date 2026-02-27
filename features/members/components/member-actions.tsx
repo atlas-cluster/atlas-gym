@@ -3,12 +3,14 @@
 import {
   CalendarPlus,
   CreditCard,
+  GraduationCap,
   KeyRound,
   MoreHorizontalIcon,
   PencilIcon,
   Search,
   Trash,
   Undo2,
+  User,
   XCircle,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -32,7 +34,6 @@ import {
   Empty,
   EmptyDescription,
   EmptyMedia,
-  EmptyTitle,
 } from '@/features/shared/components/ui/empty'
 import {
   InputGroup,
@@ -86,6 +87,20 @@ export function MemberActions({
                   <KeyRound />
                   Change Password
                 </DropdownMenuItem>
+                {!member.isTrainer && (
+                  <DropdownMenuItem
+                    onSelect={() => meta?.onConvertToTrainer(member)}>
+                    <GraduationCap />
+                    Promote to Trainer
+                  </DropdownMenuItem>
+                )}
+                {member.isTrainer && (
+                  <DropdownMenuItem
+                    onSelect={() => meta?.onConvertToMember(member)}>
+                    <User />
+                    Demote to Member
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   variant={'destructive'}
                   onSelect={() => meta?.onDelete(member)}>

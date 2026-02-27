@@ -2,6 +2,8 @@
 
 import { toast } from 'sonner'
 
+import { MemberDisplay } from '@/features/members'
+import { deleteMembers } from '@/features/members/actions/delete-members'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Dialog,
@@ -10,44 +12,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
-import {
-  SubscriptionDisplay,
-  cancelSubscription,
-} from '@/features/subscriptions'
 
-interface SubscriptionCancelDialogProps {
-  subscription: SubscriptionDisplay | null
+interface DeleteMembersDialogProps {
+  members: MemberDisplay[]
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function SubscriptionCancelDialog({
-  subscription,
+export function DeleteMembersDialog({
+  members,
   open,
   onOpenChange: setOpen,
-}: SubscriptionCancelDialogProps) {
-  function onCancel(subscriptionId: string) {
-    const promise = cancelSubscription(
-      subscriptionId,
-      subscription!.updatedAt!
-    ).then((result) => {
+}: DeleteMembersDialogProps) {
+  function onDelete(ids: string[]) {
+    const promise = deleteMembers(ids).then((result) => {
       if (!result.success) {
-        throw new Error(result.message || 'Failed to cancel subscription')
+        throw new Error(result.message || 'Failed to delete members')
       }
       setOpen(false)
       return result
     })
 
     toast.promise(promise, {
-      loading: 'Cancelling subscription...',
+      loading: `Deleting ${ids.length} member${ids.length === 1 ? '' : 's'}...`,
       success: (result) => result.message,
-      error: (err) => err?.message || 'Failed to cancel subscription',
+      error: (err) => err?.message || 'Failed to delete members',
     })
   }
 
   const onSubmit = () => {
-    if (subscription?.id) {
-      onCancel(subscription.id)
+    if (members.length > 0) {
+      onDelete(members.map((m) => m.id))
     }
   }
 
@@ -56,12 +51,12 @@ export function SubscriptionCancelDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            Are you sure you want to cancel this subscription?
+            Are you sure you want to delete {members.length} member
+            {members.length === 1 ? '' : 's'}?
           </DialogTitle>
           <DialogDescription>
-            {subscription?.isFuture
-              ? `Your future subscription to the ${subscription?.name} plan will be deleted immediately.`
-              : `Your subscription to the ${subscription?.name} plan will remain active until the end of the minimum duration period, after which it will be cancelled.`}
+            This will permanently delete the selected members and all their
+            associated data. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4 flex justify-end gap-3">
@@ -69,10 +64,10 @@ export function SubscriptionCancelDialog({
             variant="outline"
             type="button"
             onClick={() => setOpen(false)}>
-            Keep Subscription
+            Cancel
           </Button>
           <Button variant="destructive" type="button" onClick={onSubmit}>
-            Cancel Subscription
+            Delete ({members.length})
           </Button>
         </div>
       </DialogContent>

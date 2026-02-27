@@ -5,4 +5,4 @@ export * from '@/features/subscriptions/actions/create-subscription'
 export * from '@/features/subscriptions/actions/revert-cancellation'
 export * from '@/features/subscriptions/actions/delete-subscription'
 
-export { TableClient as SubscriptionsTableClient } from '@/features/subscriptions/components/client'
+export { SubscriptionsClient as SubscriptionsTableClient } from '@/features/subscriptions/components/subscriptions-client'
