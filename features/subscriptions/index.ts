@@ -1,7 +1,5 @@
 export * from '@/features/subscriptions/types'
 export * from '@/features/subscriptions/actions/get-subscriptions'
-export * from '@/features/subscriptions/actions/get-subscriptions-by-member'
-export * from '@/features/subscriptions/actions/get-available-plans'
 export * from '@/features/subscriptions/actions/cancel-subscription'
 export * from '@/features/subscriptions/actions/create-subscription'
 export * from '@/features/subscriptions/actions/revert-cancellation'

@@ -36,7 +36,7 @@ interface PlanDetailsDialogProps {
 
 export function PlanDetailsDialog({
   plan,
-  open: open,
+  open,
   onOpenChange: setOpen,
 }: PlanDetailsDialogProps) {
   const isEditing = !!plan

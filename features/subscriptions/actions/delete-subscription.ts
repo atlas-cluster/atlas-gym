@@ -103,7 +103,6 @@ export async function deleteSubscription(
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

@@ -8,6 +8,11 @@ export interface Plan {
   updatedAt: Date
 }
 
-export type PlanDisplay = Plan & {
+export interface PlanDisplay extends Plan {
   subscriptionCount?: number
 }
+
+export type PlanDisplayMinimal = Omit<
+  PlanDisplay,
+  'description' | 'subscriptionCount'
+>

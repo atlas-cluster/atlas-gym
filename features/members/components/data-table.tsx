@@ -1,43 +1,18 @@
 'use client'
 
 import { GraduationCap, RefreshCwIcon, UserIcon, XIcon } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { z } from 'zod'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 
-import { useAuth } from '@/features/auth'
-import {
-  MemberDisplay,
-  changePassword,
-  changePasswordSchema,
-  convertToMember,
-  convertToTrainer,
-  deleteMember,
-  deleteMembers,
-  getMembers,
-  memberDetailsSchema,
-  memberPaymentSchema,
-  updateMember,
-  updateMemberPayment,
-} from '@/features/members'
+import { MemberDisplay, getMembers } from '@/features/members'
 import { columns } from '@/features/members/components/columns'
-import { ChangePasswordDialog } from '@/features/members/dialog/change-password'
-import { MemberDetailsDialog } from '@/features/members/dialog/member-details'
-import { MemberPaymentDialog } from '@/features/members/dialog/member-payment'
-import { PlanDisplay } from '@/features/plans'
+import {
+  PlanDisplay,
+  PlanDisplayMinimal,
+  getPlansMinimal,
+} from '@/features/plans'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableViewOptions } from '@/features/shared/components/data-table-view-options'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/features/shared/components/ui/alert-dialog'
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import { Input } from '@/features/shared/components/ui/input'
@@ -49,13 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/features/shared/components/ui/table'
-import {
-  cancelSubscription,
-  createSubscription,
-  deleteSubscription,
-  getAvailablePlans,
-  revertCancellation,
-} from '@/features/subscriptions'
 import {
   flexRender,
   getFacetedRowModel,
@@ -74,34 +42,52 @@ import {
   getCoreRowModel,
 } from '@tanstack/table-core'
 
-export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
-  const { member: currentMember, refreshMember } = useAuth()
+export interface DataTableProps {
+  members: MemberDisplay[]
+  plans: PlanDisplayMinimal[]
+  onUpdateDetails: (data: MemberDisplay) => void
+  onUpdatePayment: (data: MemberDisplay) => void
+  onChangePassword: (data: MemberDisplay) => void
+  onConvertToMember: (data: MemberDisplay) => void
+  onConvertToTrainer: (data: MemberDisplay) => void
+  onChooseSubscription: (
+    member: MemberDisplay,
+    plan: PlanDisplayMinimal
+  ) => void
+  onChooseFutureSubscription: (
+    member: MemberDisplay,
+    plan: PlanDisplayMinimal
+  ) => void
+  onCancelSubscription: (member: MemberDisplay) => void
+  onCancelFutureSubscription: (member: MemberDisplay) => void
+  onRevertCancelSubscription: (member: MemberDisplay) => void
+  onDeleteSubscription: (member: MemberDisplay) => void
+  onDelete: (member: MemberDisplay) => void
+  onDeleteMany: (members: MemberDisplay[]) => void
+}
+
+export function DataTable({
+  members,
+  plans,
+  onUpdateDetails,
+  onUpdatePayment,
+  onChangePassword,
+  onConvertToMember,
+  onConvertToTrainer,
+  onChooseSubscription,
+  onChooseFutureSubscription,
+  onCancelSubscription,
+  onCancelFutureSubscription,
+  onRevertCancelSubscription,
+  onDeleteSubscription,
+  onDelete,
+  onDeleteMany,
+}: DataTableProps) {
   const [isPending, startTransition] = useTransition()
-  const [tableData, setTableData] = useState<MemberDisplay[]>(initialData)
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [paymentOpen, setPaymentOpen] = useState(false)
-  const [passwordOpen, setPasswordOpen] = useState(false)
-  const [detailsMember, setDetailsMember] = useState<
-    MemberDisplay | undefined
-  >()
-  const [paymentMember, setPaymentMember] = useState<
-    MemberDisplay | undefined
-  >()
-  const [passwordMember, setPasswordMember] = useState<
-    MemberDisplay | undefined
-  >()
+  const [tableData, setTableData] = useState<MemberDisplay[]>(members)
+  const [availablePlans, setAvailablePlans] =
+    useState<PlanDisplayMinimal[]>(plans)
 
-  // Subscription Dialog State - only for confirmations, not plan selection
-  const [cancelSubDialogOpen, setCancelSubDialogOpen] = useState(false)
-  const [revertCancelDialogOpen, setRevertCancelDialogOpen] = useState(false)
-  const [cancelFutureDialogOpen, setCancelFutureDialogOpen] = useState(false)
-  const [removeSubDialogOpen, setRemoveSubDialogOpen] = useState(false)
-  const [selectedMember, setSelectedMember] = useState<MemberDisplay | null>(
-    null
-  )
-  const [availablePlans, setAvailablePlans] = useState<PlanDisplay[]>([])
-
-  // Table State
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
@@ -113,363 +99,44 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
   })
 
   useEffect(() => {
-    setTableData(initialData)
-  }, [initialData])
+    setTableData(members)
+  }, [members])
 
-  // Fetch available plans once on mount
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const plans = await getAvailablePlans()
-        setAvailablePlans(plans)
-      } catch (error) {
-        console.error('Failed to fetch plans:', error)
-      }
-    }
-    fetchPlans()
-  }, [])
+    setAvailablePlans(plans)
+  }, [plans])
 
-  const updateMemberInState = (id: string, update: Partial<MemberDisplay>) => {
-    setTableData((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...update } : item))
-    )
-  }
-
-  const handleUpdate = (
-    id: string,
-    data: z.infer<typeof memberDetailsSchema>
-  ) => {
-    const promise = updateMember(id, data).then(async () => {
-      updateMemberInState(id, {
-        firstname: data.firstname,
-        middlename: data.middlename || undefined,
-        lastname: data.lastname,
-        email: data.email,
-        phone: data.phone || undefined,
-        address: data.address || undefined,
-        birthdate: new Date(data.birthdate),
-      })
-
-      if (currentMember?.id === id) {
-        await refreshMember()
-      }
-    })
-
-    toast.promise(promise, {
-      loading: 'Updating member...',
-      success: 'Member updated successfully',
-      error: 'Error updating member',
-    })
-  }
-
-  const handleUpdatePayment = (
-    id: string,
-    data: z.infer<typeof memberPaymentSchema>
-  ) => {
-    const promise = updateMemberPayment(id, data).then(() => {
-      updateMemberInState(id, { paymentType: data.paymentType })
-    })
-
-    toast.promise(promise, {
-      loading: 'Updating payment...',
-      success: 'Payment updated successfully',
-      error: 'Error updating payment',
-    })
-  }
-
-  const handleDetailsOpenChange = (nextOpen: boolean) => {
-    setDetailsOpen(nextOpen)
-  }
-
-  const handleDelete = (id: string) => {
-    const promise = deleteMember(id).then(() => fetchData())
-
-    toast.promise(promise, {
-      loading: 'Deleting member...',
-      success: 'Member deleted successfully',
-      error: 'Error deleting member',
-    })
-  }
-
-  const handleDeleteMany = (ids: string[]) => {
-    const promise = deleteMembers(ids).then(() => fetchData())
-
-    toast.promise(promise, {
-      loading: 'Deleting members...',
-      success: 'Members deleted successfully',
-      error: 'Error deleting members',
-    })
-  }
-
-  const handleConvertToMember = (id: string) => {
-    const promise = convertToMember(id).then(async () => {
-      // fetchData() removed - server action updateTag('members') will auto-refresh
-      if (currentMember?.id === id) {
-        await refreshMember()
-      }
-    })
-
-    toast.promise(promise, {
-      loading: 'Changing to member...',
-      success: 'Member updated successfully',
-      error: 'Error changing member type',
-    })
-  }
-
-  const handleConvertToTrainer = (id: string) => {
-    const promise = convertToTrainer(id).then(async () => {
-      // fetchData() removed - server action updateTag('members') will auto-refresh
-      if (currentMember?.id === id) {
-        await refreshMember()
-      }
-    })
-
-    toast.promise(promise, {
-      loading: 'Changing to trainer...',
-      success: 'Trainer updated successfully',
-      error: 'Error changing member type',
-    })
-  }
-
-  const handleRefresh = () => {
-    fetchData()
-  }
-
-  const handleCancelSubscription = (member: MemberDisplay) => {
-    setSelectedMember(member)
-    setCancelSubDialogOpen(true)
-  }
-
-  const handleCancelSubscriptionConfirm = async () => {
-    if (!selectedMember) return
-
-    setCancelSubDialogOpen(false)
-
-    const promise = (async () => {
-      if (!selectedMember.subscriptionId) {
-        throw new Error('No active subscription found')
-      }
-
-      const result = await cancelSubscription(
-        selectedMember.subscriptionId,
-        selectedMember.subscriptionUpdatedAt!,
-        selectedMember.id
-      )
-      if (!result.success) throw new Error(result.message)
-      setSelectedMember(null)
-      fetchData()
-      return result.message
-    })()
-
-    toast.promise(promise, {
-      loading: 'Cancelling subscription...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to cancel subscription',
-    })
-  }
-
-  const handleRevertCancellation = (member: MemberDisplay) => {
-    setSelectedMember(member)
-    setRevertCancelDialogOpen(true)
-  }
-
-  const handleRevertCancellationConfirm = async () => {
-    if (!selectedMember) return
-
-    setRevertCancelDialogOpen(false)
-
-    const promise = (async () => {
-      if (!selectedMember.subscriptionId) {
-        throw new Error('No cancelled subscription found')
-      }
-
-      const result = await revertCancellation(
-        selectedMember.subscriptionId,
-        selectedMember.subscriptionUpdatedAt!,
-        !!selectedMember.futureSubscriptionId,
-        selectedMember.id
-      )
-      if (!result.success) throw new Error(result.message)
-      setSelectedMember(null)
-      fetchData()
-      return result.message
-    })()
-
-    toast.promise(promise, {
-      loading: 'Reverting cancellation...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to revert cancellation',
-    })
-  }
-
-  const handleChangeSubscription = async (
-    member: MemberDisplay,
-    planId: string
-  ) => {
-    const promise = createSubscription(planId, member.id).then((result) => {
-      if (!result.success) throw new Error(result.message)
-      fetchData()
-      return result.message
-    })
-
-    toast.promise(promise, {
-      loading: 'Creating future subscription...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to create future subscription',
-    })
-  }
-
-  const handleCancelFutureSubscription = (member: MemberDisplay) => {
-    setSelectedMember(member)
-    setCancelFutureDialogOpen(true)
-  }
-
-  const handleCancelFutureSubscriptionConfirm = async () => {
-    if (!selectedMember) return
-
-    setCancelFutureDialogOpen(false)
-
-    const promise = (async () => {
-      if (!selectedMember.futureSubscriptionId) {
-        throw new Error('No future subscription found')
-      }
-
-      const result = await cancelSubscription(
-        selectedMember.futureSubscriptionId,
-        selectedMember.futureSubscriptionUpdatedAt!,
-        selectedMember.id
-      )
-      if (!result.success) throw new Error(result.message)
-      setSelectedMember(null)
-      fetchData()
-      return result.message
-    })()
-
-    toast.promise(promise, {
-      loading: 'Cancelling future subscription...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to cancel future subscription',
-    })
-  }
-
-  const handleChoosePlan = async (member: MemberDisplay, planId: string) => {
-    const promise = createSubscription(planId, member.id).then((result) => {
-      if (!result.success) throw new Error(result.message)
-      fetchData()
-      return result.message
-    })
-
-    toast.promise(promise, {
-      loading: 'Creating subscription...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to create subscription',
-    })
-  }
-
-  const handleRemoveSubscription = (member: MemberDisplay) => {
-    setSelectedMember(member)
-    setRemoveSubDialogOpen(true)
-  }
-
-  const handleRemoveSubscriptionConfirm = async () => {
-    if (!selectedMember) return
-
-    setRemoveSubDialogOpen(false)
-
-    const promise = (async () => {
-      const subscriptions = [
-        {
-          id: selectedMember.subscriptionId,
-          updatedAt: selectedMember.subscriptionUpdatedAt,
-        },
-        {
-          id: selectedMember.futureSubscriptionId,
-          updatedAt: selectedMember.futureSubscriptionUpdatedAt,
-        },
-      ].filter((s) => s.id && s.updatedAt) as { id: string; updatedAt: Date }[]
-
-      if (subscriptions.length === 0) {
-        throw new Error('No subscription found to remove')
-      }
-
-      for (const sub of subscriptions) {
-        const result = await deleteSubscription(
-          sub.id,
-          selectedMember.id,
-          sub.updatedAt
-        )
-        if (!result.success) throw new Error(result.message)
-      }
-
-      setSelectedMember(null)
-      fetchData()
-      return subscriptions.length > 1
-        ? 'Subscriptions removed successfully'
-        : 'Subscription removed successfully'
-    })()
-
-    toast.promise(promise, {
-      loading: 'Removing subscription(s)...',
-      success: (msg) => msg,
-      error: (err) => err?.message ?? 'Failed to remove subscription(s)',
-    })
-  }
-
-  const fetchData = () => {
+  const onRefreshMembers = () => {
     startTransition(async () => {
-      const result = await getMembers()
-      setRowSelection({})
-      setTableData(result)
+      const [members, plans] = await Promise.all([
+        getMembers(),
+        getPlansMinimal(),
+      ])
+      setTableData(members)
+      setAvailablePlans(plans)
     })
   }
 
-  const handlePasswordChange = async (
-    data: z.infer<typeof changePasswordSchema>
-  ) => {
-    if (!passwordMember) return
-
-    const promise = changePassword(passwordMember.id, data)
-
-    toast.promise(promise, {
-      loading: 'Changing password...',
-      success: 'Password changed successfully',
-      error: 'Failed to change password',
-    })
-
-    return promise
-  }
-
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: tableData,
     columns,
 
     meta: {
-      updateMember: handleUpdate,
-      updateMemberPayment: handleUpdatePayment,
-      openMemberDetails: (member: MemberDisplay) => {
-        setDetailsMember(member)
-        setDetailsOpen(true)
-      },
-      openMemberPayment: (member: MemberDisplay) => {
-        setPaymentMember(member)
-        setPaymentOpen(true)
-      },
-      openChangePassword: (member: MemberDisplay) => {
-        setPasswordMember(member)
-        setPasswordOpen(true)
-      },
-      deleteMember: handleDelete,
-      deleteMembers: handleDeleteMany,
-      convertToMember: handleConvertToMember,
-      convertToTrainer: handleConvertToTrainer,
-      refreshMembers: handleRefresh,
-      cancelSubscription: handleCancelSubscription,
-      revertCancellation: handleRevertCancellation,
-      changeSubscription: handleChangeSubscription,
-      cancelFutureSubscription: handleCancelFutureSubscription,
-      choosePlan: handleChoosePlan,
-      removeSubscription: handleRemoveSubscription,
-      availablePlans,
+      plans: availablePlans,
+      onUpdateDetails,
+      onUpdatePayment,
+      onChangePassword,
+      onConvertToMember,
+      onConvertToTrainer,
+      onChooseSubscription,
+      onChooseFutureSubscription,
+      onCancelSubscription,
+      onCancelFutureSubscription,
+      onRevertCancelSubscription,
+      onDeleteSubscription,
+      onDelete,
+      onDeleteMany,
     },
 
     enableRowSelection: true,
@@ -499,132 +166,24 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
     },
   })
 
+  const subscriptionOptions = useMemo(() => {
+    const subscriptionColumn = table.getColumn('subscription')
+    if (!subscriptionColumn) return []
+
+    const uniqueValues = subscriptionColumn.getFacetedUniqueValues()
+
+    const presentPlans = availablePlans.filter((plan) =>
+      uniqueValues.has(plan.id)
+    )
+
+    return presentPlans.map((plan) => ({
+      value: plan.id,
+      label: plan.name,
+    }))
+  }, [table, availablePlans])
+
   return (
     <div className="w-full space-y-3">
-      <MemberDetailsDialog
-        member={detailsMember}
-        open={detailsOpen}
-        onOpenChange={handleDetailsOpenChange}
-        onSubmit={(payload) =>
-          detailsMember ? handleUpdate(detailsMember.id, payload) : undefined
-        }
-      />
-      <MemberPaymentDialog
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-        member={paymentMember}
-        onSubmit={(data) =>
-          paymentMember && handleUpdatePayment(paymentMember.id, data)
-        }
-      />
-      <ChangePasswordDialog
-        open={passwordOpen}
-        onOpenChange={setPasswordOpen}
-        member={passwordMember}
-        onSubmit={handlePasswordChange}
-      />
-
-      {/* Cancel Subscription Dialog */}
-      <AlertDialog
-        open={cancelSubDialogOpen}
-        onOpenChange={(open) => {
-          setCancelSubDialogOpen(open)
-          if (!open) setSelectedMember(null)
-        }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel the subscription for{' '}
-              {selectedMember?.firstname} {selectedMember?.lastname}? This
-              action cannot be undone and the subscription will end at the end
-              of the billing period.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelSubscriptionConfirm}>
-              Cancel Subscription
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Revert Cancellation Dialog */}
-      <AlertDialog
-        open={revertCancelDialogOpen}
-        onOpenChange={(open) => {
-          setRevertCancelDialogOpen(open)
-          if (!open) setSelectedMember(null)
-        }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revert Cancellation?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to revert the cancellation for{' '}
-              {selectedMember?.firstname} {selectedMember?.lastname}? This will
-              reactivate their subscription.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRevertCancellationConfirm}>
-              Revert Cancellation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Cancel Future Subscription Dialog */}
-      <AlertDialog
-        open={cancelFutureDialogOpen}
-        onOpenChange={(open) => {
-          setCancelFutureDialogOpen(open)
-          if (!open) setSelectedMember(null)
-        }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Future Subscription?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel the future subscription for{' '}
-              {selectedMember?.firstname} {selectedMember?.lastname}? This will
-              remove the scheduled subscription change.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Future Subscription</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelFutureSubscriptionConfirm}>
-              Cancel Future Subscription
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Remove Subscription Dialog */}
-      <AlertDialog
-        open={removeSubDialogOpen}
-        onOpenChange={setRemoveSubDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Subscription?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to permanently remove the subscription for{' '}
-              {selectedMember?.firstname} {selectedMember?.lastname}? This will
-              immediately delete the subscription regardless of its status or
-              duration. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleRemoveSubscriptionConfirm}>
-              Remove Subscription
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="flex w-full flex-wrap items-center gap-2">
           <div className="flex w-full gap-2 md:w-64">
@@ -649,7 +208,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
                 type="button"
                 disabled={isPending}
                 suppressHydrationWarning
-                onClick={handleRefresh}>
+                onClick={onRefreshMembers}>
                 <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
                 <span className={'sr-only'}>Refresh Data</span>
               </Button>
@@ -673,18 +232,7 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
           />
           <DataTableFacetedFilter
             title={'Subscription'}
-            options={Array.from(
-              new Set(
-                tableData
-                  .map((m) => m.planName)
-                  .filter((name): name is string => !!name)
-              )
-            )
-              .sort()
-              .map((name) => ({
-                value: name,
-                label: name,
-              }))}
+            options={subscriptionOptions}
             column={table.getColumn('subscription')}
           />
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
@@ -711,9 +259,9 @@ export function DataTable({ initialData }: { initialData: MemberDisplay[] }) {
               type="button"
               disabled={isPending}
               suppressHydrationWarning
-              onClick={handleRefresh}>
+              onClick={onRefreshMembers}>
               <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
-              <span className={'sr-only'}>Daten aktualisieren</span>
+              <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
         </div>

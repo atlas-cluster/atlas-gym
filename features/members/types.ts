@@ -1,7 +1,5 @@
-import { z } from 'zod'
-
-import { memberDetailsSchema } from '@/features/members/schemas/member-details'
-import { memberPaymentSchema } from '@/features/members/schemas/member-payment'
+import { PlanDisplayMinimal } from '@/features/plans'
+import { SubscriptionDisplay } from '@/features/subscriptions'
 
 export type PaymentType = 'credit_card' | 'iban'
 
@@ -20,42 +18,30 @@ export interface Member {
   paymentType?: PaymentType
 }
 
-export type SessionMember = Omit<Member, 'createdAt' | 'updatedAt'>
-
-export type MemberDisplay = Omit<Member, 'createdAt' | 'updatedAt'> & {
-  planName?: string
-  subscriptionId?: string
-  subscriptionUpdatedAt?: Date
-  isCancelled?: boolean
-  futureSubscriptionName?: string
-  futureSubscriptionId?: string
-  futureSubscriptionUpdatedAt?: Date
+export interface MemberDisplay extends Member {
+  currentSubscription?: SubscriptionDisplay
+  futureSubscription?: SubscriptionDisplay
 }
 
 export interface MembersTableMeta {
-  updateMember: (id: string, data: z.infer<typeof memberDetailsSchema>) => void
-  updateMemberPayment: (
-    id: string,
-    data: z.infer<typeof memberPaymentSchema>
+  plans: PlanDisplayMinimal[]
+  onUpdateDetails: (data: MemberDisplay) => void
+  onUpdatePayment: (data: MemberDisplay) => void
+  onChangePassword: (data: MemberDisplay) => void
+  onConvertToMember: (data: MemberDisplay) => void
+  onConvertToTrainer: (data: MemberDisplay) => void
+  onChooseSubscription: (
+    member: MemberDisplay,
+    plan: PlanDisplayMinimal
   ) => void
-  openMemberDetails: (member: MemberDisplay) => void
-  openMemberPayment: (member: MemberDisplay) => void
-  openChangePassword: (member: MemberDisplay) => void
-  deleteMember: (id: string) => void
-  deleteMembers: (ids: string[]) => void
-  convertToMember: (id: string) => void
-  convertToTrainer: (id: string) => void
-  refreshMembers: () => void
-  cancelSubscription?: (member: MemberDisplay) => void
-  revertCancellation?: (member: MemberDisplay) => void
-  changeSubscription?: (member: MemberDisplay, planId: string) => void
-  cancelFutureSubscription?: (member: MemberDisplay) => void
-  choosePlan?: (member: MemberDisplay, planId: string) => void
-  removeSubscription?: (member: MemberDisplay) => void
-  availablePlans?: {
-    id: string
-    name: string
-    price: number
-    minDurationMonths: number
-  }[]
+  onChooseFutureSubscription: (
+    member: MemberDisplay,
+    plan: PlanDisplayMinimal
+  ) => void
+  onCancelSubscription: (member: MemberDisplay) => void
+  onCancelFutureSubscription: (member: MemberDisplay) => void
+  onRevertCancelSubscription: (member: MemberDisplay) => void
+  onDeleteSubscription: (member: MemberDisplay) => void
+  onDelete: (member: MemberDisplay) => void
+  onDeleteMany: (members: MemberDisplay[]) => void
 }

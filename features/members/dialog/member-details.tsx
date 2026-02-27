@@ -1,18 +1,22 @@
 'use client'
 
 import { ChevronDownIcon } from 'lucide-react'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { MemberDisplay, memberDetailsSchema } from '@/features/members'
+import {
+  MemberDisplay,
+  memberDetailsSchema,
+  updateMember,
+} from '@/features/members'
 import { Button } from '@/features/shared/components/ui/button'
 import { Calendar } from '@/features/shared/components/ui/calendar'
 import {
   Dialog,
   DialogFooter,
   DialogHeader,
-  DialogTrigger,
 } from '@/features/shared/components/ui/dialog'
 import {
   DialogContent,
@@ -36,28 +40,17 @@ import { cn } from '@/features/shared/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface MemberDetailsDialogProps {
-  member?: MemberDisplay
-  trigger?: ReactNode
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSubmit?: (
-    data: z.infer<typeof memberDetailsSchema>
-  ) => Promise<unknown> | unknown
+  member: MemberDisplay | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function MemberDetailsDialog({
   member,
-  trigger,
-  open: controlledOpen,
-  onOpenChange: setControlledOpen,
-  onSubmit,
+  open,
+  onOpenChange: setOpen,
 }: MemberDetailsDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
-
-  const open = controlledOpen ?? internalOpen
-  const setOpen = setControlledOpen ?? setInternalOpen
-  const isEditing = !!member
 
   const form = useForm<z.infer<typeof memberDetailsSchema>>({
     resolver: zodResolver(memberDetailsSchema),
@@ -73,44 +66,52 @@ export function MemberDetailsDialog({
   })
 
   useEffect(() => {
-    if (open) {
-      if (member) {
-        const birthdate = member.birthdate
+    if (open && member) {
+      form.reset({
+        firstname: member.firstname,
+        middlename: member.middlename ?? '',
+        lastname: member.lastname,
+        email: member.email,
+        phone: member.phone,
+        address: member.address,
+        birthdate: member.birthdate
           ? new Date(member.birthdate).toISOString().split('T')[0]
-          : ''
-
-        form.reset({
-          firstname: member.firstname,
-          middlename: member.middlename || '',
-          lastname: member.lastname,
-          email: member.email,
-          phone: member.phone || '',
-          address: member.address || '',
-          birthdate,
-        })
-      } else {
-        form.reset()
-      }
+          : '',
+      })
     }
   }, [member, form, open])
 
-  async function handleSubmit(data: z.infer<typeof memberDetailsSchema>) {
-    setOpen(false)
-    await onSubmit?.(data)
+  function onUpdate(data: z.infer<typeof memberDetailsSchema>) {
+    if (!member) return
+
+    const promise = updateMember(member.id, data, member.updatedAt).then(
+      (result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update member')
+        }
+        setOpen(false)
+        return result
+      }
+    )
+
+    toast.promise(promise, {
+      loading: 'Updating member...',
+      success: (result) => result.message,
+      error: (err) => err?.message || 'Failed to update member',
+    })
+  }
+
+  const handleSubmit = (data: z.infer<typeof memberDetailsSchema>) => {
+    onUpdate(data)
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className={'max-h-[90vh] overflow-y-auto'}>
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Member Details' : 'Create Member'}
-          </DialogTitle>
+          <DialogTitle>Edit Member Details</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Update personal and contact information.'
-              : 'Add a new member.'}
+            Update personal and contact information.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -322,11 +323,16 @@ export function MemberDetailsDialog({
                 </Field>
               )}
             />
-
-            <DialogFooter>
-              <Button type="submit">{isEditing ? 'Save' : 'Create'}</Button>
-            </DialogFooter>
           </FieldGroup>
+          <div className="mt-4 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              type={'button'}
+              onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Update Member</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

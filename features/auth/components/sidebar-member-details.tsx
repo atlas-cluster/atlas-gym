@@ -6,15 +6,10 @@ import { z } from 'zod'
 
 import { useAuth } from '@/features/auth/components/auth-provider'
 import {
-  ChangePasswordDialog,
-  MemberDetailsDialog,
-  MemberPaymentDialog,
-  changePassword,
   changePasswordSchema,
   memberDetailsSchema,
   memberPaymentSchema,
   updateMember,
-  updateMemberPayment,
 } from '@/features/members'
 import { Avatar, AvatarFallback } from '@/features/shared/components/ui/avatar'
 import {
@@ -232,25 +227,25 @@ export function SidebarMemberDetails() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Dialogs */}
-        <MemberDetailsDialog
-          member={member || undefined}
-          open={detailsDialogOpen}
-          onOpenChange={setDetailsDialogOpen}
-          onSubmit={handleUpdateDetails}
-        />
-        <MemberPaymentDialog
-          member={member || undefined}
-          open={paymentDialogOpen}
-          onOpenChange={setPaymentDialogOpen}
-          onSubmit={handleUpdatePayment}
-        />
-        <ChangePasswordDialog
-          member={member || undefined}
-          open={passwordDialogOpen}
-          onOpenChange={setPasswordDialogOpen}
-          onSubmit={handleChangePassword}
-        />
+        {/*/!* Dialogs *!/*/}
+        {/*<MemberDetailsDialog*/}
+        {/*  member={member || undefined}*/}
+        {/*  open={detailsDialogOpen}*/}
+        {/*  onOpenChange={setDetailsDialogOpen}*/}
+        {/*  onSubmit={handleUpdateDetails}*/}
+        {/*/>*/}
+        {/*<MemberPaymentDialog*/}
+        {/*  member={member || undefined}*/}
+        {/*  open={paymentDialogOpen}*/}
+        {/*  onOpenChange={setPaymentDialogOpen}*/}
+        {/*  onSubmit={handleUpdatePayment}*/}
+        {/*/>*/}
+        {/*<ChangePasswordDialog*/}
+        {/*  member={member || undefined}*/}
+        {/*  open={passwordDialogOpen}*/}
+        {/*  onOpenChange={setPasswordDialogOpen}*/}
+        {/*  onSubmit={handleChangePassword}*/}
+        {/*/>*/}
       </SidebarMenuItem>
     </SidebarMenu>
   )

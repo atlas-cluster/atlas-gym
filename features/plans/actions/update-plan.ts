@@ -97,7 +97,6 @@ export async function updatePlan(
     }
 
     updateTag('plans')
-    updateTag('members')
 
     return { success: true, message: 'Plan updated successfully.' }
   } catch (error: unknown) {

@@ -55,7 +55,6 @@ export async function createPlan(
     )
 
     updateTag('plans')
-    updateTag('members')
 
     return {
       success: true,

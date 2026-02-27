@@ -98,8 +98,6 @@ export async function deletePlan(
     }
 
     updateTag('plans')
-    updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

@@ -49,7 +49,10 @@ export function DataTablePagination<TData>({
                   Items per page
                 </SelectLabel>
                 {pageSizes.map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                  <SelectItem
+                    key={pageSize}
+                    value={`${pageSize}`}
+                    suppressHydrationWarning>
                     {pageSize}
                   </SelectItem>
                 ))}

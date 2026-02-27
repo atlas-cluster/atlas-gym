@@ -213,7 +213,6 @@ export async function revertCancellation(
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

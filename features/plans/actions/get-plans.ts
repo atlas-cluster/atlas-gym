@@ -31,7 +31,7 @@ const getPlansCached = unstable_cache(
     }))
   },
   ['get-plans'],
-  { revalidate: 3600, tags: ['plans'] }
+  { revalidate: 3600, tags: ['plans', 'subscriptions'] }
 )
 
 export async function getPlans(): Promise<PlanDisplay[]> {

@@ -188,7 +188,6 @@ export async function createSubscription(
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

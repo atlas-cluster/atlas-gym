@@ -177,7 +177,6 @@ export async function cancelSubscription(
     await client.query('COMMIT')
 
     updateTag('subscriptions')
-    updateTag('members')
 
     return {
       success: true,

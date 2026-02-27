@@ -6,8 +6,6 @@ export interface SubscriptionDisplay extends Omit<
 > {
   id?: string
   planId: string
-  planCreatedAt: Date
-  planUpdatedAt: Date
   updatedAt?: Date
   startDate?: Date
   endDate?: Date
