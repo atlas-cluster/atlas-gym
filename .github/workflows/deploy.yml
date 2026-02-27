@@ -20,6 +20,7 @@ jobs:
       contents: read
     outputs:
       db: ${{ steps.filter.outputs.db }}
+      migrations: ${{ steps.filter.outputs.migrations }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
@@ -28,6 +29,9 @@ jobs:
           filters: |
             db:
               - 'Dockerfile.Postgres'
+            migrations:
+              - 'db/migrations/**'
+              - 'db/seeds/**'
 
   build:
     name: Build Image
@@ -140,8 +144,8 @@ jobs:
 
   migrate:
     name: Run Database Migrations
-    needs: deploy-db
-    if: ${{ !failure() && !cancelled() }}
+    needs: [build, deploy-db, changes]
+    if: ${{ !failure() && !cancelled() && (needs.changes.outputs.migrations == 'true' || needs.changes.outputs.db == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -194,7 +198,8 @@ jobs:
 
   deploy-app:
     name: Deploy Application
-    needs: migrate
+    needs: [build, migrate]
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH (through Jump Host)
