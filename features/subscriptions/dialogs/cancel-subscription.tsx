@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/features/shared/components/ui/button'
@@ -26,17 +27,19 @@ export function CancelSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: CancelSubscriptionDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onCancel(subscriptionId: string) {
-    const promise = cancelSubscription(
-      subscriptionId,
-      subscription!.updatedAt!
-    ).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to cancel subscription')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = cancelSubscription(subscriptionId, subscription!.updatedAt!)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to cancel subscription')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Cancelling subscription...',
@@ -71,7 +74,11 @@ export function CancelSubscriptionDialog({
             onClick={() => setOpen(false)}>
             Keep Subscription
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Cancel Subscription
           </Button>
         </div>

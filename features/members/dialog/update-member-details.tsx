@@ -49,6 +49,7 @@ export function UpdateMemberDetailsDialog({
   onSuccess,
 }: UpdateMemberDetailsDialogProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [isPending, setIsPending] = useState(false)
 
   const form = useForm<z.infer<typeof memberDetailsSchema>>({
     resolver: zodResolver(memberDetailsSchema),
@@ -85,16 +86,17 @@ export function UpdateMemberDetailsDialog({
       return
     }
 
-    const promise = updateMemberDetails(member.id, data, member.updatedAt).then(
-      (result) => {
+    setIsPending(true)
+    const promise = updateMemberDetails(member.id, data, member.updatedAt)
+      .then((result) => {
         if (!result.success) {
           throw new Error(result.message || 'Failed to update member')
         }
         setOpen(false)
         onSuccess?.()
         return result
-      }
-    )
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Updating member...',
@@ -333,7 +335,9 @@ export function UpdateMemberDetailsDialog({
               onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">Update Member</Button>
+            <Button type="submit" disabled={isPending}>
+              Update Member
+            </Button>
           </div>
         </form>
       </DialogContent>

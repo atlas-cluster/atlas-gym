@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -24,14 +25,19 @@ export function ConvertToMemberDialog({
   open,
   onOpenChange: setOpen,
 }: ConvertToMemberDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onConvert(id: string, updatedAt: Date) {
-    const promise = convertToMember(id, updatedAt).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to demote to member')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = convertToMember(id, updatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to demote to member')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Demoting to member...',
@@ -67,7 +73,11 @@ export function ConvertToMemberDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Demote
           </Button>
         </div>

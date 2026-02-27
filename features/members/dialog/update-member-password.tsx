@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -38,6 +38,7 @@ export function UpdateMemberPasswordDialog({
   onOpenChange: setOpen,
   onSuccess,
 }: UpdateMemberPasswordDialogProps) {
+  const [isPending, setIsPending] = useState(false)
   const form = useForm<z.infer<typeof memberPasswordSchema>>({
     resolver: zodResolver(memberPasswordSchema),
     defaultValues: {
@@ -61,14 +62,17 @@ export function UpdateMemberPasswordDialog({
       return
     }
 
-    const promise = updateMemberPassword(member.id, data).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to update password')
-      }
-      setOpen(false)
-      onSuccess?.()
-      return result
-    })
+    setIsPending(true)
+    const promise = updateMemberPassword(member.id, data)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update password')
+        }
+        setOpen(false)
+        onSuccess?.()
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Updating password...',
@@ -152,7 +156,9 @@ export function UpdateMemberPasswordDialog({
               onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">Update password</Button>
+            <Button type="submit" disabled={isPending}>
+              Update password
+            </Button>
           </div>
         </form>
       </DialogContent>

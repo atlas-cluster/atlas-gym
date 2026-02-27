@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useHookFormMask } from 'use-mask-input'
@@ -44,6 +44,7 @@ export function UpdateMemberPaymentDialog({
   onOpenChange: setOpen,
   onSuccess,
 }: UpdateMemberPaymentDialogProps) {
+  const [isPending, setIsPending] = useState(false)
   const form = useForm<z.infer<typeof memberPaymentSchema>>({
     resolver: zodResolver(memberPaymentSchema),
     defaultValues: {
@@ -81,14 +82,17 @@ export function UpdateMemberPaymentDialog({
       return
     }
 
-    const promise = updateMemberPayment(member.id, data).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to update payment')
-      }
-      setOpen(false)
-      onSuccess?.()
-      return result
-    })
+    setIsPending(true)
+    const promise = updateMemberPayment(member.id, data)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update payment')
+        }
+        setOpen(false)
+        onSuccess?.()
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Updating payment...',
@@ -231,7 +235,9 @@ export function UpdateMemberPaymentDialog({
               onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">Update payment</Button>
+            <Button type="submit" disabled={isPending}>
+              Update payment
+            </Button>
           </div>
         </form>
       </DialogContent>

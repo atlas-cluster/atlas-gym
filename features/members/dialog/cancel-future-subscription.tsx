@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -24,20 +25,21 @@ export function CancelFutureSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: CancelFutureSubscriptionDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onCancel(subscriptionId: string, updatedAt: Date, memberId: string) {
-    const promise = cancelSubscription(
-      subscriptionId,
-      updatedAt,
-      memberId
-    ).then((result) => {
-      if (!result.success) {
-        throw new Error(
-          result.message || 'Failed to cancel future subscription'
-        )
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = cancelSubscription(subscriptionId, updatedAt, memberId)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(
+            result.message || 'Failed to cancel future subscription'
+          )
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Cancelling future subscription...',
@@ -77,7 +79,11 @@ export function CancelFutureSubscriptionDialog({
             onClick={() => setOpen(false)}>
             Keep Subscription
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Cancel Future Subscription
           </Button>
         </div>
