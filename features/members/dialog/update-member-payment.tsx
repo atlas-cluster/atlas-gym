@@ -35,12 +35,14 @@ interface UpdateMemberPaymentDialogProps {
   member: MemberDisplay | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
 export function UpdateMemberPaymentDialog({
   member,
   open,
   onOpenChange: setOpen,
+  onSuccess,
 }: UpdateMemberPaymentDialogProps) {
   const form = useForm<z.infer<typeof memberPaymentSchema>>({
     resolver: zodResolver(memberPaymentSchema),
@@ -84,6 +86,7 @@ export function UpdateMemberPaymentDialog({
         throw new Error(result.message || 'Failed to update payment')
       }
       setOpen(false)
+      onSuccess?.()
       return result
     })
 

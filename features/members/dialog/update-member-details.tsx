@@ -39,12 +39,14 @@ interface UpdateMemberDetailsDialogProps {
   member: MemberDisplay | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
 export function UpdateMemberDetailsDialog({
   member,
   open,
   onOpenChange: setOpen,
+  onSuccess,
 }: UpdateMemberDetailsDialogProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
 
@@ -89,6 +91,7 @@ export function UpdateMemberDetailsDialog({
           throw new Error(result.message || 'Failed to update member')
         }
         setOpen(false)
+        onSuccess?.()
         return result
       }
     )

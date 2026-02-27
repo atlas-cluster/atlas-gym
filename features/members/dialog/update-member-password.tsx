@@ -29,12 +29,14 @@ interface UpdateMemberPasswordDialogProps {
   member: MemberDisplay | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
 export function UpdateMemberPasswordDialog({
   member,
   open,
   onOpenChange: setOpen,
+  onSuccess,
 }: UpdateMemberPasswordDialogProps) {
   const form = useForm<z.infer<typeof memberPasswordSchema>>({
     resolver: zodResolver(memberPasswordSchema),
@@ -64,6 +66,7 @@ export function UpdateMemberPasswordDialog({
         throw new Error(result.message || 'Failed to update password')
       }
       setOpen(false)
+      onSuccess?.()
       return result
     })
 

@@ -1,15 +1,14 @@
 'use client'
 import { CreditCardIcon, KeyRoundIcon, LogOut, UserPenIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { z } from 'zod'
 
 import { useAuth } from '@/features/auth/components/auth-provider'
 import {
-  memberDetailsSchema,
-  memberPaymentSchema,
-  updateMemberDetails,
-  updateMemberPayment,
+  MemberDisplay,
+  UpdateMemberDetailsDialog,
+  UpdateMemberPasswordDialog,
+  UpdateMemberPaymentDialog,
 } from '@/features/members'
 import { Avatar, AvatarFallback } from '@/features/shared/components/ui/avatar'
 import {
@@ -67,7 +66,7 @@ const MemberDetails = ({
 
 export function SidebarMemberDetails() {
   const { isMobile } = useSidebar()
-  const { member, loading, logout } = useAuth()
+  const { member, loading, logout, refreshMember } = useAuth()
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
@@ -84,56 +83,11 @@ export function SidebarMemberDetails() {
     }
   }
 
-  const handleUpdateDetails = async (
-    data: z.infer<typeof memberDetailsSchema>
-  ) => {
-    if (!member?.id) return
-    const promise = updateMemberDetails(member.id, data, member.updatedAt).then(
-      () => {
-        setDetailsDialogOpen(false)
-        // Reload to refresh session data
-        window.location.reload()
-      }
-    )
+  const memberDisplay: MemberDisplay | null = member ?? null
 
-    toast.promise(promise, {
-      loading: 'Updating details...',
-      success: 'Details updated successfully',
-      error: (err) => err?.message || 'Failed to update details',
-    })
-  }
-
-  const handleUpdatePayment = async (
-    data: z.infer<typeof memberPaymentSchema>
-  ) => {
-    if (!member?.id) return
-    const promise = updateMemberPayment(member.id, data, member.updatedAt).then(
-      () => {
-        setPaymentDialogOpen(false)
-      }
-    )
-
-    toast.promise(promise, {
-      loading: 'Updating payment...',
-      success: 'Payment updated successfully',
-      error: (err) => err?.message || 'Failed to update payment',
-    })
-  }
-
-  const handleChangePassword = async (
-    data: z.infer<typeof changePasswordSchema>
-  ) => {
-    if (!member?.id) return
-    const promise = changePassword(member.id, data).then(() => {
-      setPasswordDialogOpen(false)
-    })
-
-    toast.promise(promise, {
-      loading: 'Changing password...',
-      success: 'Password changed successfully',
-      error: (err) => err?.message || 'Failed to change password',
-    })
-  }
+  const deferredRefresh = useCallback(() => {
+    setTimeout(() => refreshMember(), 200)
+  }, [refreshMember])
 
   const getInitials = () => {
     // Assume `member` exists when this is called.
@@ -231,25 +185,26 @@ export function SidebarMemberDetails() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/*/!* Dialogs *!/*/}
-        {/*<MemberDetailsDialog*/}
-        {/*  member={member || undefined}*/}
-        {/*  open={detailsDialogOpen}*/}
-        {/*  onOpenChange={setDetailsDialogOpen}*/}
-        {/*  onSubmit={handleUpdateDetails}*/}
-        {/*/>*/}
-        {/*<MemberPaymentDialog*/}
-        {/*  member={member || undefined}*/}
-        {/*  open={paymentDialogOpen}*/}
-        {/*  onOpenChange={setPaymentDialogOpen}*/}
-        {/*  onSubmit={handleUpdatePayment}*/}
-        {/*/>*/}
-        {/*<ChangePasswordDialog*/}
-        {/*  member={member || undefined}*/}
-        {/*  open={passwordDialogOpen}*/}
-        {/*  onOpenChange={setPasswordDialogOpen}*/}
-        {/*  onSubmit={handleChangePassword}*/}
-        {/*/>*/}
+        <UpdateMemberDetailsDialog
+          key={'details' + member?.id}
+          member={memberDisplay}
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
+          onSuccess={deferredRefresh}
+        />
+        <UpdateMemberPaymentDialog
+          key={'payment' + member?.id}
+          member={memberDisplay}
+          open={paymentDialogOpen}
+          onOpenChange={setPaymentDialogOpen}
+          onSuccess={deferredRefresh}
+        />
+        <UpdateMemberPasswordDialog
+          member={memberDisplay}
+          open={passwordDialogOpen}
+          onOpenChange={setPasswordDialogOpen}
+          onSuccess={deferredRefresh}
+        />
       </SidebarMenuItem>
     </SidebarMenu>
   )

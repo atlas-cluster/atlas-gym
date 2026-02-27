@@ -44,6 +44,9 @@ export async function updateMemberPayment(
     const validated = memberPaymentSchema.parse(data)
     const isSelf = member.id === memberId
     const isCreditCard = validated.paymentType === 'credit_card'
+    const sanitizedExpiry = isCreditCard
+      ? (validated.cardExpiry || '').replace(/\s/g, '')
+      : null
     const sanitizedIban = isCreditCard
       ? null
       : (validated.iban || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
@@ -113,7 +116,7 @@ export async function updateMemberPayment(
         isCreditCard, // $4
         validated.cardNumber ?? null, // $5
         validated.cardHolder ?? null, // $6
-        validated.cardExpiry ?? null, // $7
+        sanitizedExpiry, // $7
         validated.cardCvc ?? null, // $8
         sanitizedIban, // $9
         member.id, // $10

@@ -13,3 +13,6 @@ export * from '@/features/members/actions/convert-to-trainer'
 export * from '@/features/members/actions/convert-to-member'
 
 export { MembersController } from '@/features/members/components/members-controller'
+export { UpdateMemberDetailsDialog } from '@/features/members/dialog/update-member-details'
+export { UpdateMemberPasswordDialog } from '@/features/members/dialog/update-member-password'
+export { UpdateMemberPaymentDialog } from '@/features/members/dialog/update-member-payment'
