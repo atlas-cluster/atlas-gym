@@ -16,7 +16,6 @@ const getPlansMinimalCached = unstable_cache(
              created_at as "createdAt",
              updated_at as "updatedAt"
       FROM plans 
-      GROUP BY id, name, price, min_duration_months, created_at, updated_at
       ORDER BY name
     `)
     return plansResponse.rows.map((row) => ({

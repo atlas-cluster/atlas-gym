@@ -45,6 +45,7 @@ export async function deleteSubscription(
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
+      FOR UPDATE OF s
     `,
       [subscriptionId, targetMemberId, lastUpdatedAt]
     )
@@ -86,12 +87,12 @@ export async function deleteSubscription(
         SELECT $3, 'Delete'::action_type, id, 'subscription', $4
         FROM deleted_sub
       )
-      SELECT 1
+      SELECT id FROM deleted_sub
     `,
       [subscriptionId, targetMemberId, session.member.id, deleteDescription]
     )
 
-    if (deleteQuery.rowCount === 0) {
+    if (deleteQuery.rows.length === 0) {
       await client.query('ROLLBACK')
       return {
         success: false,

@@ -98,7 +98,8 @@ export function DataTableDateRangeFilter<TData, TValue>({
         <Button
           variant={'outline'}
           size={'sm'}
-          className={'h-9 justify-start text-left font-normal border-dashed'}>
+          className={'h-9 justify-start text-left font-normal border-dashed'}
+          suppressHydrationWarning>
           <CalendarIcon />
           {date?.from ? (
             date.to ? (

@@ -7,7 +7,7 @@ import { DataTable } from '@/features/plans/components/data-table'
 import { PlanDeleteDialog } from '@/features/plans/dialogs/plan-delete'
 import { PlanDetailsDialog } from '@/features/plans/dialogs/plan-details'
 
-export function TableClient({ data }: { data: PlanDisplay[] }) {
+export function Controller({ data }: { data: PlanDisplay[] }) {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null)

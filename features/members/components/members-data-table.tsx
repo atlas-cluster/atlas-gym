@@ -4,7 +4,7 @@ import { GraduationCap, RefreshCwIcon, UserIcon, XIcon } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
 import { MemberDisplay, getMembers } from '@/features/members'
-import { columns } from '@/features/members/components/columns'
+import { memberColumns } from '@/features/members/components/member-columns'
 import {
   PlanDisplay,
   PlanDisplayMinimal,
@@ -47,7 +47,7 @@ export interface DataTableProps {
   plans: PlanDisplayMinimal[]
   onUpdateDetails: (data: MemberDisplay) => void
   onUpdatePayment: (data: MemberDisplay) => void
-  onChangePassword: (data: MemberDisplay) => void
+  onUpdatePassword: (data: MemberDisplay) => void
   onConvertToMember: (data: MemberDisplay) => void
   onConvertToTrainer: (data: MemberDisplay) => void
   onChooseSubscription: (
@@ -66,12 +66,12 @@ export interface DataTableProps {
   onDeleteMany: (members: MemberDisplay[]) => void
 }
 
-export function DataTable({
+export function MembersDataTable({
   members,
   plans,
   onUpdateDetails,
   onUpdatePayment,
-  onChangePassword,
+  onUpdatePassword,
   onConvertToMember,
   onConvertToTrainer,
   onChooseSubscription,
@@ -120,13 +120,13 @@ export function DataTable({
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: tableData,
-    columns,
+    columns: memberColumns,
 
     meta: {
       plans: availablePlans,
       onUpdateDetails,
       onUpdatePayment,
-      onChangePassword,
+      onUpdatePassword,
       onConvertToMember,
       onConvertToTrainer,
       onChooseSubscription,
@@ -305,7 +305,7 @@ export function DataTable({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={memberColumns.length}
                   className="h-24 text-center">
                   No members found.
                 </TableCell>

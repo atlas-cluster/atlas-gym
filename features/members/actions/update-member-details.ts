@@ -8,7 +8,7 @@ import { memberDetailsSchema } from '@/features/members/schemas/member-details'
 import { pool } from '@/features/shared/lib/db'
 import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
-export async function updateMember(
+export async function updateMemberDetails(
   id: string,
   data: z.infer<typeof memberDetailsSchema>,
   lastUpdatedAt: Date
@@ -44,22 +44,28 @@ export async function updateMember(
 
     const validated = memberDetailsSchema.parse(data)
 
+    const description =
+      member.id === id
+        ? 'Member details updated'
+        : `Member details for ${validated.firstname} ${validated.lastname} updated`
+
     const result = await pool.query(
       `WITH target_member AS (
         SELECT id,
                (date_trunc('milliseconds', updated_at) = $9::timestamptz) AS version_match
         FROM members WHERE id = $8
+        FOR UPDATE
       ),
       updated_member AS (
         UPDATE members
           SET firstname = $1, lastname = $2, middlename = $3, email = $4, phone = $5, address = $6, birthdate = $7, updated_at = NOW()
           WHERE id = $8
             AND (SELECT version_match FROM target_member) = true
-          RETURNING id, firstname, lastname
+          RETURNING id
       ),
       log_member AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $10, 'Update'::action_type, id, 'member', 'Member updated: ' || firstname || ' ' || lastname
+        SELECT $10, 'Update'::action_type, id, 'member', $11
         FROM updated_member
       )
       SELECT
@@ -77,6 +83,7 @@ export async function updateMember(
         id,
         lastUpdatedAt,
         member.id,
+        description,
       ]
     )
 

@@ -59,6 +59,7 @@ export async function revertCancellation(
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
+      FOR UPDATE OF s
     `,
       [subscriptionId, memberId, lastUpdatedAt]
     )
@@ -162,6 +163,7 @@ export async function revertCancellation(
       `
       SELECT id FROM subscriptions
       WHERE member_id = $1 AND end_date IS NULL AND id <> $2
+      FOR UPDATE
     `,
       [memberId, subscriptionId]
     )
@@ -196,12 +198,12 @@ export async function revertCancellation(
         SELECT $3, 'Update'::action_type, id, 'subscription', $4
         FROM updated_sub
       )
-      SELECT 1
+      SELECT id FROM updated_sub
     `,
       [subscriptionId, memberId, session.member.id, revertDescription]
     )
 
-    if (updateQuery.rowCount === 0) {
+    if (updateQuery.rows.length === 0) {
       await client.query('ROLLBACK')
       return {
         success: false,

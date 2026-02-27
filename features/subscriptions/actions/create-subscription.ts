@@ -4,7 +4,10 @@ import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
-import { PG_EXCLUSION_VIOLATION } from '@/features/shared/lib/postgres-errors'
+import {
+  PG_EXCLUSION_VIOLATION,
+  PG_FOREIGN_KEY_VIOLATION,
+} from '@/features/shared/lib/postgres-errors'
 
 export async function createSubscription(
   planId: string,
@@ -20,7 +23,6 @@ export async function createSubscription(
     | 'CANCELLED_PENDING'
     | 'UNKNOWN'
 }> {
-  const client = await pool.connect()
   try {
     const session = await getSession()
     if (!session || !session.member) {
@@ -45,20 +47,98 @@ export async function createSubscription(
       memberId = session.member.id
     }
 
-    await client.query('BEGIN')
+    const isSelf = memberId === session.member.id
 
-    // Check if plan exists
-    const planQuery = await client.query(
+    const result = await pool.query(
       `
-      SELECT id, name, min_duration_months
-      FROM plans 
-      WHERE id = $1
-    `,
-      [planId]
+      WITH locked_plan AS (
+        SELECT id, name
+        FROM plans
+        WHERE id = $1
+        FOR UPDATE
+      ),
+      member_info AS (
+        SELECT id, firstname, lastname
+        FROM members
+        WHERE id = $2
+      ),
+      active_sub AS (
+        SELECT id
+        FROM subscriptions
+        WHERE member_id = $2 AND end_date IS NULL
+        FOR UPDATE
+      ),
+      future_sub AS (
+        SELECT id
+        FROM subscriptions
+        WHERE member_id = $2 AND start_date > CURRENT_DATE
+        FOR UPDATE
+      ),
+      cancelled_sub AS (
+        SELECT s.end_date
+        FROM subscriptions s
+        WHERE s.member_id = $2
+          AND s.end_date IS NOT NULL
+          AND s.end_date >= CURRENT_DATE
+        ORDER BY s.end_date DESC
+        LIMIT 1
+        FOR UPDATE
+      ),
+      computed_start AS (
+        SELECT CASE
+          WHEN (SELECT end_date FROM cancelled_sub) IS NOT NULL
+            THEN (SELECT end_date + 1 FROM cancelled_sub)
+          ELSE CURRENT_DATE
+        END AS start_date
+      ),
+      pre_checks AS (
+        SELECT
+          (SELECT COUNT(*) FROM locked_plan) AS plan_exists,
+          (SELECT COUNT(*) FROM member_info) AS member_exists,
+          (SELECT COUNT(*) FROM active_sub) AS has_active,
+          (SELECT COUNT(*) FROM future_sub) AS has_future,
+          (SELECT start_date FROM computed_start) AS start_date,
+          (SELECT name FROM locked_plan) AS plan_name,
+          (SELECT firstname FROM member_info) AS firstname,
+          (SELECT lastname FROM member_info) AS lastname
+      ),
+      new_sub AS (
+        INSERT INTO subscriptions (member_id, plan_id, start_date)
+        SELECT $2, $1, pc.start_date
+        FROM pre_checks pc
+        WHERE pc.plan_exists > 0
+          AND pc.member_exists > 0
+          AND pc.has_active = 0
+          AND pc.has_future = 0
+        RETURNING id
+      ),
+      log_sub AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT
+          $3,
+          'Create'::action_type,
+          ns.id,
+          'subscription',
+          CASE
+            WHEN $4::boolean THEN 'Subscription to ' || pc.plan_name || ' created'
+            ELSE 'Subscription to ' || pc.plan_name || ' created for ' || pc.firstname || ' ' || pc.lastname
+          END
+        FROM new_sub ns, pre_checks pc
+      )
+      SELECT
+        pc.plan_exists,
+        pc.member_exists,
+        pc.has_active,
+        pc.has_future,
+        (SELECT COUNT(*) FROM new_sub) AS inserted
+      FROM pre_checks pc
+      `,
+      [planId, memberId, session.member.id, isSelf]
     )
 
-    if (planQuery.rows.length === 0) {
-      await client.query('ROLLBACK')
+    const row = result.rows[0]
+
+    if (Number(row.plan_exists) === 0) {
       return {
         success: false,
         errorType: 'NOT_FOUND',
@@ -66,20 +146,15 @@ export async function createSubscription(
       }
     }
 
-    const planName = planQuery.rows[0].name
+    if (Number(row.member_exists) === 0) {
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Member not found.',
+      }
+    }
 
-    // Check for active subscription
-    const activeSubQuery = await client.query(
-      `
-      SELECT id 
-      FROM subscriptions
-      WHERE member_id = $1 AND end_date IS NULL
-    `,
-      [memberId]
-    )
-
-    if (activeSubQuery.rows.length > 0) {
-      await client.query('ROLLBACK')
+    if (Number(row.has_active) > 0) {
       return {
         success: false,
         errorType: 'ALREADY_ACTIVE',
@@ -87,18 +162,7 @@ export async function createSubscription(
       }
     }
 
-    // Check for future subscription
-    const futureSubQuery = await client.query(
-      `
-      SELECT id 
-      FROM subscriptions
-      WHERE member_id = $1 AND start_date > CURRENT_DATE
-    `,
-      [memberId]
-    )
-
-    if (futureSubQuery.rows.length > 0) {
-      await client.query('ROLLBACK')
+    if (Number(row.has_future) > 0) {
       return {
         success: false,
         errorType: 'FUTURE_EXISTS',
@@ -106,86 +170,13 @@ export async function createSubscription(
       }
     }
 
-    // Check for cancelled subscription that hasn't ended yet
-    const cancelledSubQuery = await client.query(
-      `
-      SELECT s.id, s.end_date, m.firstname, m.lastname
-      FROM subscriptions s
-      JOIN members m ON s.member_id = m.id
-      WHERE s.member_id = $1 
-        AND end_date IS NOT NULL 
-        AND end_date >= CURRENT_DATE
-      ORDER BY end_date DESC
-      LIMIT 1
-    `,
-      [memberId]
-    )
-
-    let startDate: Date
-    let memberName: string
-
-    if (cancelledSubQuery.rows.length > 0) {
-      // Start the day after the cancelled subscription ends
-      const cancelledEndDate = new Date(cancelledSubQuery.rows[0].end_date)
-      startDate = new Date(cancelledEndDate)
-      startDate.setDate(startDate.getDate() + 1)
-      memberName = `${cancelledSubQuery.rows[0].firstname} ${cancelledSubQuery.rows[0].lastname}`
-    } else {
-      // Start immediately
-      startDate = new Date()
-      startDate.setHours(0, 0, 0, 0)
-
-      // Get member name
-      const memberQuery = await client.query(
-        `
-        SELECT firstname, lastname 
-        FROM members 
-        WHERE id = $1
-      `,
-        [memberId]
-      )
-
-      memberName =
-        memberQuery.rows.length > 0
-          ? `${memberQuery.rows[0].firstname} ${memberQuery.rows[0].lastname}`
-          : 'Unknown'
-    }
-
-    // Create new subscription
-    let createDescription: string
-    if (memberId === session.member.id) {
-      createDescription = `Subscription to ${planName} created`
-    } else {
-      createDescription = `Subscription to ${planName} created for ${memberName}`
-    }
-
-    const insertQuery = await client.query(
-      `
-      WITH new_sub AS (
-        INSERT INTO subscriptions (member_id, plan_id, start_date)
-        VALUES ($1, $2, $3)
-        RETURNING id
-      ),
-      log_sub AS (
-        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $4, 'Create'::action_type, id, 'subscription', $5
-        FROM new_sub
-      )
-      SELECT id FROM new_sub
-    `,
-      [memberId, planId, startDate, session.member.id, createDescription]
-    )
-
-    if (insertQuery.rowCount === 0) {
-      await client.query('ROLLBACK')
+    if (Number(row.inserted) === 0) {
       return {
         success: false,
         errorType: 'UNKNOWN',
         message: 'Failed to create subscription.',
       }
     }
-
-    await client.query('COMMIT')
 
     updateTag('subscriptions')
 
@@ -194,27 +185,28 @@ export async function createSubscription(
       message: 'Subscription created successfully.',
     }
   } catch (error: unknown) {
-    if (
-      error !== null &&
-      typeof error === 'object' &&
-      'code' in error &&
-      error.code === PG_EXCLUSION_VIOLATION
-    ) {
-      await client.query('ROLLBACK').catch(() => {})
-      return {
-        success: false,
-        errorType: 'ALREADY_ACTIVE',
-        message: 'You already have an active subscription during this period.',
+    if (error !== null && typeof error === 'object' && 'code' in error) {
+      if (error.code === PG_EXCLUSION_VIOLATION) {
+        return {
+          success: false,
+          errorType: 'ALREADY_ACTIVE',
+          message:
+            'You already have an active subscription during this period.',
+        }
+      }
+      if (error.code === PG_FOREIGN_KEY_VIOLATION) {
+        return {
+          success: false,
+          errorType: 'NOT_FOUND',
+          message: 'Plan or member no longer exists.',
+        }
       }
     }
-    await client.query('ROLLBACK').catch(() => {})
     console.error('[CREATE_SUBSCRIPTION_ERROR]:', error)
     return {
       success: false,
       errorType: 'UNKNOWN',
       message: 'An error occurred while creating the subscription.',
     }
-  } finally {
-    client.release()
   }
 }

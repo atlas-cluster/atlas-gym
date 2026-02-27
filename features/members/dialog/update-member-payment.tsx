@@ -1,19 +1,16 @@
 'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { useHookFormMask } from 'use-mask-input'
 import { z } from 'zod'
 
 import { MemberDisplay, memberPaymentSchema } from '@/features/members'
+import { updateMemberPayment } from '@/features/members/actions/update-member-payment'
 import { Button } from '@/features/shared/components/ui/button'
 import { CreditCardInput } from '@/features/shared/components/ui/credit-card-input'
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-  DialogTrigger,
-} from '@/features/shared/components/ui/dialog'
+import { Dialog, DialogHeader } from '@/features/shared/components/ui/dialog'
 import {
   DialogContent,
   DialogDescription,
@@ -34,29 +31,17 @@ import {
 } from '@/features/shared/components/ui/tabs'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-interface MemberPaymentDialogProps {
-  member?: MemberDisplay
-  trigger?: ReactNode
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSubmit?: (
-    data: z.infer<typeof memberPaymentSchema>
-  ) => Promise<unknown> | unknown
+interface UpdateMemberPaymentDialogProps {
+  member: MemberDisplay | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function MemberPaymentDialog({
+export function UpdateMemberPaymentDialog({
   member,
-  trigger,
-  open: controlledOpen,
-  onOpenChange: setControlledOpen,
-  onSubmit,
-}: MemberPaymentDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
-
-  const open = controlledOpen ?? internalOpen
-  const setOpen = setControlledOpen ?? setInternalOpen
-  const isEditing = !!member
-
+  open,
+  onOpenChange: setOpen,
+}: UpdateMemberPaymentDialogProps) {
   const form = useForm<z.infer<typeof memberPaymentSchema>>({
     resolver: zodResolver(memberPaymentSchema),
     defaultValues: {
@@ -76,7 +61,7 @@ export function MemberPaymentDialog({
   const registerWithMask = useHookFormMask(form.register)
 
   useEffect(() => {
-    if (open) {
+    if (open && member) {
       form.reset({
         paymentType: member?.paymentType ?? 'credit_card',
         cardNumber: '',
@@ -86,21 +71,38 @@ export function MemberPaymentDialog({
         iban: '',
       })
     }
-  }, [member, form, open])
+  }, [form, member, open])
 
-  async function handleSubmit(data: z.infer<typeof memberPaymentSchema>) {
-    setOpen(false)
-    await onSubmit?.(data)
+  function onUpdate(data: z.infer<typeof memberPaymentSchema>) {
+    if (!member) {
+      toast.error('No member selected for payment update')
+      return
+    }
+
+    const promise = updateMemberPayment(member.id, data).then((result) => {
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update payment')
+      }
+      setOpen(false)
+      return result
+    })
+
+    toast.promise(promise, {
+      loading: 'Updating payment...',
+      success: (result) => result.message,
+      error: (err) => err?.message || 'Failed to update payment',
+    })
+  }
+
+  const handleSubmit = (data: z.infer<typeof memberPaymentSchema>) => {
+    onUpdate(data)
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className={'max-h-[90vh] overflow-y-auto'}>
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Payment' : 'Add Payment'}
-          </DialogTitle>
+          <DialogTitle>Edit Payment Details</DialogTitle>
           <DialogDescription>
             Payment details are not prefilled for security reasons.
           </DialogDescription>
@@ -218,11 +220,16 @@ export function MemberPaymentDialog({
                 </Field>
               </TabsContent>
             </Tabs>
-
-            <DialogFooter>
-              <Button type="submit">Save Payment</Button>
-            </DialogFooter>
           </FieldGroup>
+          <div className="mt-4 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              type={'button'}
+              onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Update payment</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

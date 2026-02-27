@@ -6,10 +6,10 @@ import { z } from 'zod'
 
 import { useAuth } from '@/features/auth/components/auth-provider'
 import {
-  changePasswordSchema,
   memberDetailsSchema,
   memberPaymentSchema,
-  updateMember,
+  updateMemberDetails,
+  updateMemberPayment,
 } from '@/features/members'
 import { Avatar, AvatarFallback } from '@/features/shared/components/ui/avatar'
 import {
@@ -88,11 +88,13 @@ export function SidebarMemberDetails() {
     data: z.infer<typeof memberDetailsSchema>
   ) => {
     if (!member?.id) return
-    const promise = updateMember(member.id, data).then(() => {
-      setDetailsDialogOpen(false)
-      // Reload to refresh session data
-      window.location.reload()
-    })
+    const promise = updateMemberDetails(member.id, data, member.updatedAt).then(
+      () => {
+        setDetailsDialogOpen(false)
+        // Reload to refresh session data
+        window.location.reload()
+      }
+    )
 
     toast.promise(promise, {
       loading: 'Updating details...',
@@ -105,9 +107,11 @@ export function SidebarMemberDetails() {
     data: z.infer<typeof memberPaymentSchema>
   ) => {
     if (!member?.id) return
-    const promise = updateMemberPayment(member.id, data).then(() => {
-      setPaymentDialogOpen(false)
-    })
+    const promise = updateMemberPayment(member.id, data, member.updatedAt).then(
+      () => {
+        setPaymentDialogOpen(false)
+      }
+    )
 
     toast.promise(promise, {
       loading: 'Updating payment...',

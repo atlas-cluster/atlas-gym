@@ -96,12 +96,13 @@ export async function register(data: z.infer<typeof registerSchema>) {
         [memberId, cardNumber, cleanExpiry, cardCvc, cardHolder]
       )
     } else if (paymentType === 'iban') {
+      const cleanIban = (iban || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
       await client.query(
         `INSERT INTO bank_accounts (
              member_id,
              iban
            ) VALUES ($1, $2)`,
-        [memberId, iban]
+        [memberId, cleanIban]
       )
     }
 

@@ -27,7 +27,7 @@ export interface MembersTableMeta {
   plans: PlanDisplayMinimal[]
   onUpdateDetails: (data: MemberDisplay) => void
   onUpdatePayment: (data: MemberDisplay) => void
-  onChangePassword: (data: MemberDisplay) => void
+  onUpdatePassword: (data: MemberDisplay) => void
   onConvertToMember: (data: MemberDisplay) => void
   onConvertToTrainer: (data: MemberDisplay) => void
   onChooseSubscription: (

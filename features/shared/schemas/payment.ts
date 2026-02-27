@@ -63,14 +63,8 @@ export const ibanSchema = z.object({
   type: z.literal('iban'),
   iban: z
     .string()
-    .refine(
-      (val) => val.replace(/[^a-zA-Z0-9]/g, '').length >= 15,
-      'IBAN is too short'
-    )
-    .refine(
-      (val) => val.replace(/[^a-zA-Z0-9]/g, '').length <= 34,
-      'IBAN is too long'
-    ),
+    .transform((val) => val.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())
+    .pipe(z.string().min(15, 'IBAN is too short').max(34, 'IBAN is too long')),
 })
 
 export const paymentMethodSchema = z.discriminatedUnion('type', [

@@ -37,6 +37,7 @@ export async function deletePlan(
          SELECT id, name,
                 (date_trunc('milliseconds', updated_at) = $3::timestamptz) AS version_match
          FROM plans WHERE id = $1
+         FOR UPDATE
       ),
       target_subscriptions AS (
          SELECT s.id, s.start_date, s.end_date, m.firstname, m.lastname

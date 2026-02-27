@@ -40,7 +40,7 @@ export function DataTablePagination<TData>({
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(v) => table.setPageSize(Number(v))}>
-            <SelectTrigger>
+            <SelectTrigger suppressHydrationWarning>
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">

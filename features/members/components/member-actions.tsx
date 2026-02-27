@@ -43,7 +43,7 @@ import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
 import { Table } from '@tanstack/react-table'
 import { Row } from '@tanstack/table-core'
 
-export function Actions({
+export function MemberActions({
   row,
   table,
 }: {
@@ -82,7 +82,7 @@ export function Actions({
                   Edit Payment
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => meta?.onChangePassword(member)}>
+                  onSelect={() => meta?.onUpdatePassword(member)}>
                   <KeyRound />
                   Change Password
                 </DropdownMenuItem>

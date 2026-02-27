@@ -9,15 +9,11 @@ import { z } from 'zod'
 import {
   MemberDisplay,
   memberDetailsSchema,
-  updateMember,
+  updateMemberDetails,
 } from '@/features/members'
 import { Button } from '@/features/shared/components/ui/button'
 import { Calendar } from '@/features/shared/components/ui/calendar'
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-} from '@/features/shared/components/ui/dialog'
+import { Dialog, DialogHeader } from '@/features/shared/components/ui/dialog'
 import {
   DialogContent,
   DialogDescription,
@@ -39,17 +35,17 @@ import {
 import { cn } from '@/features/shared/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-interface MemberDetailsDialogProps {
+interface UpdateMemberDetailsDialogProps {
   member: MemberDisplay | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function MemberDetailsDialog({
+export function UpdateMemberDetailsDialog({
   member,
   open,
   onOpenChange: setOpen,
-}: MemberDetailsDialogProps) {
+}: UpdateMemberDetailsDialogProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
 
   const form = useForm<z.infer<typeof memberDetailsSchema>>({
@@ -79,12 +75,15 @@ export function MemberDetailsDialog({
           : '',
       })
     }
-  }, [member, form, open])
+  }, [form, member, open])
 
   function onUpdate(data: z.infer<typeof memberDetailsSchema>) {
-    if (!member) return
+    if (!member) {
+      toast.error('No member selected for update')
+      return
+    }
 
-    const promise = updateMember(member.id, data, member.updatedAt).then(
+    const promise = updateMemberDetails(member.id, data, member.updatedAt).then(
       (result) => {
         if (!result.success) {
           throw new Error(result.message || 'Failed to update member')

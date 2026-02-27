@@ -55,6 +55,7 @@ export async function cancelSubscription(
       JOIN plans p ON s.plan_id = p.id
       JOIN members m ON s.member_id = m.id
       WHERE s.id = $1 AND s.member_id = $2
+      FOR UPDATE
     `,
       [subscriptionId, memberId, lastUpdatedAt]
     )

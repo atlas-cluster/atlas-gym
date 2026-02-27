@@ -68,7 +68,7 @@ const getSubscriptionsCached = unstable_cache(
       isFuture: row.isFuture || undefined,
     }))
   },
-  ['get-subscriptions'],
+  ['get-subscriptions', 'memberId'],
   { revalidate: 3600, tags: ['subscriptions', 'plans'] }
 )
 

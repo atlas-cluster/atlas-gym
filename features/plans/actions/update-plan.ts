@@ -49,6 +49,7 @@ export async function updatePlan(
         SELECT id,
                (date_trunc('milliseconds', updated_at) = $6::timestamptz) AS version_match
         FROM plans WHERE id = $5
+        FOR UPDATE
       ),
       updated_plan AS (
         UPDATE plans
