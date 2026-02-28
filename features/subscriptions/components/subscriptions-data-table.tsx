@@ -100,7 +100,7 @@ export function SubscriptionsDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex: false,
+    autoResetPageIndex: true,
 
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),

@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 import { checkEmail } from '@/features/auth/actions/check-email'
 import { register } from '@/features/auth/actions/register'
+import { useAuth } from '@/features/auth/components/auth-provider'
 import { registerSchema } from '@/features/auth/schemas/register'
 import { Button } from '@/features/shared/components/ui/button'
 import { Calendar } from '@/features/shared/components/ui/calendar'
@@ -70,6 +71,7 @@ const { useStepper, steps, utils } = defineStepper(
 export function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { refreshMember } = useAuth()
   const stepper = useStepper()
   const currentIndex = utils.getIndex(stepper.current.id)
   const [loading, setLoading] = useState(false)
@@ -140,15 +142,15 @@ export function RegisterForm() {
       const email = form.getValues('email')
       try {
         const response = await checkEmail(email)
-        if (response?.error) {
-          switch (response.error) {
+        if (!response.success) {
+          switch (response.errorType) {
             case 'EMAIL_ALREADY_EXISTS':
               setError('email', {
                 type: 'server',
                 message: 'Email already exists',
               })
               return false
-            case 'INVALID_EMAIL':
+            case 'VALIDATION':
               setError('email', {
                 type: 'server',
                 message: 'Invalid email address',
@@ -190,18 +192,19 @@ export function RegisterForm() {
 
     const result = await register(data)
 
-    if (result?.error) {
-      switch (result.error) {
+    if (!result.success) {
+      switch (result.errorType) {
         case 'EMAIL_ALREADY_EXISTS':
           setError('email', { type: 'server', message: 'Email already exists' })
           break
-        case 'INVALID_INPUT':
+        case 'VALIDATION':
           toast.error('Invalid input. Please check your data and try again.')
           break
         default:
           toast.error('Something went wrong. Please try again.')
       }
     } else {
+      await refreshMember()
       toast.success('Account created successfully!')
       const redirect = searchParams.get('redirect')
       router.push(redirect || '/dashboard')

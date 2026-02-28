@@ -1,75 +1,100 @@
 'use server'
 
-import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
-import { createAuditLog } from '@/features/audit-logs'
 import { loginSchema } from '@/features/auth/schemas/login'
-import { LoginError } from '@/features/auth/types'
 import { pool } from '@/features/shared/lib/db'
 
-export async function login(
-  data: z.infer<typeof loginSchema>
-): Promise<{ error: LoginError } | void> {
-  const validation = loginSchema.safeParse(data)
-
-  if (!validation.success) {
-    return { error: 'INVALID_INPUT' }
-  }
-
-  const { email, password } = validation.data
-
+export async function login(data: z.infer<typeof loginSchema>): Promise<{
+  success: boolean
+  message: string
+  errorType?:
+    | 'INVALID_CREDENTIALS'
+    | 'MEMBER_NOT_FOUND'
+    | 'VALIDATION'
+    | 'UNKNOWN'
+}> {
   try {
-    // 1. Find member
-    const result = await pool.query(
-      `SELECT id, password_hash, firstname, lastname FROM members WHERE email = $1`,
-      [email]
-    )
+    const validated = loginSchema.parse(data)
 
-    if (result.rows.length === 0) {
-      return { error: 'MEMBER_NOT_FOUND' }
-    }
-
-    const member = result.rows[0]
-    const memberName = `${member.firstname} ${member.lastname}`
-
-    // 2. Verify password
-    const validPassword = await bcrypt.compare(password, member.password_hash)
-    if (!validPassword) {
-      return { error: 'INVALID_CREDENTIALS' }
-    }
-
-    // 3. Create session (valid for 7 days)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    const sessionResult = await pool.query<{ id: string }>(
-      `INSERT INTO sessions (member_id, expires_at) 
-       VALUES ($1, $2) 
-       RETURNING id`,
-      [member.id, expiresAt]
+
+    const result = await pool.query<{
+      found: string
+      password_valid: boolean | null
+      session_id: string | null
+    }>(
+      `WITH target_member AS (
+        SELECT id, password_hash, firstname, lastname,
+               (crypt($2, password_hash) = password_hash) AS password_valid
+        FROM members WHERE email = $1
+      ),
+      new_session AS (
+        INSERT INTO sessions (member_id, expires_at)
+        SELECT tm.id, $3
+        FROM target_member tm
+        WHERE tm.password_valid = true
+        RETURNING id, member_id
+      ),
+      log_login AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT ns.member_id, 'Create'::action_type, ns.id, 'session',
+          'Member logged in: ' || tm.firstname || ' ' || tm.lastname
+        FROM new_session ns
+        JOIN target_member tm ON ns.member_id = tm.id
+      )
+      SELECT
+        (SELECT COUNT(*) FROM target_member) AS found,
+        (SELECT password_valid FROM target_member) AS password_valid,
+        (SELECT id FROM new_session) AS session_id`,
+      [validated.email, validated.password, expiresAt]
     )
 
-    const sessionId = sessionResult.rows[0].id
+    const row = result.rows[0]
 
-    await createAuditLog({
-      memberId: member.id,
-      action: 'Create',
-      entityId: sessionId,
-      entityType: 'session',
-      description: `Member logged in: ${memberName}`,
-    })
+    if (parseInt(row.found) === 0) {
+      return {
+        success: false,
+        errorType: 'MEMBER_NOT_FOUND',
+        message: 'No account found with this email address.',
+      }
+    }
 
-    // 4. Set cookie
+    if (!row.password_valid) {
+      return {
+        success: false,
+        errorType: 'INVALID_CREDENTIALS',
+        message: 'Invalid password.',
+      }
+    }
+
     const cookieStore = await cookies()
-    cookieStore.set('session', sessionId, {
+    cookieStore.set('session', row.session_id!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       expires: expiresAt,
       sameSite: 'lax',
       path: '/',
     })
-  } catch (error) {
-    console.error('Login error:', error)
-    return { error: 'UNKNOWN_ERROR' }
+
+    return {
+      success: true,
+      message: 'Logged in successfully.',
+    }
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        errorType: 'VALIDATION',
+        message: 'Invalid input. Please check your data and try again.',
+      }
+    }
+    console.error('[LOGIN_ERROR]:', error)
+    return {
+      success: false,
+      errorType: 'UNKNOWN',
+      message: 'An unexpected error occurred. Please try again later.',
+    }
   }
 }

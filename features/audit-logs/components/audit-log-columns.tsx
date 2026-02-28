@@ -8,7 +8,7 @@ import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
 import { ColumnDef } from '@tanstack/react-table'
 
-export const columns: ColumnDef<AuditLog>[] = [
+export const auditLogColumns: ColumnDef<AuditLog>[] = [
   {
     id: 'timestamp',
     accessorKey: 'timestamp',

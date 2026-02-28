@@ -4,7 +4,7 @@ import { Database, RefreshCwIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
 import { entityIcons, getAuditLogs } from '@/features/audit-logs'
-import { columns } from '@/features/audit-logs/components/columns'
+import { auditLogColumns } from '@/features/audit-logs/components/audit-log-columns'
 import { AuditLog, GetAuditLogsResponse } from '@/features/audit-logs/types'
 import { DataTableDateRangeFilter } from '@/features/shared/components/data-table-date-range-filter'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
@@ -32,7 +32,7 @@ import {
   getCoreRowModel,
 } from '@tanstack/table-core'
 
-export function DataTable({
+export function AuditLogsDataTable({
   initialData,
 }: {
   initialData: GetAuditLogsResponse
@@ -135,7 +135,7 @@ export function DataTable({
 
   const table = useReactTable({
     data,
-    columns,
+    columns: auditLogColumns,
     pageCount,
     rowCount,
     manualPagination: true,
@@ -291,7 +291,7 @@ export function DataTable({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={auditLogColumns.length}
                   className="h-24 text-center">
                   Keine Dozenten gefunden.
                 </TableCell>

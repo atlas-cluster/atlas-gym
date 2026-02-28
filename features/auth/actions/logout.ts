@@ -2,33 +2,55 @@
 
 import { cookies } from 'next/headers'
 
-import { createAuditLog } from '@/features/audit-logs'
 import { pool } from '@/features/shared/lib/db'
 
-export async function logout() {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get('session')?.value
+export async function logout(): Promise<{
+  success: boolean
+  message: string
+  errorType?: 'AUTH' | 'UNKNOWN'
+}> {
+  try {
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get('session')?.value
 
-  if (sessionId) {
-    try {
-      const result = await pool.query<{ member_id: string }>(
-        'DELETE FROM sessions WHERE id = $1 RETURNING member_id',
-        [sessionId]
-      )
-
-      if (result.rows.length > 0) {
-        await createAuditLog({
-          memberId: result.rows[0].member_id,
-          action: 'Delete',
-          entityId: sessionId,
-          entityType: 'session',
-          description: 'Member logged out',
-        })
+    if (!sessionId) {
+      return {
+        success: false,
+        errorType: 'AUTH',
+        message: 'No active session found.',
       }
-    } catch (error) {
-      console.error('Error removing session:', error)
+    }
+
+    await pool.query(
+      `WITH deleted_session AS (
+        DELETE FROM sessions WHERE id = $1
+        RETURNING member_id
+      ),
+      log_logout AS (
+        INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+        SELECT ds.member_id, 'Delete'::action_type, $1, 'session', 'Member logged out'
+        FROM deleted_session ds
+      )
+      SELECT member_id FROM deleted_session`,
+      [sessionId]
+    )
+
+    cookieStore.delete('session')
+
+    return {
+      success: true,
+      message: 'Logged out successfully.',
+    }
+  } catch (error: unknown) {
+    console.error('[LOGOUT_ERROR]:', error)
+
+    const cookieStore = await cookies()
+    cookieStore.delete('session')
+
+    return {
+      success: false,
+      errorType: 'UNKNOWN',
+      message: 'An error occurred during logout.',
     }
   }
-
-  cookieStore.delete('session')
 }

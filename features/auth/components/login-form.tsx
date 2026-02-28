@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { login } from '@/features/auth/actions/login'
+import { useAuth } from '@/features/auth/components/auth-provider'
 import { loginSchema } from '@/features/auth/schemas/login'
 import { Button } from '@/features/shared/components/ui/button'
 import {
@@ -26,6 +27,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { refreshMember } = useAuth()
   const [loading, setLoading] = useState(false)
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -41,8 +43,8 @@ export function LoginForm() {
 
     const result = await login(data)
 
-    if (result?.error) {
-      switch (result.error) {
+    if (!result.success) {
+      switch (result.errorType) {
         case 'MEMBER_NOT_FOUND':
           form.setError('email', { message: 'Member not found' })
           form.setFocus('email')
@@ -51,13 +53,14 @@ export function LoginForm() {
           form.setError('password', { message: 'Invalid password' })
           form.setFocus('password')
           break
-        case 'INVALID_INPUT':
+        case 'VALIDATION':
           toast.error('Invalid input. Please check your data and try again.')
           break
         default:
           toast.error('Something went wrong. Please try again.')
       }
     } else {
+      await refreshMember()
       toast.success('Logged in successfully!')
       const redirect = searchParams.get('redirect')
       router.push(redirect || '/dashboard')
