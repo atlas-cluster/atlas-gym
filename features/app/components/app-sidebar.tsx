@@ -1,12 +1,12 @@
 'use client'
 import {
-  BookCheckIcon,
+  BookmarkIcon,
   CalendarIcon,
-  DumbbellIcon,
   History,
   HomeIcon,
   Layers,
   MapPinIcon,
+  PersonStandingIcon,
   Repeat,
   UsersIcon,
 } from 'lucide-react'
@@ -30,17 +30,17 @@ import {
 
 const mainNavItems = [
   { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },
-  { title: 'Courses', url: '/courses', icon: CalendarIcon },
-  { title: 'Reservations', url: '/reservations', icon: BookCheckIcon },
-  { title: 'Equipment', url: '/equipment', icon: DumbbellIcon },
+  { title: 'Courses', url: '/courses', icon: PersonStandingIcon },
+  { title: 'Reservations', url: '/reservations', icon: BookmarkIcon },
   { title: 'Rooms', url: '/rooms', icon: MapPinIcon },
   { title: 'Subscription', url: '/subscription', icon: Repeat },
 ]
 
 const trainerNavItems = [
-  { title: 'Members', url: '/members', icon: UsersIcon },
-  { title: 'Plans', url: '/plans', icon: Layers },
-  { title: 'Audit Logs', url: '/audit-logs', icon: History },
+  { title: 'Members', url: '/trainers/members', icon: UsersIcon },
+  { title: 'Courses', url: '/trainers/courses', icon: CalendarIcon },
+  { title: 'Plans', url: '/trainers/plans', icon: Layers },
+  { title: 'Audit Logs', url: '/trainers/audit-logs', icon: History },
 ]
 
 export function AppSidebar() {

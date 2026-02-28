@@ -11,6 +11,16 @@ CREATE TYPE payment_type AS ENUM('credit_card', 'iban');
 
 CREATE TYPE action_type AS ENUM('Create', 'Update', 'Delete');
 
+CREATE TYPE weekday AS ENUM(
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday'
+);
+
 CREATE TABLE members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email CITEXT NOT NULL UNIQUE,
@@ -104,7 +114,7 @@ CREATE TABLE course_templates (
   room_id UUID NOT NULL REFERENCES rooms (id) ON DELETE RESTRICT,
   name VARCHAR(100) NOT NULL,
   description TEXT,
-  weekday INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  weekdays weekday[] NOT NULL CHECK (array_length(weekdays, 1) > 0),
   start_time TIME NOT NULL,
   end_time TIME NOT NULL CHECK (end_time > start_time),
   start_date DATE NOT NULL,
