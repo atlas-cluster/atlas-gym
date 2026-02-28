@@ -1,26 +1,9 @@
-import { CircleAlertIcon } from 'lucide-react'
+import { getRoomsWithSchedule } from '@/features/rooms'
+import { RoomsView } from '@/features/rooms/components/rooms-view'
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/features/shared/components/ui/empty'
+export const dynamic = 'force-dynamic'
 
-export default function RoomsPage() {
-  return (
-    <Empty className={'h-full'}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <CircleAlertIcon />
-        </EmptyMedia>
-        <EmptyTitle>No Content Available</EmptyTitle>
-        <EmptyDescription>
-          There is currently no content to display here. Please check back later
-          or add new content to get started.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  )
+export default async function RoomsPage() {
+  const rooms = await getRoomsWithSchedule()
+  return <RoomsView initialData={rooms} />
 }
