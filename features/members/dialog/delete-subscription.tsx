@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import { deleteSubscription } from '@/features/subscriptions'
 
 interface DeleteSubscriptionDialogProps {
@@ -25,10 +25,10 @@ export function DeleteSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: DeleteSubscriptionDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onDelete(subscriptionId: string, memberId: string, updatedAt: Date) {
-    setIsPending(true)
+    if (!start()) return
     const promise = deleteSubscription(subscriptionId, memberId, updatedAt)
       .then((result) => {
         if (!result.success) {
@@ -37,7 +37,7 @@ export function DeleteSubscriptionDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Deleting subscription...',

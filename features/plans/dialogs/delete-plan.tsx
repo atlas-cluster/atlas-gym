@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { PlanDisplay, deletePlan } from '@/features/plans'
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 
 interface DeletePlanDialogProps {
   plan: PlanDisplay | null
@@ -24,10 +24,10 @@ export function DeletePlanDialog({
   open,
   onOpenChange: setOpen,
 }: DeletePlanDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onDelete(id: string, updatedAt: Date) {
-    setIsPending(true)
+    if (!start()) return
     const promise = deletePlan(id, updatedAt)
       .then((result) => {
         if (!result.success) {
@@ -36,7 +36,7 @@ export function DeletePlanDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Deleting plan...',

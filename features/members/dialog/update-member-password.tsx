@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -23,6 +23,7 @@ import {
   FieldLabel,
 } from '@/features/shared/components/ui/field'
 import { Input } from '@/features/shared/components/ui/input'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface UpdateMemberPasswordDialogProps {
@@ -38,7 +39,7 @@ export function UpdateMemberPasswordDialog({
   onOpenChange: setOpen,
   onSuccess,
 }: UpdateMemberPasswordDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
   const form = useForm<z.infer<typeof memberPasswordSchema>>({
     resolver: zodResolver(memberPasswordSchema),
     defaultValues: {
@@ -62,7 +63,7 @@ export function UpdateMemberPasswordDialog({
       return
     }
 
-    setIsPending(true)
+    if (!start()) return
     const promise = updateMemberPassword(member.id, data)
       .then((result) => {
         if (!result.success) {
@@ -72,7 +73,7 @@ export function UpdateMemberPasswordDialog({
         onSuccess?.()
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Updating password...',

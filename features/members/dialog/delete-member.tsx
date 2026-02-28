@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 
 interface DeleteMemberDialogProps {
   member: MemberDisplay | null
@@ -25,10 +25,10 @@ export function DeleteMemberDialog({
   open,
   onOpenChange: setOpen,
 }: DeleteMemberDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onDelete(id: string, updatedAt: Date) {
-    setIsPending(true)
+    if (!start()) return
     const promise = deleteMember(id, updatedAt)
       .then((result) => {
         if (!result.success) {
@@ -37,7 +37,7 @@ export function DeleteMemberDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Deleting member...',

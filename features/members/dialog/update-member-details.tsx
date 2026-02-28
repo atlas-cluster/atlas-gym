@@ -32,6 +32,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/features/shared/components/ui/popover'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import { cn } from '@/features/shared/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -49,7 +50,7 @@ export function UpdateMemberDetailsDialog({
   onSuccess,
 }: UpdateMemberDetailsDialogProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   const form = useForm<z.infer<typeof memberDetailsSchema>>({
     resolver: zodResolver(memberDetailsSchema),
@@ -86,7 +87,7 @@ export function UpdateMemberDetailsDialog({
       return
     }
 
-    setIsPending(true)
+    if (!start()) return
     const promise = updateMemberDetails(member.id, data, member.updatedAt)
       .then((result) => {
         if (!result.success) {
@@ -96,7 +97,7 @@ export function UpdateMemberDetailsDialog({
         onSuccess?.()
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Updating member...',

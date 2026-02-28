@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/features/shared/components/ui/button'
@@ -11,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import {
   SubscriptionDisplay,
   revertCancellation,
@@ -29,10 +29,10 @@ export function SubscriptionRevertCancelDialog({
   open,
   onOpenChange: setOpen,
 }: SubscriptionRevertCancelDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onRevert(subscriptionId: string) {
-    setIsPending(true)
+    if (!start()) return
     const promise = revertCancellation(
       subscriptionId,
       subscription!.updatedAt!,
@@ -45,7 +45,7 @@ export function SubscriptionRevertCancelDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Reverting cancellation...',

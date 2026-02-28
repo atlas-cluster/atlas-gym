@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 
 interface ConvertToTrainerDialogProps {
   member: MemberDisplay | null
@@ -25,10 +25,10 @@ export function ConvertToTrainerDialog({
   open,
   onOpenChange: setOpen,
 }: ConvertToTrainerDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onConvert(id: string, updatedAt: Date) {
-    setIsPending(true)
+    if (!start()) return
     const promise = convertToTrainer(id, updatedAt)
       .then((result) => {
         if (!result.success) {
@@ -37,7 +37,7 @@ export function ConvertToTrainerDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Promoting to trainer...',

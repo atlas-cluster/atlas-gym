@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'sonner'
@@ -26,6 +26,7 @@ import {
 } from '@/features/shared/components/ui/field'
 import { Input } from '@/features/shared/components/ui/input'
 import { Textarea } from '@/features/shared/components/ui/textarea'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface UpdatePlanDetailsDialogProps {
@@ -40,7 +41,7 @@ export function UpdatePlanDetailsDialog({
   onOpenChange: setOpen,
 }: UpdatePlanDetailsDialogProps) {
   const isEditing = !!plan
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   const form = useForm({
     resolver: zodResolver(planDetailsSchema),
@@ -73,7 +74,7 @@ export function UpdatePlanDetailsDialog({
   }, [open, plan, form])
 
   function onCreate(data: z.infer<typeof planDetailsSchema>) {
-    setIsPending(true)
+    if (!start()) return
     const promise = createPlan(data)
       .then((result) => {
         if (!result.success) {
@@ -82,7 +83,7 @@ export function UpdatePlanDetailsDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Creating plan...',
@@ -96,7 +97,7 @@ export function UpdatePlanDetailsDialog({
     data: z.infer<typeof planDetailsSchema>,
     lastUpdatedAt: Date
   ) {
-    setIsPending(true)
+    if (!start()) return
     const promise = updatePlan(id, data, lastUpdatedAt)
       .then((result) => {
         if (!result.success) {
@@ -105,7 +106,7 @@ export function UpdatePlanDetailsDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Updating plan...',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useHookFormMask } from 'use-mask-input'
@@ -29,6 +29,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/features/shared/components/ui/tabs'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 interface UpdateMemberPaymentDialogProps {
@@ -44,7 +45,7 @@ export function UpdateMemberPaymentDialog({
   onOpenChange: setOpen,
   onSuccess,
 }: UpdateMemberPaymentDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
   const form = useForm<z.infer<typeof memberPaymentSchema>>({
     resolver: zodResolver(memberPaymentSchema),
     defaultValues: {
@@ -82,7 +83,7 @@ export function UpdateMemberPaymentDialog({
       return
     }
 
-    setIsPending(true)
+    if (!start()) return
     const promise = updateMemberPayment(member.id, data)
       .then((result) => {
         if (!result.success) {
@@ -92,7 +93,7 @@ export function UpdateMemberPaymentDialog({
         onSuccess?.()
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Updating payment...',

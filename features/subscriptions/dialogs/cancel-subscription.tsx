@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/features/shared/components/ui/button'
@@ -11,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/features/shared/components/ui/dialog'
+import { useAsyncAction } from '@/features/shared/hooks/use-async-action'
 import {
   SubscriptionDisplay,
   cancelSubscription,
@@ -27,10 +27,10 @@ export function CancelSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: CancelSubscriptionDialogProps) {
-  const [isPending, setIsPending] = useState(false)
+  const { isPending, start, stop } = useAsyncAction()
 
   function onCancel(subscriptionId: string) {
-    setIsPending(true)
+    if (!start()) return
     const promise = cancelSubscription(subscriptionId, subscription!.updatedAt!)
       .then((result) => {
         if (!result.success) {
@@ -39,7 +39,7 @@ export function CancelSubscriptionDialog({
         setOpen(false)
         return result
       })
-      .finally(() => setIsPending(false))
+      .finally(stop)
 
     toast.promise(promise, {
       loading: 'Cancelling subscription...',
