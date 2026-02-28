@@ -1,13 +1,15 @@
 'use client'
 
 import {
-  CalendarIcon,
   CheckCircleIcon,
-  ClockIcon,
+  PencilIcon,
+  PlusIcon,
   RefreshCwIcon,
+  TrashIcon,
   UserIcon,
   UsersIcon,
   XCircleIcon,
+  XIcon,
 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 
@@ -17,6 +19,7 @@ import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -26,9 +29,17 @@ import { Separator } from '@/features/shared/components/ui/separator'
 
 interface RoomsViewProps {
   initialData: RoomWithSchedule[]
+  onCreateRoom?: () => void
+  onEditRoom?: (room: RoomWithSchedule) => void
+  onDeleteRoom?: (room: RoomWithSchedule) => void
 }
 
-export function RoomsView({ initialData }: RoomsViewProps) {
+export function RoomsView({
+  initialData,
+  onCreateRoom,
+  onEditRoom,
+  onDeleteRoom,
+}: RoomsViewProps) {
   const [isPending, startTransition] = useTransition()
   const [rooms, setRooms] = useState<RoomWithSchedule[]>(initialData)
   const [filterDate, setFilterDate] = useState(
@@ -37,6 +48,8 @@ export function RoomsView({ initialData }: RoomsViewProps) {
   const [filterTime, setFilterTime] = useState(
     () => new Date().toTimeString().slice(0, 5)
   )
+  const defaultDate = new Date().toISOString().split('T')[0]
+  const defaultTime = new Date().toTimeString().slice(0, 5)
 
   useEffect(() => {
     setRooms(initialData)
@@ -68,52 +81,105 @@ export function RoomsView({ initialData }: RoomsViewProps) {
     })
   }
 
+  const hasFilterChanged = filterDate !== defaultDate || filterTime !== defaultTime
+
+  const clearFilters = () => {
+    setFilterDate(defaultDate)
+    setFilterTime(defaultTime)
+    startTransition(async () => {
+      const result = await getRoomsWithSchedule(defaultDate, defaultTime)
+      setRooms(result)
+    })
+  }
+
   return (
     <div className="w-full space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2">
           <Input
             type="date"
-            className="w-44"
+            className="w-full md:w-44"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
             suppressHydrationWarning
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <ClockIcon className="w-4 h-4 text-muted-foreground" />
           <Input
             type="time"
-            className="w-36"
+            className="w-full md:w-36"
             value={filterTime}
             onChange={(e) => setFilterTime(e.target.value)}
             suppressHydrationWarning
           />
+          <ButtonGroup>
+            <Button
+              variant="outline"
+              type="button"
+              suppressHydrationWarning
+              onClick={handleApplyFilter}
+              disabled={isPending}>
+              Apply
+            </Button>
+            {hasFilterChanged && (
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                suppressHydrationWarning
+                onClick={clearFilters}>
+                <XIcon />
+                <span className="sr-only">Clear filters</span>
+              </Button>
+            )}
+          </ButtonGroup>
+          {/* Mobile: refresh + create in same row */}
+          <div className="flex gap-2 md:hidden ml-auto">
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              disabled={isPending}
+              suppressHydrationWarning
+              onClick={onRefresh}>
+              <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+              <span className="sr-only">Refresh</span>
+            </Button>
+            {onCreateRoom && (
+              <Button
+                variant="default"
+                size="icon"
+                type="button"
+                suppressHydrationWarning
+                onClick={onCreateRoom}>
+                <PlusIcon />
+                <span className="sr-only">Create Room</span>
+              </Button>
+            )}
+          </div>
         </div>
-
-        <ButtonGroup>
+        {/* Right (desktop only) */}
+        <div className="hidden md:flex gap-2">
           <Button
             variant="outline"
+            size="icon"
             type="button"
+            disabled={isPending}
             suppressHydrationWarning
-            onClick={handleApplyFilter}
-            disabled={isPending}>
-            Apply
+            onClick={onRefresh}>
+            <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
+            <span className="sr-only">Refresh</span>
           </Button>
-        </ButtonGroup>
-
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
-          disabled={isPending}
-          suppressHydrationWarning
-          onClick={onRefresh}
-          className="ml-auto">
-          <RefreshCwIcon className={isPending ? 'animate-spin' : ''} />
-          <span className="sr-only">Refresh</span>
-        </Button>
+          {onCreateRoom && (
+            <Button
+              variant="default"
+              size="default"
+              type="button"
+              suppressHydrationWarning
+              onClick={onCreateRoom}>
+              <PlusIcon />
+              <span className="hidden md:inline">Create Room</span>
+            </Button>
+          )}
+        </div>
       </div>
 
       {rooms.length > 0 ? (
@@ -147,6 +213,32 @@ export function RoomsView({ initialData }: RoomsViewProps) {
                   <UsersIcon className="w-3 h-3" />
                   Capacity: {room.capacity}
                 </div>
+                {(onEditRoom || onDeleteRoom) && (
+                  <CardAction>
+                    <ButtonGroup>
+                      {onEditRoom && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onEditRoom(room)}>
+                          <PencilIcon />
+                          <span className="sr-only">Edit room</span>
+                        </Button>
+                      )}
+                      {onDeleteRoom && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onDeleteRoom(room)}>
+                          <TrashIcon />
+                          <span className="sr-only">Delete room</span>
+                        </Button>
+                      )}
+                    </ButtonGroup>
+                  </CardAction>
+                )}
               </CardHeader>
               <CardContent>
                 {room.sessions.length > 0 ? (

@@ -1,3 +1,7 @@
 export * from '@/features/rooms/types'
 export * from '@/features/rooms/actions/get-rooms-with-schedule'
 export * from '@/features/rooms/actions/get-rooms-minimal'
+export * from '@/features/rooms/schemas/room-details'
+export * from '@/features/rooms/actions/create-room'
+export * from '@/features/rooms/actions/update-room'
+export * from '@/features/rooms/actions/delete-room'

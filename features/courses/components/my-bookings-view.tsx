@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  BookmarkIcon,
   BookmarkXIcon,
   CalendarIcon,
   ClockIcon,
@@ -15,9 +14,8 @@ import { toast } from 'sonner'
 
 import {
   CourseSessionDisplay,
-  bookCourseSession,
   cancelCourseBooking,
-  getCourseSessions,
+  getMyBookings,
 } from '@/features/courses'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
@@ -31,74 +29,40 @@ import {
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
 
-interface CourseSessionsViewProps {
+interface MyBookingsViewProps {
   initialData: CourseSessionDisplay[]
 }
 
-export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
+export function MyBookingsView({ initialData }: MyBookingsViewProps) {
   const [isPending, startTransition] = useTransition()
-  const [sessions, setSessions] = useState<CourseSessionDisplay[]>(initialData)
+  const [bookings, setBookings] = useState<CourseSessionDisplay[]>(initialData)
   const [search, setSearch] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [bookingPending, setBookingPending] = useState<Set<string>>(new Set())
+  const [cancelPending, setCancelPending] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    setSessions(initialData)
+    setBookings(initialData)
   }, [initialData])
 
   const onRefresh = () => {
     startTransition(async () => {
-      const result = await getCourseSessions(startDate || undefined, endDate || undefined)
-      setSessions(result)
-    })
-  }
-
-  const handleApplyFilter = () => {
-    startTransition(async () => {
-      const result = await getCourseSessions(startDate || undefined, endDate || undefined)
-      setSessions(result)
-    })
-  }
-
-  const handleBook = (session: CourseSessionDisplay) => {
-    setBookingPending((prev) => new Set(prev).add(session.id))
-    const promise = bookCourseSession(session.id)
-      .then((result) => {
-        if (!result.success) throw new Error(result.message)
-        return getCourseSessions(startDate || undefined, endDate || undefined).then((data) => {
-          setSessions(data)
-          return result
-        })
-      })
-      .finally(() => {
-        setBookingPending((prev) => {
-          const next = new Set(prev)
-          next.delete(session.id)
-          return next
-        })
-      })
-
-    toast.promise(promise, {
-      loading: 'Booking session...',
-      success: (result) => result.message,
-      error: (err) => err?.message || 'Failed to book session',
+      const result = await getMyBookings()
+      setBookings(result)
     })
   }
 
   const handleCancelBooking = (session: CourseSessionDisplay) => {
     if (!session.bookingId) return
-    setBookingPending((prev) => new Set(prev).add(session.id))
+    setCancelPending((prev) => new Set(prev).add(session.id))
     const promise = cancelCourseBooking(session.bookingId)
       .then((result) => {
         if (!result.success) throw new Error(result.message)
-        return getCourseSessions(startDate || undefined, endDate || undefined).then((data) => {
-          setSessions(data)
+        return getMyBookings().then((data) => {
+          setBookings(data)
           return result
         })
       })
       .finally(() => {
-        setBookingPending((prev) => {
+        setCancelPending((prev) => {
           const next = new Set(prev)
           next.delete(session.id)
           return next
@@ -112,7 +76,9 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
     })
   }
 
-  const filtered = sessions.filter(
+  const today = new Date().toISOString().split('T')[0]
+
+  const filtered = bookings.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.trainerName.toLowerCase().includes(search.toLowerCase()) ||
@@ -139,7 +105,7 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
           {/* Desktop search input */}
           <Input
             className="hidden md:flex md:w-64"
-            placeholder="Search sessions..."
+            placeholder="Search bookings..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -147,7 +113,7 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
           <div className="flex w-full gap-2 md:hidden">
             <ButtonGroup className="flex-1">
               <Input
-                placeholder="Search sessions..."
+                placeholder="Search bookings..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -163,44 +129,14 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
               </Button>
             </ButtonGroup>
           </div>
-          <Input
-            type="date"
-            className="w-full md:w-44"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <span className="text-muted-foreground text-sm">to</span>
-          <Input
-            type="date"
-            className="w-full md:w-44"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-          <Button
-            variant="outline"
-            type="button"
-            suppressHydrationWarning
-            onClick={handleApplyFilter}
-            disabled={isPending}>
-            Apply
-          </Button>
-          {(startDate || endDate || search) && (
+          {search && (
             <Button
               variant="ghost"
               size="icon"
-              type="button"
-              suppressHydrationWarning
-              onClick={() => {
-                setSearch('')
-                setStartDate('')
-                setEndDate('')
-                startTransition(async () => {
-                  const result = await getCourseSessions()
-                  setSessions(result)
-                })
-              }}>
+              onClick={() => setSearch('')}
+              suppressHydrationWarning>
               <XIcon />
-              <span className="sr-only">Clear filters</span>
+              <span className="sr-only">Clear search</span>
             </Button>
           )}
         </div>
@@ -222,33 +158,26 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((session) => {
-            const isFull = session.bookedCount >= session.roomCapacity
-            const isBooked = !!session.bookingId
-            const isPendingAction = bookingPending.has(session.id)
+            const isPendingCancel = cancelPending.has(session.id)
+            const sessionDateStr = new Date(session.sessionDate)
+              .toISOString()
+              .split('T')[0]
+            const canCancel = !session.isCancelled && sessionDateStr >= today
 
             return (
-              <Card key={session.id} className={session.isCancelled ? 'opacity-60' : ''}>
+              <Card key={`${session.bookingId ?? ''}-${session.id}`} className={session.isCancelled ? 'opacity-60' : ''}>
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2 flex-wrap">
-                        {session.name}
-                        {session.isCancelled && (
-                          <Badge variant="destructive" className="text-xs">
-                            Cancelled
-                          </Badge>
-                        )}
-                        {isBooked && !session.isCancelled && (
-                          <Badge variant="default" className="text-xs">
-                            Booked
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {session.description || 'No description'}
-                      </CardDescription>
-                    </div>
-                  </div>
+                  <CardTitle className="flex items-center gap-2 flex-wrap">
+                    {session.name}
+                    {session.isCancelled && (
+                      <Badge variant="destructive" className="text-xs">
+                        Cancelled
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    {session.description || 'No description'}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
@@ -269,40 +198,23 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
                     <span className="text-muted-foreground">{session.roomName}</span>
                     <div className="flex items-center gap-1">
                       <UsersIcon className="w-3 h-3 text-muted-foreground" />
-                      <span
-                        className={
-                          isFull ? 'text-destructive font-medium' : 'text-muted-foreground'
-                        }>
+                      <span className="text-muted-foreground">
                         {session.bookedCount}/{session.roomCapacity}
                       </span>
                     </div>
                   </div>
-
-                  {!session.isCancelled && (
+                  {canCancel && (
                     <div className="pt-2">
-                      {isBooked ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          disabled={isPendingAction}
-                          suppressHydrationWarning
-                          onClick={() => handleCancelBooking(session)}>
-                          <BookmarkXIcon className="w-4 h-4" />
-                          Cancel Booking
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="w-full"
-                          disabled={isFull || isPendingAction}
-                          suppressHydrationWarning
-                          onClick={() => handleBook(session)}>
-                          <BookmarkIcon className="w-4 h-4" />
-                          {isFull ? 'Session Full' : 'Book Session'}
-                        </Button>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={isPendingCancel}
+                        suppressHydrationWarning
+                        onClick={() => handleCancelBooking(session)}>
+                        <BookmarkXIcon className="w-4 h-4" />
+                        Cancel Booking
+                      </Button>
                     </div>
                   )}
                 </CardContent>
@@ -313,7 +225,7 @@ export function CourseSessionsView({ initialData }: CourseSessionsViewProps) {
       ) : (
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">
-            {search ? 'No sessions found matching your search.' : 'No upcoming sessions available.'}
+            {search ? 'No bookings found matching your search.' : 'You have no booked sessions.'}
           </p>
         </div>
       )}
