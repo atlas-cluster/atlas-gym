@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -27,14 +28,19 @@ export function CreateSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: CreateSubscriptionDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onCreate(planId: string, memberId: string) {
-    const promise = createSubscription(planId, memberId).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to create subscription')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = createSubscription(planId, memberId)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to create subscription')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Creating subscription...',
@@ -78,7 +84,7 @@ export function CreateSubscriptionDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="button" onClick={onSubmit}>
+          <Button type="button" onClick={onSubmit} disabled={isPending}>
             Subscribe
           </Button>
         </div>

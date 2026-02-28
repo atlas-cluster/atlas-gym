@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -24,18 +25,19 @@ export function DeleteSubscriptionDialog({
   open,
   onOpenChange: setOpen,
 }: DeleteSubscriptionDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onDelete(subscriptionId: string, memberId: string, updatedAt: Date) {
-    const promise = deleteSubscription(
-      subscriptionId,
-      memberId,
-      updatedAt
-    ).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to delete subscription')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = deleteSubscription(subscriptionId, memberId, updatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to delete subscription')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Deleting subscription...',
@@ -106,7 +108,11 @@ export function DeleteSubscriptionDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Delete {hasCurrent && hasFuture ? 'Subscriptions' : 'Subscription'}
           </Button>
         </div>

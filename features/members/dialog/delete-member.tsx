@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -24,14 +25,19 @@ export function DeleteMemberDialog({
   open,
   onOpenChange: setOpen,
 }: DeleteMemberDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onDelete(id: string, updatedAt: Date) {
-    const promise = deleteMember(id, updatedAt).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to delete member')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = deleteMember(id, updatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to delete member')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Deleting member...',
@@ -68,7 +74,11 @@ export function DeleteMemberDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Delete
           </Button>
         </div>

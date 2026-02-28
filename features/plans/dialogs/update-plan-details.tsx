@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'sonner'
@@ -40,6 +40,7 @@ export function UpdatePlanDetailsDialog({
   onOpenChange: setOpen,
 }: UpdatePlanDetailsDialogProps) {
   const isEditing = !!plan
+  const [isPending, setIsPending] = useState(false)
 
   const form = useForm({
     resolver: zodResolver(planDetailsSchema),
@@ -72,13 +73,16 @@ export function UpdatePlanDetailsDialog({
   }, [open, plan, form])
 
   function onCreate(data: z.infer<typeof planDetailsSchema>) {
-    const promise = createPlan(data).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to create plan')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = createPlan(data)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to create plan')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Creating plan...',
@@ -92,13 +96,16 @@ export function UpdatePlanDetailsDialog({
     data: z.infer<typeof planDetailsSchema>,
     lastUpdatedAt: Date
   ) {
-    const promise = updatePlan(id, data, lastUpdatedAt).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to update plan')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = updatePlan(id, data, lastUpdatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update plan')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Updating plan...',
@@ -238,7 +245,7 @@ export function UpdatePlanDetailsDialog({
               onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={isPending}>
               {isEditing ? 'Update Plan' : 'Create Plan'}
             </Button>
           </div>

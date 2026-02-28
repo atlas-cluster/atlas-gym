@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { PlanDisplay, deletePlan } from '@/features/plans'
@@ -23,14 +24,19 @@ export function DeletePlanDialog({
   open,
   onOpenChange: setOpen,
 }: DeletePlanDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onDelete(id: string, updatedAt: Date) {
-    const promise = deletePlan(id, updatedAt).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to delete plan')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = deletePlan(id, updatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to delete plan')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Deleting plan...',
@@ -62,7 +68,11 @@ export function DeletePlanDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" type="button" onClick={onSubmit}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onSubmit}
+            disabled={isPending}>
             Delete
           </Button>
         </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { MemberDisplay } from '@/features/members'
@@ -24,14 +25,19 @@ export function ConvertToTrainerDialog({
   open,
   onOpenChange: setOpen,
 }: ConvertToTrainerDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onConvert(id: string, updatedAt: Date) {
-    const promise = convertToTrainer(id, updatedAt).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to promote to trainer')
-      }
-      setOpen(false)
-      return result
-    })
+    setIsPending(true)
+    const promise = convertToTrainer(id, updatedAt)
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to promote to trainer')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Promoting to trainer...',
@@ -67,7 +73,7 @@ export function ConvertToTrainerDialog({
             onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="button" onClick={onSubmit}>
+          <Button type="button" onClick={onSubmit} disabled={isPending}>
             Promote
           </Button>
         </div>

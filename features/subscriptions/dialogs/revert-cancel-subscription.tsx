@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/features/shared/components/ui/button'
@@ -28,18 +29,23 @@ export function SubscriptionRevertCancelDialog({
   open,
   onOpenChange: setOpen,
 }: SubscriptionRevertCancelDialogProps) {
+  const [isPending, setIsPending] = useState(false)
+
   function onRevert(subscriptionId: string) {
+    setIsPending(true)
     const promise = revertCancellation(
       subscriptionId,
       subscription!.updatedAt!,
       hasFutureSubscription
-    ).then((result) => {
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to revert cancellation')
-      }
-      setOpen(false)
-      return result
-    })
+    )
+      .then((result) => {
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to revert cancellation')
+        }
+        setOpen(false)
+        return result
+      })
+      .finally(() => setIsPending(false))
 
     toast.promise(promise, {
       loading: 'Reverting cancellation...',
@@ -72,7 +78,7 @@ export function SubscriptionRevertCancelDialog({
             onClick={() => setOpen(false)}>
             Keep Cancelled
           </Button>
-          <Button type="button" onClick={onSubmit}>
+          <Button type="button" onClick={onSubmit} disabled={isPending}>
             Revert Cancellation
           </Button>
         </div>
