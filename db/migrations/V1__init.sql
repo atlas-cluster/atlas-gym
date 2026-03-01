@@ -103,7 +103,7 @@ CREATE TABLE subscriptions (
 CREATE TABLE rooms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(50) NOT NULL,
-  capacity INTEGER NOT NULL CHECK (capacity > 0),
+  description TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

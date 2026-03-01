@@ -1,12 +1,13 @@
 import { CourseSessionDisplay } from '@/features/courses'
 
-interface Room {
+export interface Room {
   id: string
   name: string
+  description?: string
   createdAt: Date
   updatedAt: Date
 }
 
-interface RoomDisplay extends Room {
+export interface RoomDisplay extends Room {
   sessions: CourseSessionDisplay[]
 }
