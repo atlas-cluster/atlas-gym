@@ -84,7 +84,7 @@ const getRoomsCached = unstable_cache(
     return Array.from(roomMap.values())
   },
   ['get-rooms'],
-  { revalidate: 3600, tags: ['rooms', 'courses'] }
+  { revalidate: 3600, tags: ['rooms', 'courses', 'members'] }
 )
 
 export async function getRooms(date?: string): Promise<RoomDisplay[]> {

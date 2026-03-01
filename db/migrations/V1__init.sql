@@ -115,7 +115,7 @@ CREATE TABLE rooms (
 
 CREATE TABLE course_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  trainer_id UUID NOT NULL REFERENCES trainers (member_id) ON DELETE RESTRICT,
+  trainer_id UUID REFERENCES trainers (member_id) ON DELETE SET NULL,
   room_id UUID REFERENCES rooms (id) ON DELETE SET NULL,
   name VARCHAR(100) NOT NULL,
   description TEXT,

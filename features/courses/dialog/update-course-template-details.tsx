@@ -98,7 +98,7 @@ export function UpdateCourseTemplateDialog({
           ? {
               name: courseTemplate.name,
               description: courseTemplate.description ?? '',
-              trainerId: courseTemplate.trainerId,
+              trainerId: courseTemplate.trainerId ?? '',
               roomId: courseTemplate.roomId ?? undefined,
               weekDays: courseTemplate.weekDays,
               startTime: courseTemplate.startTime.slice(0, 5),

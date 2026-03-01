@@ -24,7 +24,7 @@ const getCourseTemplatesCached = unstable_cache(
              ct.room_id                            AS "roomId",
              r.name                                AS "roomName"
       FROM course_templates ct
-        JOIN members m ON ct.trainer_id = m.id
+        LEFT JOIN members m ON ct.trainer_id = m.id
         LEFT JOIN rooms r ON ct.room_id = r.id
       ORDER BY ct.name
     `)
@@ -41,6 +41,8 @@ const getCourseTemplatesCached = unstable_cache(
       endDate: row.endDate ? new Date(row.endDate) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
+      trainerId: row.trainerId ?? undefined,
+      trainerName: row.trainerName ?? undefined,
       roomId: row.roomId ?? undefined,
       roomName: row.roomName ?? undefined,
       description: row.description ?? undefined,

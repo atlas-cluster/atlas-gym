@@ -132,14 +132,18 @@ export function CourseTemplatesDataTable({
   }, [tableData])
 
   const trainerOptions = useMemo(() => {
-    const unique = [...new Set(tableData.map((d) => d.trainerName))]
+    const unique = [
+      ...new Set(tableData.map((d) => d.trainerName).filter(Boolean)),
+    ] as string[]
     return unique.sort().map((name) => ({ value: name, label: name }))
   }, [tableData])
 
   const trainerFacets = useMemo(() => {
     const counts = new Map<string, number>()
     for (const row of tableData) {
-      counts.set(row.trainerName, (counts.get(row.trainerName) ?? 0) + 1)
+      if (row.trainerName) {
+        counts.set(row.trainerName, (counts.get(row.trainerName) ?? 0) + 1)
+      }
     }
     return counts
   }, [tableData])
@@ -392,7 +396,14 @@ export function CourseTemplatesDataTable({
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{row.original.trainerName}</span>
+                  <span
+                    className={
+                      row.original.trainerName
+                        ? ''
+                        : 'text-muted-foreground italic'
+                    }>
+                    {row.original.trainerName ?? 'No trainer'}
+                  </span>
                 </div>
                 {row.original.roomName && (
                   <div className="flex items-center gap-2 text-sm">

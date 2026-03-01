@@ -12,8 +12,8 @@ export interface CourseTemplate {
 }
 
 export interface CourseTemplateDisplay extends CourseTemplate {
-  trainerId: string
-  trainerName: string
+  trainerId?: string
+  trainerName?: string
   roomId?: string
   roomName?: string
 }
