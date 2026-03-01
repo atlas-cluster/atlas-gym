@@ -1,9 +1,10 @@
+import { getRooms } from '@/features/rooms/actions/get-rooms'
 import { RoomsController } from '@/features/rooms/components/rooms-controller'
 
 export const dynamic = 'force-dynamic'
 
 export default async function RoomsPage() {
-  // const rooms = await getRooms()
+  const rooms = await getRooms()
 
-  return <RoomsController data={[]} />
+  return <RoomsController data={rooms} />
 }

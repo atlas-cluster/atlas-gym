@@ -15,12 +15,6 @@ export const roomColumns: ColumnDef<RoomDisplay>[] = [
     enableGlobalFilter: true,
   },
   {
-    accessorKey: 'sessions.length',
-    enableSorting: true,
-    enableHiding: false,
-    enableGlobalFilter: true,
-  },
-  {
     accessorKey: 'sessions',
     enableSorting: false,
     enableHiding: false,

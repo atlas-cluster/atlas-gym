@@ -1,11 +1,11 @@
 import {
   Activity,
-  BookCheck,
+  Bookmark,
   Calendar,
-  Dumbbell,
   Layers,
   MapPin,
   MonitorSmartphone,
+  PersonStanding,
   Repeat,
   Users,
 } from 'lucide-react'
@@ -15,10 +15,10 @@ export const entityIcons: Record<string, typeof Activity> = {
   session: MonitorSmartphone,
   plan: Layers,
   subscription: Repeat,
-  course: Calendar,
-  reservation: BookCheck,
-  equipment: Dumbbell,
+  course: PersonStanding,
+  reservation: Bookmark,
   room: MapPin,
+  course_template: Calendar,
 }
 
 export type Action = 'Create' | 'Update' | 'Delete'

@@ -64,7 +64,7 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
     accessorKey: 'entity',
     header: 'Entity',
     cell: ({ row }) => {
-      const entity = row.getValue('entity') as string
+      const entity = (row.getValue('entity') as string).replace(/_/g, ' ')
       const Icon = entityIcons[entity] || Database
 
       return (

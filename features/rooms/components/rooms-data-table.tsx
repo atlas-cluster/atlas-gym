@@ -1,23 +1,29 @@
 'use client'
 
 import {
+  CalendarIcon,
+  ChevronDownIcon,
+  ClockIcon,
   PencilIcon,
   PlusIcon,
   RefreshCwIcon,
   TrashIcon,
-  UsersIcon,
+  UserIcon,
   XIcon,
 } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 
+import { useAuth } from '@/features/auth'
+import { CourseSessionDisplay } from '@/features/courses'
+import { getRooms } from '@/features/rooms/actions/get-rooms'
 import { roomColumns } from '@/features/rooms/components/room-columns'
 import { RoomDisplay } from '@/features/rooms/types'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
-import { DataTableRangeFilter } from '@/features/shared/components/data-table-range-filter'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
 import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
 import { ButtonGroup } from '@/features/shared/components/ui/button-group'
+import { Calendar } from '@/features/shared/components/ui/calendar'
 import {
   Card,
   CardAction,
@@ -27,6 +33,13 @@ import {
   CardTitle,
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/features/shared/components/ui/popover'
+import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
+import { Separator } from '@/features/shared/components/ui/separator'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -42,6 +55,43 @@ import {
   getFacetedRowModel,
 } from '@tanstack/table-core'
 
+type RoomStatus =
+  | { status: 'occupied'; until: string; sessionName: string }
+  | { status: 'free' }
+  | { status: 'free-until'; until: string; sessionName: string }
+
+function getRoomStatus(
+  sessions: CourseSessionDisplay[],
+  now: Date
+): RoomStatus {
+  const activeSessions = sessions
+    .filter((s) => !s.isCancelled)
+    .sort(
+      (a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    )
+
+  const fmt = (d: Date) =>
+    `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+
+  for (const s of activeSessions) {
+    const start = new Date(s.startTime)
+    const end = new Date(s.endTime)
+    if (now >= start && now < end) {
+      return { status: 'occupied', until: fmt(end), sessionName: s.name }
+    }
+  }
+
+  for (const s of activeSessions) {
+    const start = new Date(s.startTime)
+    if (start > now) {
+      return { status: 'free-until', until: fmt(start), sessionName: s.name }
+    }
+  }
+
+  return { status: 'free' }
+}
+
 interface RoomsDataTableProps {
   data: RoomDisplay[]
   onCreate: () => void
@@ -56,28 +106,61 @@ export function RoomsDataTable({
   onDelete,
 }: RoomsDataTableProps) {
   const [isPending, startTransition] = useTransition()
+  const { member } = useAuth()
+  const isTrainer = member?.isTrainer ?? false
   const [tableData, setTableData] = useState<RoomDisplay[]>(data)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [now, setNow] = useState<Date>(new Date())
+
+  const isToday = useCallback(() => {
+    const today = new Date()
+    return (
+      selectedDate.getFullYear() === today.getFullYear() &&
+      selectedDate.getMonth() === today.getMonth() &&
+      selectedDate.getDate() === today.getDate()
+    )
+  }, [selectedDate])
+
+  useEffect(() => {
+    if (!isToday()) return
+    const interval = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(interval)
+  }, [isToday])
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 9 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
 
   useEffect(() => {
     setTableData(data)
   }, [data])
 
-  const onRefreshRooms = () => {
+  const fetchRoomsForDate = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
     startTransition(async () => {
-      // const result = await getRooms()
-      // setTableData(result)
+      const result = await getRooms(dateStr)
+      setTableData(result)
     })
+  }
+
+  const onRefreshRooms = () => {
+    fetchRoomsForDate(selectedDate)
+  }
+
+  const onDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date)
+      fetchRoomsForDate(date)
+    }
+    setCalendarOpen(false)
   }
 
   const sortItems = [
     { id: 'name', label: 'Name' },
-    { id: 'sessions.length', label: 'Total sessions' },
+    { id: 'sessionCount', label: 'Total sessions' },
   ]
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -152,25 +235,44 @@ export function RoomsDataTable({
                   <span className={'sr-only'}>Refresh Data</span>
                 </Button>
               </ButtonGroup>
-              <Button
-                variant="default"
-                size="icon"
-                type="button"
-                suppressHydrationWarning
-                onClick={onCreate}>
-                <PlusIcon />
-                <span className="sr-only">Create Room</span>
-              </Button>
+              {isTrainer && (
+                <Button
+                  variant="default"
+                  size="icon"
+                  type="button"
+                  suppressHydrationWarning
+                  onClick={onCreate}>
+                  <PlusIcon />
+                  <span className="sr-only">Create Room</span>
+                </Button>
+              )}
             </div>
           </div>
 
-          {/* Range Filters */}
-          <DataTableRangeFilter
-            title="Total Sessions"
-            column={table.getColumn('sessions.length')}
-            min={1}
-            max={50}
-          />
+          {/* Date Picker */}
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-40 justify-between font-normal"
+                suppressHydrationWarning>
+                {selectedDate.getDate() == new Date().getDate()
+                  ? 'Today'
+                  : `${selectedDate.getDate().toString().padStart(2, '0')}.${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}.${selectedDate.getFullYear()}`}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={onDateSelect}
+              />
+            </PopoverContent>
+          </Popover>
 
           {(table.getState().columnFilters.length > 0 || globalFilter) && (
             <Button
@@ -179,7 +281,7 @@ export function RoomsDataTable({
               onClick={() => {
                 table.resetColumnFilters()
                 table.setGlobalFilter('')
-                table.getColumn('sessions.length')?.setFilterValue(undefined)
+                table.getColumn('sessionCount')?.setFilterValue(undefined)
               }}
               suppressHydrationWarning>
               <XIcon />
@@ -208,15 +310,17 @@ export function RoomsDataTable({
               <span className={'sr-only'}>Refresh Data</span>
             </Button>
           </ButtonGroup>
-          <Button
-            variant="default"
-            size="default"
-            type="button"
-            suppressHydrationWarning
-            onClick={onCreate}>
-            <PlusIcon />
-            <span className="hidden md:inline">Create Room</span>
-          </Button>
+          {isTrainer && (
+            <Button
+              variant="default"
+              size="default"
+              type="button"
+              suppressHydrationWarning
+              onClick={onCreate}>
+              <PlusIcon />
+              <span className="hidden md:inline">Create Room</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -231,51 +335,114 @@ export function RoomsDataTable({
                     <CardTitle className="flex items-center gap-2">
                       {Room.original.name}
                       <Badge variant="secondary" className="text-xs">
-                        <UsersIcon className="w-3 h-3" />
-                        {/*{Room.original.subscriptionCount || 0}*/}
+                        <CalendarIcon className="w-3 h-3" />
+                        {Room.original.sessions.length}
                       </Badge>
+                      {isToday() &&
+                        (() => {
+                          const status = getRoomStatus(
+                            Room.original.sessions,
+                            now
+                          )
+                          if (status.status === 'occupied') {
+                            return (
+                              <Badge
+                                variant="destructive"
+                                className="text-xs"
+                                suppressHydrationWarning>
+                                Occupied until {status.until}
+                              </Badge>
+                            )
+                          }
+                          if (status.status === 'free-until') {
+                            return (
+                              <Badge suppressHydrationWarning>
+                                Available until {status.until}
+                              </Badge>
+                            )
+                          }
+                          return (
+                            <Badge suppressHydrationWarning>Available</Badge>
+                          )
+                        })()}
                     </CardTitle>
                     <CardDescription className="mt-2">
                       {Room.original.description || 'No description'}
                     </CardDescription>
                   </div>
                 </div>
-                <CardAction>
-                  <ButtonGroup>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onEdit(Room.original)}>
-                      <PencilIcon />
-                      <span className="sr-only">Edit Room</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onDelete(Room.original)}>
-                      <TrashIcon />
-                      <span className="sr-only">Delete Room</span>
-                    </Button>
-                  </ButtonGroup>
-                </CardAction>
+                {isTrainer && (
+                  <CardAction>
+                    <ButtonGroup>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        suppressHydrationWarning
+                        onClick={() => onEdit(Room.original)}>
+                        <PencilIcon />
+                        <span className="sr-only">Edit Room</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        suppressHydrationWarning
+                        onClick={() => onDelete(Room.original)}>
+                        <TrashIcon />
+                        <span className="sr-only">Delete Room</span>
+                      </Button>
+                    </ButtonGroup>
+                  </CardAction>
+                )}
               </CardHeader>
-              {/*<CardContent className="space-y-3">*/}
-              {/*  <div>*/}
-              {/*    <p className="text-3xl font-bold">*/}
-              {/*      €{Room.original.price.toFixed(2)}*/}
-              {/*    </p>*/}
-              {/*    <p className="text-sm text-muted-foreground">per month</p>*/}
-              {/*  </div>*/}
-              {/*  <div className="flex items-center gap-2 text-sm">*/}
-              {/*    <span className="text-muted-foreground">Min. Duration:</span>*/}
-              {/*    <span className="font-medium">*/}
-              {/*      {Room.original.minDurationMonths}{' '}*/}
-              {/*      {Room.original.minDurationMonths === 1 ? 'month' : 'months'}*/}
-              {/*    </span>*/}
-              {/*  </div>*/}
-              {/*</CardContent>*/}
+              <CardContent>
+                {Room.original.sessions.length > 0 ? (
+                  <ScrollArea className="h-48">
+                    <div className="space-y-2">
+                      {Room.original.sessions
+                        .sort(
+                          (a, b) =>
+                            new Date(a.startTime).getTime() -
+                            new Date(b.startTime).getTime()
+                        )
+                        .map((session, i) => (
+                          <div key={i}>
+                            {i > 0 && <Separator className="mb-2" />}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="space-y-1 min-w-0">
+                                <p className="text-sm font-medium leading-none truncate">
+                                  {session.name}
+                                </p>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <ClockIcon className="h-3 w-3" />
+                                    {`${new Date(session.startTime).getHours().toString().padStart(2, '0')}:${new Date(session.startTime).getMinutes().toString().padStart(2, '0')}`}
+                                    {' – '}
+                                    {`${new Date(session.endTime).getHours().toString().padStart(2, '0')}:${new Date(session.endTime).getMinutes().toString().padStart(2, '0')}`}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <UserIcon className="h-3 w-3" />
+                                    {session.trainerName}
+                                  </span>
+                                </div>
+                              </div>
+                              {session.isCancelled && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs shrink-0">
+                                  Cancelled
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No sessions today
+                  </p>
+                )}
+              </CardContent>
             </Card>
           ))}
         </div>

@@ -1,12 +1,16 @@
 SET
   search_path TO public;
 
+-- EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- ENUMS
 CREATE TYPE payment_type AS ENUM('credit_card', 'iban');
 
 CREATE TYPE action_type AS ENUM('Create', 'Update', 'Delete');
@@ -21,6 +25,7 @@ CREATE TYPE weekday AS ENUM(
   'sunday'
 );
 
+-- TABLES
 CREATE TABLE members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email CITEXT NOT NULL UNIQUE,
@@ -111,7 +116,7 @@ CREATE TABLE rooms (
 CREATE TABLE course_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trainer_id UUID NOT NULL REFERENCES trainers (member_id) ON DELETE RESTRICT,
-  room_id UUID NOT NULL REFERENCES rooms (id) ON DELETE RESTRICT,
+  room_id UUID REFERENCES rooms (id) ON DELETE SET NULL,
   name VARCHAR(100) NOT NULL,
   description TEXT,
   weekdays weekday[] NOT NULL CHECK (array_length(weekdays, 1) > 0),
@@ -134,6 +139,14 @@ CREATE TABLE course_sessions (
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   is_cancelled BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Override columns: when NULL, the value is inherited from the template.
+  -- When set, the session has a per-session override that template updates won't touch.
+  trainer_id_override UUID REFERENCES trainers (member_id) ON DELETE SET NULL,
+  room_id_override UUID REFERENCES rooms (id) ON DELETE SET NULL,
+  start_time_override TIME,
+  end_time_override TIME,
+  name_override VARCHAR(100),
+  description_override TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (template_id, session_date)
