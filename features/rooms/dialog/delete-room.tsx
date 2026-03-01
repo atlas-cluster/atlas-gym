@@ -58,8 +58,8 @@ export function DeleteRoomDialog({
         <DialogHeader>
           <DialogTitle>Are you sure you want to delete this room?</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. All subscriptions associated with this
-            room will also be deleted.
+            This action cannot be undone. All assosiated courses and sessions
+            will have their room assignment removed.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4 flex justify-end gap-3">
