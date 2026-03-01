@@ -2813,47 +2813,238 @@ VALUES
   )
 ON CONFLICT DO NOTHING;
 
--- Seed banner images for select course templates
+-- Seed banner images for all course templates, matched to course category
+-- Spinning / Indoor Cycling
 UPDATE course_templates
 SET
   banner_image_url = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800'
 WHERE
-  name = 'Early Bird Spin';
+  name IN (
+    'Early Bird Spin',
+    'Spin & Burn',
+    'Endurance Ride',
+    'Power Cycling',
+    'Lunchtime Spin Express',
+    'Saturday Spin Party',
+    'Candlelight Spin',
+    'Hill Climb Challenge',
+    'Recovery Spin',
+    'Sprint Intervals',
+    'Rhythm Ride',
+    'Spin & Stretch'
+  );
 
+-- Boxing / Kickboxing
 UPDATE course_templates
 SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
+  banner_image_url = 'https://images.unsplash.com/photo-1549719312-75785eb2d6b0?w=800'
 WHERE
-  name = 'Spin & Burn';
+  name IN (
+    'Boxing Basics',
+    'Kickboxing Cardio',
+    'Fight Conditioning',
+    'Boxing Sparring Open',
+    'Heavy Bag HIIT',
+    'Boxing for Beginners',
+    'Outdoor Boxing Drills',
+    'Womens Boxing',
+    'Boxing Conditioning',
+    'Pad Work Masterclass',
+    'Boxing Footwork Clinic',
+    'Sunday Open Gym Boxing'
+  );
 
+-- Swimming / Aqua
 UPDATE course_templates
 SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
+  banner_image_url = 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800'
 WHERE
-  name = 'Endurance Ride';
+  name IN (
+    'Aqua Aerobics',
+    'Swim Technique',
+    'Aqua Power',
+    'Lap Swimming Club',
+    'Water Polo Introduction',
+    'Aqua Yoga',
+    'Deep Water Running',
+    'Masters Swim Squad',
+    'Kids Swim Lessons',
+    'Open Water Prep',
+    'Aqua Zumba'
+  );
 
+-- Pilates (mat and general)
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
+WHERE
+  name IN (
+    'Morning Mat Pilates',
+    'Power Pilates',
+    'Pilates for Runners',
+    'Prenatal Pilates',
+    'Pilates for Back Pain',
+    'Pilates & TRX Combo',
+    'Core Blast',
+    'Pilates for Swimmers',
+    'Sunday Slow Pilates'
+  );
+
+-- Pilates (reformer / barre)
 UPDATE course_templates
 SET
   banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
 WHERE
   name IN (
-    'Morning Yoga Flow',
-    'Sunrise Yoga',
-    'Yoga Dance Fusion'
+    'Reformer Pilates',
+    'Advanced Reformer Flow',
+    'Barre Fusion',
+    'Stretch & Restore'
   );
 
+-- Yoga
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
+WHERE
+  name IN (
+    'Morning Yoga Flow',
+    'Yin Yoga',
+    'Hot Power Yoga',
+    'Sunset Stretch & Restore',
+    'Yoga for Athletes',
+    'Ashtanga Yoga',
+    'Hatha Yoga Basics',
+    'Acro Yoga Partners',
+    'Rocket Yoga',
+    'Yoga for Climbers',
+    'Restorative Yoga',
+    'Yoga Dance Fusion',
+    'Sunrise Yoga'
+  );
+
+-- Meditation / Breathwork
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1545389336-cf090fa865b8?w=800'
+WHERE
+  name IN (
+    'Yoga Nidra',
+    'Sunday Meditation & Breathwork',
+    'Breathwork & Cold Exposure',
+    'Mobility & Recovery'
+  );
+
+-- Outdoor Calisthenics / Boot Camp
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
+WHERE
+  name IN (
+    'Boot Camp',
+    'Calisthenics Fundamentals',
+    'Weekend Warrior Circuit',
+    'Street Workout',
+    'Outdoor Strength & Conditioning',
+    'Weighted Calisthenics',
+    'Outdoor HIIT Circuit',
+    'Obstacle Course Training',
+    'Sunrise Mobility Flow'
+  );
+
+-- Gymnastics / Bodyweight Skills (pull-ups, handstands, rings)
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1580086319284-3328b1d61b45?w=800'
+WHERE
+  name IN (
+    'Pull-Up Progressions',
+    'Handstand Workshop',
+    'Rings & Bars'
+  );
+
+-- Hyrox / Functional Fitness / CrossFit
 UPDATE course_templates
 SET
   banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
 WHERE
-  name LIKE '%HIIT%'
-  OR name LIKE '%Strength%'
-  OR name LIKE '%Power%';
+  name IN (
+    'Hyrox Race Prep',
+    'Functional Strength',
+    'Wall Ball Madness',
+    'Hyrox Doubles Training',
+    'Functional Fitness WOD',
+    'Tabata Blast',
+    'Hyrox Open Workout',
+    'AMRAP Madness',
+    'Endurance Engine',
+    'Friday Night Throwdown',
+    'Burpee Broad Jump Drills',
+    'Sled & Erg Intervals'
+  );
 
+-- Kettlebell / Strongman / Loaded Carries
 UPDATE course_templates
 SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
+  banner_image_url = 'https://images.unsplash.com/photo-1549576490-b0332880b21f?w=800'
 WHERE
-  name LIKE '%Pilates%'
-  OR name LIKE '%Core%'
-  OR name LIKE '%Stretch%';
+  name IN (
+    'Kettlebell Fury',
+    'Strongman Saturday',
+    'Farmers Walk & Carry',
+    'Sandbag Lunges Clinic'
+  );
+
+-- Rowing / Ski Erg
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1541534260-64898e44af73?w=800'
+WHERE
+  name IN (
+    'Rowing Power',
+    'Ski Erg Technique Lab',
+    'Sled Push Masterclass'
+  );
+
+-- Dance (Latin, Afro, hip hop, contemporary, general)
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
+WHERE
+  name IN (
+    'Zumba Party',
+    'Latin Dance Fitness',
+    'Dance Cardio Express',
+    'Afro Dance Fitness',
+    'Friday Night Dance Party',
+    'Bollywood Dance Fitness',
+    'K-Pop Dance',
+    'Reggaeton Burn',
+    'Dance Technique Basics'
+  );
+
+-- Hip Hop / Urban Dance
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1535525153316-2d8dba50e5b6?w=800'
+WHERE
+  name IN (
+    'Hip Hop Fitness',
+    'Contemporary Dance',
+    'Jazz Dance',
+    'Capoeira Fitness'
+  );
+
+-- Ballet / Barre (dance)
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800'
+WHERE
+  name = 'Ballet Barre';
+
+-- Aerobics / Step / Group Weights
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1524594081293-190a1c8c7b6d?w=800'
+WHERE
+  name IN ('Step Aerobics', 'Body Pump');
