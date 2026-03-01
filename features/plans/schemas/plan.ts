@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const planDetailsSchema = z.object({
+export const planSchema = z.object({
   name: z
     .string()
     .min(1, 'Name is required')

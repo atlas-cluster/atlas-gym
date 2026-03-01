@@ -1,7 +1,7 @@
 SET
   search_path TO public;
 
--- Function to generate course sessions for all templates up to 1 year in advance.
+-- Function to generate course sessions for all templates up to 1 month in advance.
 -- Inserts sessions for each weekday the template is scheduled on, within its date range.
 CREATE OR REPLACE FUNCTION generate_course_sessions () RETURNS void AS $$
 DECLARE
@@ -15,8 +15,8 @@ BEGIN
     FOR t IN SELECT * FROM course_templates LOOP
             range_start := GREATEST(t.start_date, CURRENT_DATE);
             range_end   := LEAST(
-                    COALESCE(t.end_date, CURRENT_DATE + INTERVAL '1 year'),
-                    CURRENT_DATE + INTERVAL '1 year'
+                    COALESCE(t.end_date, CURRENT_DATE + INTERVAL '1 month'),
+                    CURRENT_DATE + INTERVAL '1 month'
                            );
 
             FOREACH wd IN ARRAY t.weekdays LOOP
@@ -92,8 +92,8 @@ BEGIN
     -- Generate new sessions for any dates that don't have one yet
     range_start := GREATEST(NEW.start_date, CURRENT_DATE);
     range_end   := LEAST(
-            COALESCE(NEW.end_date, CURRENT_DATE + INTERVAL '1 year'),
-            CURRENT_DATE + INTERVAL '1 year'
+            COALESCE(NEW.end_date, CURRENT_DATE + INTERVAL '1 month'),
+            CURRENT_DATE + INTERVAL '1 month'
                    );
 
     FOREACH wd IN ARRAY NEW.weekdays LOOP

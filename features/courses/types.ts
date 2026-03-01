@@ -2,9 +2,9 @@ export interface CourseTemplate {
   id: string
   name: string
   description?: string
-  weekDay: Weekday[]
-  startTime: `${number}:${number}:${number}`
-  endTime: `${number}:${number}:${number}`
+  weekDays: Weekday[]
+  startTime: string
+  endTime: string
   startDate: Date
   endDate?: Date
   createdAt: Date
@@ -12,8 +12,10 @@ export interface CourseTemplate {
 }
 
 export interface CourseTemplateDisplay extends CourseTemplate {
-  roomName: string
+  trainerId: string
   trainerName: string
+  roomId?: string
+  roomName?: string
 }
 
 export interface CourseSession {

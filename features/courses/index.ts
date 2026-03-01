@@ -1,1 +1,10 @@
 export * from '@/features/courses/types'
+export * from '@/features/courses/schemas/course-template'
+export * from '@/features/courses/actions/get-course-templates'
+export * from '@/features/courses/actions/create-course-template'
+export * from '@/features/courses/actions/update-course-template'
+export * from '@/features/courses/actions/delete-course-template'
+export * from '@/features/courses/actions/get-trainer-options'
+export * from '@/features/courses/actions/get-room-options'
+
+export { CourseTemplatesController } from '@/features/courses/components/course-templates-controller'

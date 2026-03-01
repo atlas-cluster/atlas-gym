@@ -257,7 +257,7 @@ export function RoomsDataTable({
                 variant="outline"
                 className="w-40 justify-between font-normal"
                 suppressHydrationWarning>
-                {selectedDate.getDate() == new Date().getDate()
+                {isToday()
                   ? 'Today'
                   : `${selectedDate.getDate().toString().padStart(2, '0')}.${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}.${selectedDate.getFullYear()}`}
                 <ChevronDownIcon />

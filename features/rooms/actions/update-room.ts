@@ -4,13 +4,13 @@ import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { getSession } from '@/features/auth'
-import { roomDetailsSchema } from '@/features/rooms/schemas/room-details'
+import { roomSchema } from '@/features/rooms/schemas/room'
 import { pool } from '@/features/shared/lib/db'
 import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
 export async function updateRoom(
   id: string,
-  data: z.infer<typeof roomDetailsSchema>,
+  data: z.infer<typeof roomSchema>,
   lastUpdatedAt: Date
 ): Promise<{
   success: boolean
@@ -42,7 +42,7 @@ export async function updateRoom(
       }
     }
 
-    const validated = roomDetailsSchema.parse(data)
+    const validated = roomSchema.parse(data)
 
     const result = await pool.query(
       `WITH target_room AS (

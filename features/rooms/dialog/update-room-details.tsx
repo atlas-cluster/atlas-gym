@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 import { createRoom } from '@/features/rooms/actions/create-room'
 import { updateRoom } from '@/features/rooms/actions/update-room'
-import { roomDetailsSchema } from '@/features/rooms/schemas/room-details'
+import { roomSchema } from '@/features/rooms/schemas/room'
 import { RoomDisplay } from '@/features/rooms/types'
 import { Button } from '@/features/shared/components/ui/button'
 import {
@@ -42,7 +42,7 @@ export function UpdateRoomDetailsDialog({
   const [isPending, setIsPending] = useState(false)
 
   const form = useForm({
-    resolver: zodResolver(roomDetailsSchema),
+    resolver: zodResolver(roomSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -65,7 +65,7 @@ export function UpdateRoomDetailsDialog({
     }
   }, [open, room, form])
 
-  function onCreate(data: z.infer<typeof roomDetailsSchema>) {
+  function onCreate(data: z.infer<typeof roomSchema>) {
     setIsPending(true)
     const promise = createRoom(data)
       .then((result) => {
@@ -86,7 +86,7 @@ export function UpdateRoomDetailsDialog({
 
   function onUpdate(
     id: string,
-    data: z.infer<typeof roomDetailsSchema>,
+    data: z.infer<typeof roomSchema>,
     lastUpdatedAt: Date
   ) {
     setIsPending(true)
@@ -107,7 +107,7 @@ export function UpdateRoomDetailsDialog({
     })
   }
 
-  const handleSubmit = (data: z.infer<typeof roomDetailsSchema>) => {
+  const handleSubmit = (data: z.infer<typeof roomSchema>) => {
     if (isEditing && room) {
       onUpdate(room.id, data, room.updatedAt)
     } else {

@@ -4,13 +4,11 @@ import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { getSession } from '@/features/auth'
-import { roomDetailsSchema } from '@/features/rooms/schemas/room-details'
+import { roomSchema } from '@/features/rooms/schemas/room'
 import { pool } from '@/features/shared/lib/db'
 import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
-export async function createRoom(
-  data: z.infer<typeof roomDetailsSchema>
-): Promise<{
+export async function createRoom(data: z.infer<typeof roomSchema>): Promise<{
   success: boolean
   message: string
   errorType?: 'AUTH' | 'NAME_COLLISION' | 'VALIDATION' | 'UNKNOWN'
@@ -34,7 +32,7 @@ export async function createRoom(
       }
     }
 
-    const validated = roomDetailsSchema.parse(data)
+    const validated = roomSchema.parse(data)
 
     await pool.query(
       `WITH inserted_room AS (

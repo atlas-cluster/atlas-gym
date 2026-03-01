@@ -128,6 +128,7 @@ export function DataTableDateRangeFilter<TData, TValue>({
             <FieldLabel>Start Time</FieldLabel>
             <Input
               type="time"
+              className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               value={startTime}
               onChange={(e) => handleTimeChange('start', e.target.value)}
             />
@@ -136,6 +137,7 @@ export function DataTableDateRangeFilter<TData, TValue>({
             <FieldLabel>End Time</FieldLabel>
             <Input
               type="time"
+              className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               value={endTime}
               onChange={(e) => handleTimeChange('end', e.target.value)}
             />
