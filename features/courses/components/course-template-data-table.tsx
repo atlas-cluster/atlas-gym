@@ -186,7 +186,7 @@ export function CourseTemplatesDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex: true,
+    autoResetPageIndex: false,
 
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),

@@ -183,7 +183,7 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex: true,
+    autoResetPageIndex: false,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     state: { sorting, columnFilters, rowSelection, globalFilter, pagination },
