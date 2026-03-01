@@ -3,6 +3,18 @@ name: CI/CD Pipeline
 on:
   push:
     branches: ['main']
+  workflow_dispatch:
+    inputs:
+      force_deploy_db:
+        description: 'Force update the database container'
+        required: false
+        type: boolean
+        default: false
+      force_migrate:
+        description: 'Force run database migrations'
+        required: false
+        type: boolean
+        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -84,7 +96,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and Push Postgres image
-        if: needs.changes.outputs.db == 'true'
+        if: needs.changes.outputs.db == 'true' || inputs.force_deploy_db == true
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -98,7 +110,7 @@ jobs:
   deploy-db:
     name: Update Database Container
     needs: [build, changes]
-    if: needs.changes.outputs.db == 'true'
+    if: needs.changes.outputs.db == 'true' || inputs.force_deploy_db == true
     runs-on: ubuntu-latest
     steps:
       - name: Update Postgres via SSH
@@ -145,7 +157,7 @@ jobs:
   migrate:
     name: Run Database Migrations
     needs: [build, deploy-db, changes]
-    if: ${{ !failure() && !cancelled() && (needs.changes.outputs.migrations == 'true' || needs.changes.outputs.db == 'true') }}
+    if: ${{ !failure() && !cancelled() && (needs.changes.outputs.migrations == 'true' || needs.changes.outputs.db == 'true' || inputs.force_migrate == true || inputs.force_deploy_db == true) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
