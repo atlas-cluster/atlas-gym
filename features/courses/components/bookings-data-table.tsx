@@ -336,6 +336,14 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
               <Card
                 key={row.id}
                 className={booking.isCancelled ? 'opacity-60' : ''}>
+                {booking.bannerImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={booking.bannerImageUrl}
+                    alt={booking.name}
+                    className="w-full h-32 object-cover rounded-t-xl"
+                  />
+                )}
                 <CardHeader>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">

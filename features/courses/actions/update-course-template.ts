@@ -48,8 +48,8 @@ export async function updateCourseTemplate(
     const result = await pool.query(
       `WITH target_template AS (
         SELECT id,
-               (date_trunc('milliseconds', updated_at) = $10::timestamptz) AS version_match
-        FROM course_templates WHERE id = $9
+               (date_trunc('milliseconds', updated_at) = $11::timestamptz) AS version_match
+        FROM course_templates WHERE id = $10
         FOR UPDATE
       ),
       updated_template AS (
@@ -58,19 +58,20 @@ export async function updateCourseTemplate(
               room_id = $2,
               name = $3,
               description = $4,
-              weekdays = $5::weekday[],
-              start_time = $6::time,
-              end_time = $7::time,
-              start_date = $8::date,
-              end_date = $11::date,
+              banner_image_url = $5,
+              weekdays = $6::weekday[],
+              start_time = $7::time,
+              end_time = $8::time,
+              start_date = $9::date,
+              end_date = $12::date,
               updated_at = NOW()
-          WHERE id = $9
+          WHERE id = $10
             AND (SELECT version_match FROM target_template) = true
           RETURNING id, name
       ),
       log_template AS (
         INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
-        SELECT $12, 'Update'::action_type, id, 'course_template', 'Course template ' || name || ' updated'
+        SELECT $13, 'Update'::action_type, id, 'course_template', 'Course template ' || name || ' updated'
         FROM updated_template
       )
       SELECT
@@ -82,6 +83,9 @@ export async function updateCourseTemplate(
         validated.roomId ?? null,
         validated.name,
         validated.description ?? null,
+        validated.bannerImageUrl && validated.bannerImageUrl !== ''
+          ? validated.bannerImageUrl
+          : null,
         `{${validated.weekDays.join(',')}}`,
         validated.startTime,
         validated.endTime,

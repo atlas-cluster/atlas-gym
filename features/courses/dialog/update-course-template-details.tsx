@@ -81,6 +81,7 @@ export function UpdateCourseTemplateDialog({
     defaultValues: {
       name: '',
       description: '',
+      bannerImageUrl: '',
       trainerId: '',
       roomId: undefined,
       weekDays: [],
@@ -98,6 +99,7 @@ export function UpdateCourseTemplateDialog({
           ? {
               name: courseTemplate.name,
               description: courseTemplate.description ?? '',
+              bannerImageUrl: courseTemplate.bannerImageUrl ?? '',
               trainerId: courseTemplate.trainerId ?? '',
               roomId: courseTemplate.roomId ?? undefined,
               weekDays: courseTemplate.weekDays,
@@ -113,6 +115,7 @@ export function UpdateCourseTemplateDialog({
           : {
               name: '',
               description: '',
+              bannerImageUrl: '',
               trainerId: '',
               roomId: undefined,
               weekDays: [],
@@ -233,6 +236,30 @@ export function UpdateCourseTemplateDialog({
                     aria-invalid={fieldState.invalid}
                     autoComplete="off"
                     rows={2}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Banner Image URL */}
+            <Controller
+              name="bannerImageUrl"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="ct-banner-image-url">
+                    Banner Image URL
+                  </FieldLabel>
+                  <Input
+                    id="ct-banner-image-url"
+                    placeholder="https://example.com/image.jpg"
+                    {...field}
+                    value={field.value ?? ''}
+                    aria-invalid={fieldState.invalid}
+                    autoComplete="off"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

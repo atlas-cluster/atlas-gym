@@ -2812,3 +2812,48 @@ VALUES
     NULL
   )
 ON CONFLICT DO NOTHING;
+
+-- Seed banner images for select course templates
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800'
+WHERE
+  name = 'Early Bird Spin';
+
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
+WHERE
+  name = 'Spin & Burn';
+
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
+WHERE
+  name = 'Endurance Ride';
+
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
+WHERE
+  name IN (
+    'Morning Yoga Flow',
+    'Sunrise Yoga',
+    'Yoga Dance Fusion'
+  );
+
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
+WHERE
+  name LIKE '%HIIT%'
+  OR name LIKE '%Strength%'
+  OR name LIKE '%Power%';
+
+UPDATE course_templates
+SET
+  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
+WHERE
+  name LIKE '%Pilates%'
+  OR name LIKE '%Core%'
+  OR name LIKE '%Stretch%';

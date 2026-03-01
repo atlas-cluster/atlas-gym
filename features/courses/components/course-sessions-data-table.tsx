@@ -358,6 +358,14 @@ export function CourseSessionsDataTable({
             const s = row.original
             return (
               <Card key={row.id} className={s.isCancelled ? 'opacity-60' : ''}>
+                {s.bannerImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={s.bannerImageUrl}
+                    alt={s.name}
+                    className="w-full h-32 object-cover rounded-t-xl"
+                  />
+                )}
                 <CardHeader>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">
