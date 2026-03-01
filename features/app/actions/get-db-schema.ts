@@ -10,13 +10,11 @@ interface TableSchema {
 
 export async function getDBSchema(): Promise<TableSchema[]> {
   try {
-    // Check if user is authenticated and is a trainer
     const session = await getSession()
     if (!session.authenticated || !session.member?.isTrainer) {
       return []
     }
 
-    // Get all tables and their columns from the public schema
     const query = `
       SELECT 
         t.table_name as table,
@@ -34,7 +32,6 @@ export async function getDBSchema(): Promise<TableSchema[]> {
     const result = await pool.query(query)
     return result.rows as TableSchema[]
   } catch (error) {
-    // Error fetching schema - return empty array to allow editor to still function
     return []
   }
 }

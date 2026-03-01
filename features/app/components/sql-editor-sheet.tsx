@@ -1,6 +1,6 @@
 'use client'
 
-import { Play, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -46,16 +46,13 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   > | null>(null)
   const { theme, resolvedTheme } = useTheme()
 
-  // Fetch database schema for autocomplete
   useEffect(() => {
     const fetchSchema = async () => {
       try {
         const dbSchema = await getDBSchema()
 
-        // Convert to CodeMirror schema format
         const schemaMap: Record<string, readonly string[]> = {}
         dbSchema.forEach((table) => {
-          // Make sure columns are properly typed as readonly array
           schemaMap[table.table] = [...table.columns]
         })
 
@@ -72,7 +69,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
 
   const handleExecute = async () => {
     setIsExecuting(true)
-    setResult(null) // Clear previous results while executing
+    setResult(null)
 
     try {
       const queryResult = await executeSQL(code)
@@ -92,13 +89,11 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     setResult(null)
   }
 
-  // Get table columns from the first row of data
   const columns =
     result?.success && result.data && result.data.length > 0
       ? Object.keys(result.data[0])
       : []
 
-  // Create SQL extension with schema autocomplete - memoized to avoid recreating
   const sqlExtension = useMemo(() => {
     if (schema && Object.keys(schema).length > 0) {
       return sql({
@@ -110,7 +105,6 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     return sql({ dialect: PostgreSQL })
   }, [schema])
 
-  // Custom theme extension to match site colors
   const customTheme = useMemo(() => {
     return EditorView.theme({
       '&': {
@@ -122,7 +116,6 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
     })
   }, [])
 
-  // Select theme based on current mode - use resolvedTheme to handle 'system' theme
   const currentTheme = resolvedTheme || theme
   const editorTheme = currentTheme === 'dark' ? darkTheme : lightTheme
 
@@ -247,7 +240,7 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
 
             {result.truncated && (
               <div className="text-sm text-amber-600 dark:text-amber-500">
-                ⚠️ Results truncated to 100 rows. Use LIMIT in your query for
+                ⚠️ Results truncated to 1000 rows. Use LIMIT in your query for
                 specific row counts.
               </div>
             )}
@@ -258,7 +251,6 @@ export function SQLEditorSheet({ open, onOpenChange }: SQLEditorSheetProps) {
   )
 }
 
-// Helper function to format cell values for display
 function formatCellValue(value: unknown): string {
   if (value === null || value === undefined) {
     return 'NULL'
