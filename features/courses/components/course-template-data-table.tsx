@@ -32,6 +32,11 @@ import {
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/features/shared/components/ui/tooltip'
+import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -351,22 +356,32 @@ export function CourseTemplatesDataTable({
                 </div>
                 <CardAction>
                   <ButtonGroup>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onEdit(row.original)}>
-                      <PencilIcon />
-                      <span className="sr-only">Edit course</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onDelete(row.original)}>
-                      <TrashIcon />
-                      <span className="sr-only">Delete course</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onEdit(row.original)}>
+                          <PencilIcon />
+                          <span className="sr-only">Edit course</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit course</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onDelete(row.original)}>
+                          <TrashIcon />
+                          <span className="sr-only">Delete course</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete course</TooltipContent>
+                    </Tooltip>
                   </ButtonGroup>
                 </CardAction>
               </CardHeader>

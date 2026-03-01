@@ -26,6 +26,11 @@ import {
   CardTitle,
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/features/shared/components/ui/tooltip'
 import { SubscriptionDisplay } from '@/features/subscriptions'
 import { getSubscriptions } from '@/features/subscriptions/actions/get-subscriptions'
 import { subscriptionColumns } from '@/features/subscriptions/components/subscription-columns'
@@ -263,32 +268,56 @@ export function SubscriptionsDataTable({
                     {(subscription.original.isActive ||
                       subscription.original.isFuture) &&
                       !subscription.original.isCancelled && (
-                        <Button
-                          variant={'ghost'}
-                          size={'icon'}
-                          suppressHydrationWarning
-                          onClick={() => onCancel(subscription.original)}>
-                          <Trash />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant={'ghost'}
+                              size={'icon'}
+                              suppressHydrationWarning
+                              onClick={() => onCancel(subscription.original)}>
+                              <Trash />
+                              <span className="sr-only">
+                                Cancel subscription
+                              </span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Cancel subscription</TooltipContent>
+                        </Tooltip>
                       )}
                     {subscription.original.isCancelled && (
-                      <Button
-                        variant={'ghost'}
-                        size={'icon'}
-                        suppressHydrationWarning
-                        onClick={() => onRevertCancel(subscription.original)}>
-                        <RotateCcw />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant={'ghost'}
+                            size={'icon'}
+                            suppressHydrationWarning
+                            onClick={() =>
+                              onRevertCancel(subscription.original)
+                            }>
+                            <RotateCcw />
+                            <span className="sr-only">
+                              Restore subscription
+                            </span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Restore subscription</TooltipContent>
+                      </Tooltip>
                     )}
                     {!subscription.original.isActive &&
                       !subscription.original.isFuture &&
                       canCreate && (
-                        <Button
-                          size={'icon'}
-                          suppressHydrationWarning
-                          onClick={() => onCreate(subscription.original)}>
-                          <PlusIcon />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size={'icon'}
+                              suppressHydrationWarning
+                              onClick={() => onCreate(subscription.original)}>
+                              <PlusIcon />
+                              <span className="sr-only">Subscribe</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Subscribe</TooltipContent>
+                        </Tooltip>
                       )}
                   </ButtonGroup>
                 </CardAction>

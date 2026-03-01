@@ -41,6 +41,11 @@ import {
 import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
 import { Separator } from '@/features/shared/components/ui/separator'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/features/shared/components/ui/tooltip'
+import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -374,22 +379,32 @@ export function RoomsDataTable({
                 {isTrainer && (
                   <CardAction>
                     <ButtonGroup>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        suppressHydrationWarning
-                        onClick={() => onEdit(Room.original)}>
-                        <PencilIcon />
-                        <span className="sr-only">Edit Room</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        suppressHydrationWarning
-                        onClick={() => onDelete(Room.original)}>
-                        <TrashIcon />
-                        <span className="sr-only">Delete Room</span>
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            suppressHydrationWarning
+                            onClick={() => onEdit(Room.original)}>
+                            <PencilIcon />
+                            <span className="sr-only">Edit Room</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit Room</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            suppressHydrationWarning
+                            onClick={() => onDelete(Room.original)}>
+                            <TrashIcon />
+                            <span className="sr-only">Delete Room</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete Room</TooltipContent>
+                      </Tooltip>
                     </ButtonGroup>
                   </CardAction>
                 )}

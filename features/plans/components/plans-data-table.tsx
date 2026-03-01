@@ -28,6 +28,11 @@ import {
 } from '@/features/shared/components/ui/card'
 import { Input } from '@/features/shared/components/ui/input'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/features/shared/components/ui/tooltip'
+import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -254,22 +259,32 @@ export function PlansDataTable({
                 </div>
                 <CardAction>
                   <ButtonGroup>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onEdit(plan.original)}>
-                      <PencilIcon />
-                      <span className="sr-only">Edit plan</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      suppressHydrationWarning
-                      onClick={() => onDelete(plan.original)}>
-                      <TrashIcon />
-                      <span className="sr-only">Delete plan</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onEdit(plan.original)}>
+                          <PencilIcon />
+                          <span className="sr-only">Edit plan</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit plan</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          suppressHydrationWarning
+                          onClick={() => onDelete(plan.original)}>
+                          <TrashIcon />
+                          <span className="sr-only">Delete plan</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete plan</TooltipContent>
+                    </Tooltip>
                   </ButtonGroup>
                 </CardAction>
               </CardHeader>
