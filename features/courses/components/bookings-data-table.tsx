@@ -43,6 +43,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -335,16 +336,20 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
             return (
               <Card
                 key={row.id}
-                className={booking.isCancelled ? 'opacity-60' : ''}>
+                className={cn(
+                  'gap-0',
+                  booking.isCancelled ? 'opacity-60' : '',
+                  booking.bannerImageUrl ? 'pt-0' : ''
+                )}>
                 {booking.bannerImageUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={booking.bannerImageUrl}
                     alt={booking.name}
-                    className="w-full h-32 object-cover rounded-t-xl"
+                    className="w-full h-28 object-cover rounded-t-xl"
                   />
                 )}
-                <CardHeader>
+                <CardHeader className={'mt-3'}>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">
                       {booking.name}

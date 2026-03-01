@@ -36,6 +36,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -342,8 +343,21 @@ export function CourseTemplatesDataTable({
       {table.getRowModel().rows.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {table.getRowModel().rows.map((row) => (
-            <Card key={row.id}>
-              <CardHeader>
+            <Card
+              key={row.id}
+              className={cn(
+                'gap-0',
+                row.original.bannerImageUrl ? 'pt-0 ' : ''
+              )}>
+              {row.original.bannerImageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={row.original.bannerImageUrl}
+                  alt={row.original.name}
+                  className="w-full h-28 object-cover rounded-t-xl"
+                />
+              )}
+              <CardHeader className={'mt-3'}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">

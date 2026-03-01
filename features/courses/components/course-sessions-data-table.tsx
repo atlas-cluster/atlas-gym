@@ -51,6 +51,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -357,16 +358,22 @@ export function CourseSessionsDataTable({
           {table.getRowModel().rows.map((row) => {
             const s = row.original
             return (
-              <Card key={row.id} className={s.isCancelled ? 'opacity-60' : ''}>
+              <Card
+                key={row.id}
+                className={cn(
+                  'gap-0',
+                  s.isCancelled ? 'opacity-60' : '',
+                  s.bannerImageUrl ? 'pt-0' : ''
+                )}>
                 {s.bannerImageUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={s.bannerImageUrl}
                     alt={s.name}
-                    className="w-full h-32 object-cover rounded-t-xl"
+                    className="w-full h-28 object-cover rounded-t-xl"
                   />
                 )}
-                <CardHeader>
+                <CardHeader className={'mt-3'}>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">
                       {s.name}
