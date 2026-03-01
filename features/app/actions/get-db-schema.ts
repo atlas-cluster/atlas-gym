@@ -31,7 +31,7 @@ export async function getDBSchema(): Promise<TableSchema[]> {
 
     const result = await pool.query(query)
     return result.rows as TableSchema[]
-  } catch (error) {
+  } catch {
     return []
   }
 }
