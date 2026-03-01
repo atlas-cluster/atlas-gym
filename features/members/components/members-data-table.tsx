@@ -147,7 +147,7 @@ export function MembersDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex: true,
+    autoResetPageIndex: false,
 
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -161,6 +161,10 @@ export function MembersDataTable({
       pagination,
     },
   })
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [globalFilter, columnFilters])
 
   const subscriptionOptions = useMemo(() => {
     const subscriptionColumn = table.getColumn('subscription')

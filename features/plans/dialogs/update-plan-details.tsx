@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { createPlan, updatePlan } from '@/features/plans'
-import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
+import { planSchema } from '@/features/plans/schemas/plan'
 import { PlanDisplay } from '@/features/plans/types'
 import { NumberInput } from '@/features/shared/components/number-input'
 import { Button } from '@/features/shared/components/ui/button'
@@ -43,7 +43,7 @@ export function UpdatePlanDetailsDialog({
   const [isPending, setIsPending] = useState(false)
 
   const form = useForm({
-    resolver: zodResolver(planDetailsSchema),
+    resolver: zodResolver(planSchema),
     defaultValues: {
       name: '',
       price: 0,
@@ -72,7 +72,7 @@ export function UpdatePlanDetailsDialog({
     }
   }, [open, plan, form])
 
-  function onCreate(data: z.infer<typeof planDetailsSchema>) {
+  function onCreate(data: z.infer<typeof planSchema>) {
     setIsPending(true)
     const promise = createPlan(data)
       .then((result) => {
@@ -93,7 +93,7 @@ export function UpdatePlanDetailsDialog({
 
   function onUpdate(
     id: string,
-    data: z.infer<typeof planDetailsSchema>,
+    data: z.infer<typeof planSchema>,
     lastUpdatedAt: Date
   ) {
     setIsPending(true)
@@ -114,7 +114,7 @@ export function UpdatePlanDetailsDialog({
     })
   }
 
-  const handleSubmit = (data: z.infer<typeof planDetailsSchema>) => {
+  const handleSubmit = (data: z.infer<typeof planSchema>) => {
     if (isEditing && plan) {
       onUpdate(plan.id, data, plan.updatedAt)
     } else {

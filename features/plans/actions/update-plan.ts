@@ -4,13 +4,13 @@ import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { getSession } from '@/features/auth'
-import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
+import { planSchema } from '@/features/plans/schemas/plan'
 import { pool } from '@/features/shared/lib/db'
 import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
 export async function updatePlan(
   id: string,
-  data: z.infer<typeof planDetailsSchema>,
+  data: z.infer<typeof planSchema>,
   lastUpdatedAt: Date
 ): Promise<{
   success: boolean
@@ -42,7 +42,7 @@ export async function updatePlan(
       }
     }
 
-    const validated = planDetailsSchema.parse(data)
+    const validated = planSchema.parse(data)
 
     const result = await pool.query(
       `WITH target_plan AS (

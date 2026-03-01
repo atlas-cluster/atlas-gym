@@ -1,26 +1,22 @@
-import { CircleAlertIcon } from 'lucide-react'
+import { getCourseSessions } from '@/features/courses/actions/get-course-sessions'
+import { getRoomOptions } from '@/features/courses/actions/get-room-options'
+import { getTrainerOptions } from '@/features/courses/actions/get-trainer-options'
+import { CourseSessionsController } from '@/features/courses/components/course-sessions-controller'
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/features/shared/components/ui/empty'
+export const dynamic = 'force-dynamic'
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const [sessions, trainers, rooms] = await Promise.all([
+    getCourseSessions(),
+    getTrainerOptions(),
+    getRoomOptions(),
+  ])
+
   return (
-    <Empty className={'h-full'}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <CircleAlertIcon />
-        </EmptyMedia>
-        <EmptyTitle>No Content Available</EmptyTitle>
-        <EmptyDescription>
-          There is currently no content to display here. Please check back later
-          or add new content to get started.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <CourseSessionsController
+      data={sessions}
+      trainers={trainers}
+      rooms={rooms}
+    />
   )
 }

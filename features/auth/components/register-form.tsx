@@ -458,7 +458,9 @@ export function RegisterForm() {
                               'w-48 justify-between font-normal ' +
                               cn(!!fieldState.error && 'border-destructive!')
                             }>
-                            {field.value ? field.value : 'Select date'}
+                            {field.value
+                              ? field.value.split('-').reverse().join('.')
+                              : 'Select date'}
                             <ChevronDownIcon />
                           </Button>
                         </PopoverTrigger>

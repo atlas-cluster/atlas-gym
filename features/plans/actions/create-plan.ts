@@ -4,13 +4,11 @@ import { updateTag } from 'next/cache'
 import { z } from 'zod'
 
 import { getSession } from '@/features/auth'
-import { planDetailsSchema } from '@/features/plans/schemas/plan-details'
+import { planSchema } from '@/features/plans/schemas/plan'
 import { pool } from '@/features/shared/lib/db'
 import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
-export async function createPlan(
-  data: z.infer<typeof planDetailsSchema>
-): Promise<{
+export async function createPlan(data: z.infer<typeof planSchema>): Promise<{
   success: boolean
   message: string
   errorType?: 'AUTH' | 'NAME_COLLISION' | 'VALIDATION' | 'UNKNOWN'
@@ -34,7 +32,7 @@ export async function createPlan(
       }
     }
 
-    const validated = planDetailsSchema.parse(data)
+    const validated = planSchema.parse(data)
 
     await pool.query(
       `WITH inserted_plan AS (

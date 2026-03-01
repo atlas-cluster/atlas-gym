@@ -214,7 +214,9 @@ export function AuditLogsDataTable({
             column={table.getColumn('entity')}
             title="Entity"
             options={Object.keys(facets.entity).map((key) => ({
-              label: key.charAt(0).toUpperCase() + key.slice(1),
+              label: key
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (c) => c.toUpperCase()),
               value: key,
               icon: entityIcons[key] || Database,
             }))}
