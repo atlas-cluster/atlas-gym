@@ -64,8 +64,9 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
     accessorKey: 'entity',
     header: 'Entity',
     cell: ({ row }) => {
-      const entity = (row.getValue('entity') as string).replace(/_/g, ' ')
-      const Icon = entityIcons[entity] || Database
+      const rawEntity = row.getValue('entity') as string
+      const entity = rawEntity.replace(/_/g, ' ')
+      const Icon = entityIcons[rawEntity] || Database
 
       return (
         <div className="flex items-center gap-2 capitalize">

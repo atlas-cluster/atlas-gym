@@ -31,7 +31,7 @@ import {
 const mainNavItems = [
   { title: 'Dashboard', url: '/dashboard', icon: HomeIcon },
   { title: 'Courses', url: '/courses', icon: PersonStandingIcon },
-  { title: 'Reservations', url: '/reservations', icon: BookmarkIcon },
+  { title: 'Bookings', url: '/bookings', icon: BookmarkIcon },
   { title: 'Rooms', url: '/rooms', icon: MapPinIcon },
   { title: 'Subscription', url: '/subscription', icon: Repeat },
 ]

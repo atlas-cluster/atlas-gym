@@ -205,7 +205,7 @@ export function RoomsDataTable({
             {/* Desktop: Show input only */}
             <Input
               className={'hidden md:flex'}
-              placeholder="Search Rooms..."
+              placeholder="Search rooms..."
               value={globalFilter}
               onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
@@ -213,7 +213,7 @@ export function RoomsDataTable({
             <div className={'flex w-full gap-2 md:hidden'}>
               <ButtonGroup className="flex-1">
                 <Input
-                  placeholder="Search Rooms..."
+                  placeholder="Search rooms..."
                   value={globalFilter}
                   onChange={(e) =>
                     table.setGlobalFilter(String(e.target.value))

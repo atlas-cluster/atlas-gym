@@ -62,7 +62,7 @@ export function PlansDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 9 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
 
   useEffect(() => {
     setTableData(data)

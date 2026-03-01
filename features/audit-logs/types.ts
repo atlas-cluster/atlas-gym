@@ -16,7 +16,7 @@ export const entityIcons: Record<string, typeof Activity> = {
   plan: Layers,
   subscription: Repeat,
   course: PersonStanding,
-  reservation: Bookmark,
+  course_booking: Bookmark,
   room: MapPin,
   course_template: Calendar,
 }
