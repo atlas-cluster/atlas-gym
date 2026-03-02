@@ -25,6 +25,7 @@ import { createBooking } from '@/features/courses/actions/create-booking'
 import { getCourseSessions } from '@/features/courses/actions/get-course-sessions'
 import { uncancelSession } from '@/features/courses/actions/uncancel-session'
 import { courseSessionColumns } from '@/features/courses/components/course-session-columns'
+import { BannerImage } from '@/features/shared/components/banner-image'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
@@ -51,6 +52,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -86,7 +88,7 @@ export function CourseSessionsDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 12 })
 
   useEffect(() => {
     setTableData(data)
@@ -353,12 +355,21 @@ export function CourseSessionsDataTable({
       </div>
 
       {table.getRowModel().rows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {table.getRowModel().rows.map((row) => {
             const s = row.original
             return (
-              <Card key={row.id} className={s.isCancelled ? 'opacity-60' : ''}>
-                <CardHeader>
+              <Card
+                key={row.id}
+                className={cn(
+                  'gap-0',
+                  s.isCancelled ? 'opacity-60' : '',
+                  s.bannerImageUrl ? 'pt-0' : ''
+                )}>
+                {s.bannerImageUrl && (
+                  <BannerImage src={s.bannerImageUrl} alt={s.name} />
+                )}
+                <CardHeader className={'mt-3'}>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">
                       {s.name}

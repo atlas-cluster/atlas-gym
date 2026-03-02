@@ -12,6 +12,7 @@ const getCourseTemplatesCached = unstable_cache(
       SELECT ct.id,
              ct.name,
              ct.description,
+             ct.banner_image_url                   AS "bannerImageUrl",
              ct.weekdays                          AS "weekDays",
              ct.start_time::text                   AS "startTime",
              ct.end_time::text                     AS "endTime",
@@ -46,6 +47,7 @@ const getCourseTemplatesCached = unstable_cache(
       roomId: row.roomId ?? undefined,
       roomName: row.roomName ?? undefined,
       description: row.description ?? undefined,
+      bannerImageUrl: row.bannerImageUrl ?? undefined,
     }))
   },
   ['get-course-templates'],

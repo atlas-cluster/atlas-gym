@@ -17,6 +17,7 @@ import { CourseBookingDisplay } from '@/features/courses'
 import { cancelBooking } from '@/features/courses/actions/cancel-booking'
 import { getMyBookings } from '@/features/courses/actions/get-my-bookings'
 import { bookingColumns } from '@/features/courses/components/booking-columns'
+import { BannerImage } from '@/features/shared/components/banner-image'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
@@ -43,6 +44,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -72,7 +74,7 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 12 })
 
   useEffect(() => {
     setTableData(data)
@@ -329,14 +331,24 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
       </div>
 
       {table.getRowModel().rows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {table.getRowModel().rows.map((row) => {
             const booking = row.original
             return (
               <Card
                 key={row.id}
-                className={booking.isCancelled ? 'opacity-60' : ''}>
-                <CardHeader>
+                className={cn(
+                  'gap-0',
+                  booking.isCancelled ? 'opacity-60' : '',
+                  booking.bannerImageUrl ? 'pt-0' : ''
+                )}>
+                {booking.bannerImageUrl && (
+                  <BannerImage
+                    src={booking.bannerImageUrl}
+                    alt={booking.name}
+                  />
+                )}
+                <CardHeader className={'mt-3'}>
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 flex-wrap">
                       {booking.name}

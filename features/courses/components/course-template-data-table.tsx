@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { CourseTemplateDisplay, Weekday } from '@/features/courses'
 import { getCourseTemplates } from '@/features/courses/actions/get-course-templates'
 import { courseTemplateColumns } from '@/features/courses/components/course-template-columns'
+import { BannerImage } from '@/features/shared/components/banner-image'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
@@ -36,6 +37,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/features/shared/components/ui/tooltip'
+import { cn } from '@/features/shared/lib/utils'
 import {
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -96,7 +98,7 @@ export function CourseTemplatesDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 9 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 12 })
 
   useEffect(() => {
     setTableData(data)
@@ -340,10 +342,21 @@ export function CourseTemplatesDataTable({
 
       {/* Courses Grid */}
       {table.getRowModel().rows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {table.getRowModel().rows.map((row) => (
-            <Card key={row.id}>
-              <CardHeader>
+            <Card
+              key={row.id}
+              className={cn(
+                'gap-0',
+                row.original.bannerImageUrl ? 'pt-0 ' : ''
+              )}>
+              {row.original.bannerImageUrl && (
+                <BannerImage
+                  src={row.original.bannerImageUrl}
+                  alt={row.original.name}
+                />
+              )}
+              <CardHeader className={'mt-3'}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">

@@ -23,6 +23,11 @@ export const courseTemplateSchema = z
       .string()
       .max(500, 'Description must be at most 500 characters')
       .optional(),
+    bannerImageUrl: z
+      .string()
+      .url('Banner image must be a valid URL')
+      .optional()
+      .or(z.literal('')),
     trainerId: z.uuid('Invalid Trainer selected'),
     roomId: z.uuid('Invalid Room selected').optional(),
     weekDays: z

@@ -119,6 +119,7 @@ CREATE TABLE course_templates (
   room_id UUID REFERENCES rooms (id) ON DELETE SET NULL,
   name VARCHAR(100) NOT NULL,
   description TEXT,
+  banner_image_url TEXT,
   weekdays weekday[] NOT NULL CHECK (array_length(weekdays, 1) > 0),
   start_time TIME NOT NULL,
   end_time TIME NOT NULL CHECK (end_time > start_time),

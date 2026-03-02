@@ -2,6 +2,7 @@ export interface CourseTemplate {
   id: string
   name: string
   description?: string
+  bannerImageUrl?: string
   weekDays: Weekday[]
   startTime: string
   endTime: string
@@ -30,6 +31,7 @@ export interface CourseSessionDisplay extends CourseSession {
   sessionDate: string
   name: string
   description?: string
+  bannerImageUrl?: string
   trainerName?: string
   trainerId?: string
   roomName?: string
@@ -47,6 +49,7 @@ export interface CourseBookingDisplay {
   sessionDate: string
   name: string
   description?: string
+  bannerImageUrl?: string
   startTime: string
   endTime: string
   trainerName?: string

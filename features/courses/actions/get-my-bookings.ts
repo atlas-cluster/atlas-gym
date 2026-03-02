@@ -24,6 +24,7 @@ export async function getMyBookings(
        cs.session_date::text                                        AS "sessionDate",
        COALESCE(cs.name_override, ct.name)                          AS "name",
        COALESCE(cs.description_override, ct.description)            AS "description",
+       ct.banner_image_url                                          AS "bannerImageUrl",
        COALESCE(cs.start_time_override, cs.start_time)::text        AS "startTime",
        COALESCE(cs.end_time_override, cs.end_time)::text            AS "endTime",
        COALESCE(
@@ -51,6 +52,7 @@ export async function getMyBookings(
     trainerName: row.trainerName ?? undefined,
     roomName: row.roomName ?? undefined,
     description: row.description ?? undefined,
+    bannerImageUrl: row.bannerImageUrl ?? undefined,
     createdAt: new Date(row.createdAt),
   }))
 }
