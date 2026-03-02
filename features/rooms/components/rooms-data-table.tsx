@@ -139,7 +139,7 @@ export function RoomsDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 12 })
 
   useEffect(() => {
     setTableData(data)
@@ -333,7 +333,7 @@ export function RoomsDataTable({
 
       {/* Rooms Grid */}
       {table.getRowModel().rows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
           {table.getRowModel().rows.map((Room) => (
             <Card key={Room.id}>
               <CardHeader>
