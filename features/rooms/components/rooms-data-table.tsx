@@ -2,6 +2,7 @@
 
 import {
   CalendarIcon,
+  Check,
   ChevronDownIcon,
   ClockIcon,
   PencilIcon,
@@ -9,6 +10,7 @@ import {
   RefreshCwIcon,
   TrashIcon,
   UserIcon,
+  X,
   XIcon,
 } from 'lucide-react'
 import { useCallback, useEffect, useState, useTransition } from 'react'
@@ -355,19 +357,23 @@ export function RoomsDataTable({
                                 variant="destructive"
                                 className="text-xs"
                                 suppressHydrationWarning>
-                                Occupied until {status.until}
+                                <X />
+                                {status.until}
                               </Badge>
                             )
                           }
                           if (status.status === 'free-until') {
                             return (
                               <Badge suppressHydrationWarning>
-                                Available until {status.until}
+                                <Check />
+                                {status.until}
                               </Badge>
                             )
                           }
                           return (
-                            <Badge suppressHydrationWarning>Available</Badge>
+                            <Badge suppressHydrationWarning>
+                              <Check />
+                            </Badge>
                           )
                         })()}
                     </CardTitle>

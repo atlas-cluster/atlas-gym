@@ -743,7 +743,7 @@ VALUES
     ),
     'Weekend Warrior Circuit',
     'Full-body outdoor circuit to kick off the weekend.',
-    NULL,
+    'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.freshairfitness.co.uk%2Fassets%2Fimg%2Fsocial%2Fbig-rig.jpg&f=1&nofb=1&ipt=c989d35a80dccf574459cfd1099913b8a95cae3c638bff60575232fd81e9f873',
     ARRAY['saturday']::weekday[],
     '08:00',
     '09:30',
