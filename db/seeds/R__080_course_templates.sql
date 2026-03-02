@@ -4,6 +4,7 @@ INSERT INTO
     room_id,
     name,
     description,
+    banner_image_url,
     weekdays,
     start_time,
     end_time,
@@ -32,6 +33,7 @@ VALUES
     ),
     'Early Bird Spin',
     'Wake up and ride! High-energy morning spin to kickstart your day.',
+    'https://images.pexels.com/photos/8766379/pexels-photo-8766379.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '06:30',
     '07:15',
@@ -57,6 +59,7 @@ VALUES
     ),
     'Spin & Burn',
     'Intense 45-minute interval ride with hill climbs and sprints.',
+    'https://images.pexels.com/photos/13896069/pexels-photo-13896069.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '07:00',
     '07:45',
@@ -82,6 +85,7 @@ VALUES
     ),
     'Endurance Ride',
     'Long steady-state cycling session. Build your aerobic base.',
+    'https://images.pexels.com/photos/14616296/pexels-photo-14616296.jpeg',
     ARRAY['sunday']::weekday[],
     '09:00',
     '10:30',
@@ -107,6 +111,7 @@ VALUES
     ),
     'Power Cycling',
     'Threshold intervals to push your FTP. Intermediate to advanced.',
+    'https://images.pexels.com/photos/6388524/pexels-photo-6388524.jpeg',
     ARRAY['monday', 'thursday']::weekday[],
     '18:00',
     '18:45',
@@ -132,6 +137,7 @@ VALUES
     ),
     'Lunchtime Spin Express',
     'Quick 30-minute spin blast during your lunch break.',
+    'https://images.pexels.com/photos/4853858/pexels-photo-4853858.jpeg',
     ARRAY['tuesday', 'wednesday', 'friday']::weekday[],
     '12:00',
     '12:30',
@@ -157,6 +163,7 @@ VALUES
     ),
     'Saturday Spin Party',
     'Weekend vibes with themed playlists and high energy.',
+    'https://images.pexels.com/photos/5851030/pexels-photo-5851030.jpeg',
     ARRAY['saturday']::weekday[],
     '10:00',
     '11:00',
@@ -184,6 +191,7 @@ VALUES
     ),
     'Boxing Basics',
     'Learn jab, cross, hook, and uppercut. Pads and bags provided.',
+    'https://images.pexels.com/photos/8736743/pexels-photo-8736743.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '09:00',
     '10:00',
@@ -209,6 +217,7 @@ VALUES
     ),
     'Kickboxing Cardio',
     'Non-contact kickboxing-inspired workout for a serious sweat.',
+    'https://images.pexels.com/photos/2628210/pexels-photo-2628210.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '17:00',
     '18:00',
@@ -234,6 +243,7 @@ VALUES
     ),
     'Fight Conditioning',
     'Strength and cardio circuit inspired by fighter training camps.',
+    'https://images.pexels.com/photos/9944849/pexels-photo-9944849.jpeg',
     ARRAY['friday']::weekday[],
     '16:00',
     '17:00',
@@ -259,6 +269,7 @@ VALUES
     ),
     'Boxing Sparring Open',
     'Supervised light sparring for intermediate and advanced boxers.',
+    'https://images.pexels.com/photos/9944253/pexels-photo-9944253.jpeg',
     ARRAY['saturday']::weekday[],
     '11:00',
     '12:30',
@@ -284,6 +295,7 @@ VALUES
     ),
     'Heavy Bag HIIT',
     'High-intensity intervals on the heavy bag. All levels welcome.',
+    'https://images.pexels.com/photos/9945069/pexels-photo-9945069.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '12:00',
     '12:45',
@@ -309,6 +321,7 @@ VALUES
     ),
     'Boxing for Beginners',
     'Step-by-step introduction to boxing. No experience needed.',
+    'https://images.pexels.com/photos/8745630/pexels-photo-8745630.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '10:00',
     '11:00',
@@ -336,6 +349,7 @@ VALUES
     ),
     'Aqua Aerobics',
     'Low-impact water-based workout. Perfect for joint-friendly exercise.',
+    'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.blog.de%2Fwp-content%2Fuploads%2F2023%2F01%2FWie-effektiv-ist-Wasser-Aerobic.jpg&f=1&nofb=1&ipt=f82886b3e9212769268718dd21ce0e9ae7af8d2591f03c69f0eb64c44a1ba670',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '08:00',
     '09:00',
@@ -361,6 +375,7 @@ VALUES
     ),
     'Swim Technique',
     'Improve your freestyle, backstroke, and breaststroke with drills.',
+    'https://images.pexels.com/photos/1263348/pexels-photo-1263348.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '07:00',
     '08:00',
@@ -386,6 +401,7 @@ VALUES
     ),
     'Aqua Power',
     'High-intensity water resistance training. Builds strength without impact.',
+    'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.ostseetherme-usedom.de%2Fwp-content%2Fuploads%2F2025%2F05%2FMK14683A-scaled.jpg&f=1&nofb=1&ipt=f85bb0303685eff4a420a11c0a8187ac3afd09ac20dad4b75a322c7c12c60d99',
     ARRAY['monday', 'wednesday']::weekday[],
     '10:00',
     '11:00',
@@ -411,6 +427,7 @@ VALUES
     ),
     'Lap Swimming Club',
     'Structured lane swimming with pace sets. Bring your own goggles.',
+    'https://images.pexels.com/photos/27625146/pexels-photo-27625146.jpeg',
     ARRAY['tuesday', 'thursday', 'saturday']::weekday[],
     '06:00',
     '07:00',
@@ -436,6 +453,7 @@ VALUES
     ),
     'Water Polo Introduction',
     'Learn the basics of water polo in a fun, relaxed setting.',
+    'https://images.pexels.com/photos/2091400/pexels-photo-2091400.jpeg',
     ARRAY['saturday']::weekday[],
     '11:00',
     '12:30',
@@ -461,6 +479,7 @@ VALUES
     ),
     'Aqua Yoga',
     'Gentle yoga poses adapted for the pool. Deep relaxation in warm water.',
+    'https://images.unsplash.com/photo-1558106340-87553f4cff67',
     ARRAY['sunday']::weekday[],
     '10:00',
     '11:00',
@@ -488,6 +507,7 @@ VALUES
     ),
     'Morning Mat Pilates',
     'Classic mat pilates focusing on core strength and flexibility.',
+    'https://images.pexels.com/photos/8436939/pexels-photo-8436939.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '07:00',
     '08:00',
@@ -513,6 +533,7 @@ VALUES
     ),
     'Power Pilates',
     'Core-focused pilates with resistance bands and stability balls.',
+    'https://images.pexels.com/photos/868483/pexels-photo-868483.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '09:00',
     '10:00',
@@ -538,6 +559,7 @@ VALUES
     ),
     'Reformer Pilates',
     'Machine-based pilates for deeper muscle engagement. Limited spots.',
+    'https://images.pexels.com/photos/8769173/pexels-photo-8769173.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '11:00',
     '12:00',
@@ -563,6 +585,7 @@ VALUES
     ),
     'Pilates for Runners',
     'Targeted pilates to improve running form, hip mobility, and core stability.',
+    'https://images.pexels.com/photos/25596677/pexels-photo-25596677.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '17:00',
     '18:00',
@@ -588,6 +611,7 @@ VALUES
     ),
     'Prenatal Pilates',
     'Safe, gentle pilates adapted for expectant mothers.',
+    'https://images.unsplash.com/photo-1758599881262-7b79a56ac284',
     ARRAY['saturday']::weekday[],
     '10:00',
     '11:00',
@@ -613,6 +637,7 @@ VALUES
     ),
     'Barre Fusion',
     'Ballet-inspired workout blending pilates, dance, and strength.',
+    'https://images.unsplash.com/photo-1758671916868-b853bc18d031',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '17:00',
     '18:00',
@@ -638,6 +663,7 @@ VALUES
     ),
     'Stretch & Restore',
     'Deep stretching and myofascial release. Perfect after intense training.',
+    'https://images.pexels.com/photos/3756518/pexels-photo-3756518.jpeg',
     ARRAY['friday']::weekday[],
     '19:00',
     '20:00',
@@ -665,6 +691,7 @@ VALUES
     ),
     'Boot Camp',
     'Military-inspired outdoor circuit training. Rain or shine!',
+    'https://images.pexels.com/photos/13993576/pexels-photo-13993576.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '06:00',
     '07:00',
@@ -690,6 +717,7 @@ VALUES
     ),
     'Calisthenics Fundamentals',
     'Master push-ups, pull-ups, dips, and muscle-ups progressions.',
+    'https://images.pexels.com/photos/13993543/pexels-photo-13993543.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '08:00',
     '09:30',
@@ -715,6 +743,7 @@ VALUES
     ),
     'Weekend Warrior Circuit',
     'Full-body outdoor circuit to kick off the weekend.',
+    NULL,
     ARRAY['saturday']::weekday[],
     '08:00',
     '09:30',
@@ -740,6 +769,7 @@ VALUES
     ),
     'Street Workout',
     'Freestyle calisthenics — levers, planches, handstands, and combos.',
+    'https://images.unsplash.com/photo-1758521959654-17618e77e2e8',
     ARRAY['monday', 'wednesday']::weekday[],
     '16:00',
     '17:30',
@@ -765,6 +795,7 @@ VALUES
     ),
     'Outdoor Strength & Conditioning',
     'Bodyweight and minimal equipment strength work in the fresh air.',
+    'https://images.pexels.com/photos/4945521/pexels-photo-4945521.jpeg',
     ARRAY['tuesday', 'thursday', 'saturday']::weekday[],
     '10:00',
     '11:00',
@@ -790,6 +821,7 @@ VALUES
     ),
     'Pull-Up Progressions',
     'From zero to hero — structured pull-up training for all levels.',
+    'https://images.pexels.com/photos/4803667/pexels-photo-4803667.jpeg',
     ARRAY['friday']::weekday[],
     '15:00',
     '16:00',
@@ -815,6 +847,7 @@ VALUES
     ),
     'Outdoor Boxing Drills',
     'Shadow boxing, footwork, and conditioning in the open air.',
+    'https://images.pexels.com/photos/6999125/pexels-photo-6999125.jpeg',
     ARRAY['sunday']::weekday[],
     '09:00',
     '10:00',
@@ -842,6 +875,7 @@ VALUES
     ),
     'Hyrox Race Prep',
     'Full Hyrox simulation — running, ski erg, sled push/pull, wall balls, and more.',
+    'https://images.unsplash.com/photo-1739283180407-21e27d5c0735',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '07:00',
     '08:30',
@@ -867,6 +901,7 @@ VALUES
     ),
     'Functional Strength',
     'Compound lifts and functional movements to build Hyrox-ready power.',
+    'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5',
     ARRAY['tuesday', 'thursday']::weekday[],
     '09:00',
     '10:00',
@@ -892,6 +927,7 @@ VALUES
     ),
     'Strongman Saturday',
     'Tire flips, farmer walks, atlas stones — weekend warrior edition.',
+    'https://images.pexels.com/photos/3253499/pexels-photo-3253499.jpeg',
     ARRAY['saturday']::weekday[],
     '09:00',
     '11:00',
@@ -917,6 +953,7 @@ VALUES
     ),
     'Sled & Erg Intervals',
     'Alternating sled pushes, pulls, and erg sprints. Pure conditioning.',
+    'https://images.unsplash.com/photo-1743993414654-0be2b73a9620',
     ARRAY['monday', 'wednesday']::weekday[],
     '12:00',
     '13:00',
@@ -942,6 +979,7 @@ VALUES
     ),
     'Wall Ball Madness',
     'Wall ball technique and endurance. A Hyrox essential.',
+    'https://img.redbull.com/images/c_crop,w_3840,h_1920,x_0,y_0/c_auto,w_1200,h_600/f_auto,q_auto/redbullcom/2024/6/10/tkatirybdfkbvuqos4pv/jake-dearden-wall-balls-station-hyrox-world-championship',
     ARRAY['tuesday', 'thursday']::weekday[],
     '12:00',
     '12:45',
@@ -967,6 +1005,7 @@ VALUES
     ),
     'Hyrox Doubles Training',
     'Partner-based Hyrox simulation for the doubles category.',
+    'https://images.pexels.com/photos/4944437/pexels-photo-4944437.jpeg',
     ARRAY['saturday']::weekday[],
     '13:00',
     '14:30',
@@ -992,6 +1031,7 @@ VALUES
     ),
     'Functional Fitness WOD',
     'Workout of the Day — constantly varied, always challenging.',
+    'https://images.pexels.com/photos/3253501/pexels-photo-3253501.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '17:00',
     '18:00',
@@ -1017,6 +1057,7 @@ VALUES
     ),
     'Tabata Blast',
     '20 seconds on, 10 seconds off — repeat until you drop.',
+    'https://images.pexels.com/photos/7676548/pexels-photo-7676548.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '17:00',
     '17:45',
@@ -1042,6 +1083,7 @@ VALUES
     ),
     'Kettlebell Fury',
     'Swings, cleans, snatches — all kettlebell, all the time.',
+    'https://images.pexels.com/photos/3766211/pexels-photo-3766211.jpeg',
     ARRAY['sunday']::weekday[],
     '10:00',
     '11:00',
@@ -1069,6 +1111,7 @@ VALUES
     ),
     'Zumba Party',
     'High-energy Latin-inspired dance fitness. No experience needed!',
+    'https://images.pexels.com/photos/3768895/pexels-photo-3768895.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '18:00',
     '19:00',
@@ -1094,6 +1137,7 @@ VALUES
     ),
     'Step Aerobics',
     'Classic step workout with choreography. Great cardio burn.',
+    'https://images.pexels.com/photos/864990/pexels-photo-864990.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '17:00',
     '18:00',
@@ -1119,6 +1163,7 @@ VALUES
     ),
     'Hip Hop Fitness',
     'Street dance inspired cardio workout to the latest beats.',
+    'https://images.pexels.com/photos/17282676/pexels-photo-17282676.jpeg',
     ARRAY['saturday']::weekday[],
     '11:00',
     '12:00',
@@ -1144,6 +1189,7 @@ VALUES
     ),
     'Body Pump',
     'Barbell-based group class targeting all major muscle groups.',
+    'https://images.pexels.com/photos/3076516/pexels-photo-3076516.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '12:00',
     '13:00',
@@ -1169,6 +1215,7 @@ VALUES
     ),
     'Latin Dance Fitness',
     'Salsa, bachata, and merengue moves wrapped in a fitness class.',
+    'https://images.pexels.com/photos/7974876/pexels-photo-7974876.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '19:00',
     '20:00',
@@ -1194,6 +1241,7 @@ VALUES
     ),
     'Dance Cardio Express',
     'Fast-paced 30-minute dance session. Maximum fun, minimum time.',
+    'https://images.pexels.com/photos/7974879/pexels-photo-7974879.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '07:00',
     '07:30',
@@ -1219,6 +1267,7 @@ VALUES
     ),
     'Contemporary Dance',
     'Expressive movement blending ballet, modern, and jazz techniques.',
+    'https://images.pexels.com/photos/209948/pexels-photo-209948.jpeg',
     ARRAY['saturday']::weekday[],
     '14:00',
     '15:30',
@@ -1244,6 +1293,7 @@ VALUES
     ),
     'Afro Dance Fitness',
     'Afrobeats-inspired dance workout. Pure joy and sweat.',
+    'https://images.unsplash.com/photo-1705965497662-b275283a2f70',
     ARRAY['sunday']::weekday[],
     '11:00',
     '12:00',
@@ -1271,6 +1321,7 @@ VALUES
     ),
     'Morning Yoga Flow',
     'Energizing vinyasa flow to start your day. All levels welcome.',
+    'https://images.pexels.com/photos/6454061/pexels-photo-6454061.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '07:00',
     '08:00',
@@ -1296,6 +1347,7 @@ VALUES
     ),
     'Yin Yoga',
     'Slow, deep stretching held for minutes. Targets connective tissue.',
+    'https://images.pexels.com/photos/4056513/pexels-photo-4056513.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '09:00',
     '10:15',
@@ -1321,6 +1373,7 @@ VALUES
     ),
     'Hot Power Yoga',
     'Heated room, powerful sequences. Prepare to sweat and grow.',
+    'https://images.pexels.com/photos/4325478/pexels-photo-4325478.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '18:00',
     '19:15',
@@ -1346,6 +1399,7 @@ VALUES
     ),
     'Sunset Stretch & Restore',
     'Gentle stretching and guided relaxation to wind down the week.',
+    'https://images.pexels.com/photos/3822688/pexels-photo-3822688.jpeg',
     ARRAY['friday']::weekday[],
     '18:00',
     '19:00',
@@ -1371,6 +1425,7 @@ VALUES
     ),
     'Yoga for Athletes',
     'Mobility and recovery focused yoga tailored for active people.',
+    'https://images.pexels.com/photos/4998815/pexels-photo-4998815.jpeg',
     ARRAY['saturday']::weekday[],
     '08:00',
     '09:00',
@@ -1396,6 +1451,7 @@ VALUES
     ),
     'Sunday Meditation & Breathwork',
     'Guided meditation, pranayama, and sound healing.',
+    'https://images.pexels.com/photos/8940491/pexels-photo-8940491.jpeg',
     ARRAY['sunday']::weekday[],
     '09:00',
     '10:00',
@@ -1421,6 +1477,7 @@ VALUES
     ),
     'Mobility & Recovery',
     'Foam rolling, dynamic stretching, and breathing exercises.',
+    'https://images.pexels.com/photos/8436762/pexels-photo-8436762.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '19:00',
     '20:00',
@@ -1446,6 +1503,7 @@ VALUES
     ),
     'Ashtanga Yoga',
     'Traditional Ashtanga primary series. Disciplined and structured.',
+    'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.templepurohit.com%2Fwp-content%2Fuploads%2F2016%2F04%2FAshtanga-Yoga-of-Patanjali-8-Practices-of-Ashatnga-Yoga-1.jpg&f=1&nofb=1&ipt=98bf2e6f91a7e870fa0e223c177af2a81ccded1b2366ce917069153808d6a00e',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '12:00',
     '13:15',
@@ -1472,6 +1530,7 @@ VALUES
     ),
     'Friday Night Throwdown',
     'Team-based competitive workout to end the week. Leaderboard included.',
+    'https://images.pexels.com/photos/16966336/pexels-photo-16966336.jpeg',
     ARRAY['friday']::weekday[],
     '18:00',
     '19:30',
@@ -1497,6 +1556,7 @@ VALUES
     ),
     'Candlelight Spin',
     'Evening spin session in dim lighting with chill beats. Unwind and ride.',
+    'https://images.pexels.com/photos/7690217/pexels-photo-7690217.jpeg',
     ARRAY['thursday']::weekday[],
     '20:00',
     '20:45',
@@ -1522,6 +1582,7 @@ VALUES
     ),
     'Friday Night Dance Party',
     'End your week on the dance floor. All styles, all fun.',
+    'https://images.pexels.com/photos/5152546/pexels-photo-5152546.jpeg',
     ARRAY['friday']::weekday[],
     '19:00',
     '20:30',
@@ -1548,6 +1609,7 @@ VALUES
     ),
     'Hill Climb Challenge',
     'Progressive resistance ride simulating steep mountain climbs.',
+    'https://images.pexels.com/photos/1174103/pexels-photo-1174103.jpeg',
     ARRAY['wednesday']::weekday[],
     '08:00',
     '08:45',
@@ -1573,6 +1635,7 @@ VALUES
     ),
     'Recovery Spin',
     'Easy-pace active recovery ride. Flush out the legs.',
+    'https://images.pexels.com/photos/11870826/pexels-photo-11870826.jpeg',
     ARRAY['sunday']::weekday[],
     '16:00',
     '16:45',
@@ -1598,6 +1661,7 @@ VALUES
     ),
     'Sprint Intervals',
     '30-second all-out sprints with 90-second recovery. Repeat x12.',
+    'https://images.pexels.com/photos/7689278/pexels-photo-7689278.jpeg',
     ARRAY['monday', 'friday']::weekday[],
     '09:00',
     '09:45',
@@ -1623,6 +1687,7 @@ VALUES
     ),
     'Rhythm Ride',
     'Pedal to the beat — music-driven spin class with choreography on the bike.',
+    'https://images.pexels.com/photos/4162595/pexels-photo-4162595.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '18:00',
     '18:45',
@@ -1648,6 +1713,7 @@ VALUES
     ),
     'Spin & Stretch',
     '30 minutes spinning followed by 15 minutes guided stretching.',
+    'https://images.pexels.com/photos/7689280/pexels-photo-7689280.jpeg',
     ARRAY['wednesday']::weekday[],
     '17:00',
     '17:45',
@@ -1674,6 +1740,7 @@ VALUES
     ),
     'Womens Boxing',
     'Boxing class designed for women. Supportive and empowering.',
+    'https://images.pexels.com/photos/6456203/pexels-photo-6456203.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '08:00',
     '09:00',
@@ -1699,6 +1766,7 @@ VALUES
     ),
     'Boxing Conditioning',
     'Rope skipping, shadow boxing, and bag work circuits.',
+    'https://images.pexels.com/photos/6740332/pexels-photo-6740332.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '17:00',
     '18:00',
@@ -1724,6 +1792,7 @@ VALUES
     ),
     'Pad Work Masterclass',
     'Partner pad work drills for timing, accuracy, and combination flow.',
+    'https://images.pexels.com/photos/5750750/pexels-photo-5750750.jpeg',
     ARRAY['saturday']::weekday[],
     '09:00',
     '10:00',
@@ -1749,6 +1818,7 @@ VALUES
     ),
     'Boxing Footwork Clinic',
     'Focused session on stance, movement, angles, and ring generalship.',
+    'https://images.pexels.com/photos/8478707/pexels-photo-8478707.jpeg',
     ARRAY['wednesday']::weekday[],
     '19:00',
     '20:00',
@@ -1774,6 +1844,7 @@ VALUES
     ),
     'Sunday Open Gym Boxing',
     'Open session — bag work, shadow boxing, or light sparring. Trainer supervised.',
+    'https://images.pexels.com/photos/6815669/pexels-photo-6815669.jpeg',
     ARRAY['sunday']::weekday[],
     '10:00',
     '12:00',
@@ -1800,6 +1871,7 @@ VALUES
     ),
     'Deep Water Running',
     'Zero-impact running in deep water with flotation belts. Excellent rehab workout.',
+    'https://images.pexels.com/photos/261185/pexels-photo-261185.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '12:00',
     '12:45',
@@ -1825,6 +1897,7 @@ VALUES
     ),
     'Masters Swim Squad',
     'Structured training for experienced swimmers. Technique and endurance.',
+    'https://images.pexels.com/photos/1415810/pexels-photo-1415810.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '17:00',
     '18:00',
@@ -1850,6 +1923,7 @@ VALUES
     ),
     'Kids Swim Lessons',
     'Swimming fundamentals for children ages 6-12.',
+    'https://images.pexels.com/photos/12918939/pexels-photo-12918939.jpeg',
     ARRAY['saturday']::weekday[],
     '09:00',
     '10:00',
@@ -1875,6 +1949,7 @@ VALUES
     ),
     'Open Water Prep',
     'Triathlon and open water skills — sighting, drafting, and bilateral breathing.',
+    'https://images.pexels.com/photos/19421169/pexels-photo-19421169.jpeg',
     ARRAY['sunday']::weekday[],
     '07:00',
     '08:30',
@@ -1900,6 +1975,7 @@ VALUES
     ),
     'Aqua Zumba',
     'Dance party in the pool! Latin rhythms meet water resistance.',
+    'https://images.unsplash.com/photo-1541689186060-3b08be2fd22f',
     ARRAY['friday']::weekday[],
     '17:00',
     '18:00',
@@ -1926,6 +2002,7 @@ VALUES
     ),
     'Pilates for Back Pain',
     'Therapeutic pilates targeting lower back and spinal health.',
+    'https://images.pexels.com/photos/18075031/pexels-photo-18075031.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '14:00',
     '15:00',
@@ -1951,6 +2028,7 @@ VALUES
     ),
     'Advanced Reformer Flow',
     'Challenging reformer sequences for experienced practitioners.',
+    'https://images.unsplash.com/photo-1747240549807-fc3962949818',
     ARRAY['tuesday', 'thursday']::weekday[],
     '11:00',
     '12:00',
@@ -1976,6 +2054,7 @@ VALUES
     ),
     'Pilates & TRX Combo',
     'Blend of mat pilates and TRX suspension training. Total body challenge.',
+    'https://images.pexels.com/photos/25599829/pexels-photo-25599829.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
     '08:00',
     '09:00',
@@ -2001,6 +2080,7 @@ VALUES
     ),
     'Core Blast',
     '30 minutes of pure core work — planks, crunches, and stability drills.',
+    'https://images.pexels.com/photos/3984358/pexels-photo-3984358.jpeg',
     ARRAY['tuesday', 'thursday', 'saturday']::weekday[],
     '13:00',
     '13:30',
@@ -2026,6 +2106,7 @@ VALUES
     ),
     'Pilates for Swimmers',
     'Shoulder mobility, core control, and rotational strength for swimmers.',
+    'https://images.pexels.com/photos/8957624/pexels-photo-8957624.jpeg',
     ARRAY['friday']::weekday[],
     '10:00',
     '11:00',
@@ -2051,6 +2132,7 @@ VALUES
     ),
     'Sunday Slow Pilates',
     'Mindful, slow-tempo pilates with extended holds. Deep work.',
+    'https://images.pexels.com/photos/8957639/pexels-photo-8957639.jpeg',
     ARRAY['sunday']::weekday[],
     '10:00',
     '11:00',
@@ -2077,6 +2159,7 @@ VALUES
     ),
     'Handstand Workshop',
     'Progressive handstand training — wall drills to freestanding holds.',
+    'https://images.pexels.com/photos/5369001/pexels-photo-5369001.jpeg',
     ARRAY['friday']::weekday[],
     '08:00',
     '09:30',
@@ -2102,6 +2185,7 @@ VALUES
     ),
     'Sunrise Mobility Flow',
     'Dynamic stretching and animal flow movements in the fresh morning air.',
+    'https://images.pexels.com/photos/4804320/pexels-photo-4804320.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
     '07:00',
     '07:45',
@@ -2127,6 +2211,7 @@ VALUES
     ),
     'Weighted Calisthenics',
     'Dips, pull-ups, and push-ups with added weight. Strength-focused.',
+    'https://i.shgcdn.com/923ea405-3f2b-4949-a081-604f5ffb2d88/-/format/auto/-/preview/3000x3000/-/quality/lighter/',
     ARRAY['monday', 'wednesday']::weekday[],
     '12:00',
     '13:00',
@@ -2152,6 +2237,7 @@ VALUES
     ),
     'Rings & Bars',
     'Gymnastics rings and bar skills — muscle-ups, levers, and skin the cats.',
+    'https://images.unsplash.com/photo-1758875569994-b87ab600f647',
     ARRAY['thursday']::weekday[],
     '16:00',
     '17:30',
@@ -2177,6 +2263,7 @@ VALUES
     ),
     'Obstacle Course Training',
     'Spartan/Tough Mudder prep — climbing, crawling, jumping, and carrying.',
+    'https://images.pexels.com/photos/36182422/pexels-photo-36182422.jpeg',
     ARRAY['saturday']::weekday[],
     '12:00',
     '13:30',
@@ -2202,6 +2289,7 @@ VALUES
     ),
     'Outdoor HIIT Circuit',
     'Bodyweight HIIT using the outdoor stations. No equipment needed.',
+    'https://images.pexels.com/photos/6295978/pexels-photo-6295978.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
     '06:00',
     '06:45',
@@ -2228,6 +2316,7 @@ VALUES
     ),
     'Ski Erg Technique Lab',
     'Perfect your ski erg form. Pacing strategies for race day.',
+    'https://images.unsplash.com/photo-1614091245298-3effbd8ed161',
     ARRAY['monday']::weekday[],
     '10:00',
     '10:45',
@@ -2253,6 +2342,7 @@ VALUES
     ),
     'Sled Push Masterclass',
     'Technique, body positioning, and pacing for the sled push station.',
+    'https://images.unsplash.com/photo-1757147517623-ee9a76c9ead2',
     ARRAY['wednesday']::weekday[],
     '10:00',
     '10:45',
@@ -2278,6 +2368,7 @@ VALUES
     ),
     'Sandbag Lunges Clinic',
     'Build lunge endurance and technique for the Hyrox sandbag carry.',
+    'https://images.unsplash.com/photo-1632167764165-74a3d686e9f8',
     ARRAY['tuesday']::weekday[],
     '15:00',
     '15:45',
@@ -2303,6 +2394,7 @@ VALUES
     ),
     'Rowing Power',
     'Rowing technique and erg intervals. Short, sharp, and effective.',
+    'https://images.pexels.com/photos/7690207/pexels-photo-7690207.jpeg',
     ARRAY['thursday', 'saturday']::weekday[],
     '07:00',
     '07:45',
@@ -2328,6 +2420,7 @@ VALUES
     ),
     'Burpee Broad Jump Drills',
     'Improve your BBJ efficiency with technique work and conditioning.',
+    'https://images.unsplash.com/photo-1600677396341-16965cbe9224',
     ARRAY['monday', 'wednesday']::weekday[],
     '15:00',
     '15:45',
@@ -2353,6 +2446,7 @@ VALUES
     ),
     'Hyrox Open Workout',
     'Self-directed Hyrox training with coach guidance. Pick your weakness.',
+    'https://images.unsplash.com/photo-1757147517535-d0d9f4cd5b28',
     ARRAY['sunday']::weekday[],
     '08:00',
     '09:30',
@@ -2378,6 +2472,7 @@ VALUES
     ),
     'AMRAP Madness',
     'As Many Rounds As Possible — mixed modality, clock is ticking.',
+    'https://images.unsplash.com/photo-1743993414579-9ad1bb84038b',
     ARRAY['tuesday', 'friday']::weekday[],
     '08:00',
     '08:45',
@@ -2403,6 +2498,7 @@ VALUES
     ),
     'Farmers Walk & Carry',
     'Grip and loaded carry variations. Functional strength at its purest.',
+    'https://images.unsplash.com/photo-1757147517573-2521839225c8',
     ARRAY['wednesday']::weekday[],
     '16:00',
     '16:45',
@@ -2428,6 +2524,7 @@ VALUES
     ),
     'Endurance Engine',
     'Long chipper-style workout mixing running, rowing, and ski erg.',
+    'https://images.unsplash.com/photo-1743993414579-9ad1bb84038b',
     ARRAY['saturday']::weekday[],
     '15:00',
     '16:30',
@@ -2454,6 +2551,7 @@ VALUES
     ),
     'Bollywood Dance Fitness',
     'Energetic Bollywood-inspired choreography. Colourful and fun.',
+    'https://images.unsplash.com/photo-1547106510-6aec13ee41ff',
     ARRAY['monday']::weekday[],
     '09:00',
     '10:00',
@@ -2479,6 +2577,7 @@ VALUES
     ),
     'K-Pop Dance',
     'Learn iconic K-Pop choreography and perform as a group.',
+    'https://images.unsplash.com/photo-1604942629278-a9dbe21428f6',
     ARRAY['wednesday']::weekday[],
     '09:00',
     '10:00',
@@ -2504,6 +2603,7 @@ VALUES
     ),
     'Reggaeton Burn',
     'Latin urban dance fitness — perreo meets cardio.',
+    'https://images.unsplash.com/photo-1714738045959-3bd0634bdce2',
     ARRAY['thursday']::weekday[],
     '19:30',
     '20:15',
@@ -2529,6 +2629,7 @@ VALUES
     ),
     'Dance Technique Basics',
     'Foundations of movement — posture, rhythm, coordination, and expression.',
+    'https://images.unsplash.com/photo-1537365587684-f490102e1225',
     ARRAY['tuesday']::weekday[],
     '10:00',
     '11:00',
@@ -2554,6 +2655,7 @@ VALUES
     ),
     'Ballet Barre',
     'Classical ballet technique at the barre. Grace, strength, and poise.',
+    'https://images.unsplash.com/photo-1659549450821-bd7d6776b1e6',
     ARRAY['tuesday', 'thursday']::weekday[],
     '08:00',
     '09:00',
@@ -2579,6 +2681,7 @@ VALUES
     ),
     'Jazz Dance',
     'Classic jazz technique with high-energy combos. Leaps and turns included.',
+    'https://images.unsplash.com/photo-1550026593-f369f98df0af',
     ARRAY['wednesday']::weekday[],
     '16:00',
     '17:00',
@@ -2604,6 +2707,7 @@ VALUES
     ),
     'Capoeira Fitness',
     'Brazilian martial art meets dance. Ginga, kicks, and acrobatics.',
+    'https://images.unsplash.com/photo-1568022877651-c8817c039fe6',
     ARRAY['saturday']::weekday[],
     '09:00',
     '10:00',
@@ -2630,6 +2734,7 @@ VALUES
     ),
     'Hatha Yoga Basics',
     'Traditional hatha poses with focus on alignment and breathwork. Beginners welcome.',
+    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b',
     ARRAY['tuesday', 'thursday']::weekday[],
     '07:00',
     '08:00',
@@ -2655,6 +2760,7 @@ VALUES
     ),
     'Yoga Nidra',
     'Guided yogic sleep meditation. Deep relaxation and stress relief.',
+    'https://images.unsplash.com/photo-1602192509154-0b900ee1f851',
     ARRAY['wednesday']::weekday[],
     '20:00',
     '21:00',
@@ -2680,6 +2786,7 @@ VALUES
     ),
     'Acro Yoga Partners',
     'Partner-based acro yoga — flying, basing, and spotting fundamentals.',
+    'https://images.unsplash.com/photo-1758274537594-ae71243befa5',
     ARRAY['saturday']::weekday[],
     '14:00',
     '15:30',
@@ -2705,6 +2812,7 @@ VALUES
     ),
     'Rocket Yoga',
     'Fast-paced, dynamic Ashtanga-derived flow. Arm balances and inversions.',
+    'https://images.unsplash.com/photo-1766069565396-b63c9254bbf0',
     ARRAY['monday', 'friday']::weekday[],
     '17:00',
     '18:00',
@@ -2730,6 +2838,7 @@ VALUES
     ),
     'Yoga for Climbers',
     'Finger, wrist, and shoulder mobility with hip openers for climbers.',
+    'http://images.unsplash.com/photo-1758274536275-a0abbcf45300',
     ARRAY['wednesday']::weekday[],
     '17:00',
     '18:00',
@@ -2755,6 +2864,7 @@ VALUES
     ),
     'Breathwork & Cold Exposure',
     'Wim Hof inspired breathing techniques and mindset training.',
+    'https://images.unsplash.com/photo-1737993705699-f71abda85ef5',
     ARRAY['saturday']::weekday[],
     '11:00',
     '12:00',
@@ -2780,6 +2890,7 @@ VALUES
     ),
     'Restorative Yoga',
     'Prop-supported poses held for 5+ minutes. Total nervous system reset.',
+    'https://images.unsplash.com/photo-1447452001602-7090c7ab2db3',
     ARRAY['sunday']::weekday[],
     '17:00',
     '18:15',
@@ -2805,6 +2916,7 @@ VALUES
     ),
     'Yoga Dance Fusion',
     'Creative blend of yoga flows and dance movement. Expressive and freeing.',
+    'https://images.unsplash.com/photo-1557512724-931547195611',
     ARRAY['monday']::weekday[],
     '10:00',
     '11:00',
@@ -2812,692 +2924,3 @@ VALUES
     NULL
   )
 ON CONFLICT DO NOTHING;
-
--- Seed banner images — one individual image per course template
--- ===== SPINNING / INDOOR CYCLING =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800'
-WHERE
-  name = 'Early Bird Spin';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Spin & Burn';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'Endurance Ride';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Power Cycling';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?w=800'
-WHERE
-  name = 'Lunchtime Spin Express';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517649281203-dad836b5e5a4?w=800'
-WHERE
-  name = 'Saturday Spin Party';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1508880871954-f9b85dba8f42?w=800'
-WHERE
-  name = 'Candlelight Spin';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800'
-WHERE
-  name = 'Hill Climb Challenge';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Recovery Spin';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'Sprint Intervals';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1526676037777-05a232554f77?w=800'
-WHERE
-  name = 'Rhythm Ride';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Spin & Stretch';
-
--- ===== BOXING / KICKBOXING =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=800'
-WHERE
-  name = 'Boxing Basics';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1552072805-7dd2eab1eda6?w=800'
-WHERE
-  name = 'Kickboxing Cardio';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Fight Conditioning';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=800'
-WHERE
-  name = 'Boxing Sparring Open';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1552072805-7dd2eab1eda6?w=800'
-WHERE
-  name = 'Heavy Bag HIIT';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=800'
-WHERE
-  name = 'Boxing for Beginners';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Outdoor Boxing Drills';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1552072805-7dd2eab1eda6?w=800'
-WHERE
-  name = 'Womens Boxing';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=800'
-WHERE
-  name = 'Boxing Conditioning';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1552072805-7dd2eab1eda6?w=800'
-WHERE
-  name = 'Pad Work Masterclass';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1517438476312-10d79c077509?w=800'
-WHERE
-  name = 'Boxing Footwork Clinic';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1552072805-7dd2eab1eda6?w=800'
-WHERE
-  name = 'Sunday Open Gym Boxing';
-
--- ===== SWIMMING / AQUA =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800'
-WHERE
-  name = 'Aqua Aerobics';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800'
-WHERE
-  name = 'Swim Technique';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800'
-WHERE
-  name = 'Aqua Power';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800'
-WHERE
-  name = 'Lap Swimming Club';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800'
-WHERE
-  name = 'Water Polo Introduction';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800'
-WHERE
-  name = 'Aqua Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800'
-WHERE
-  name = 'Deep Water Running';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800'
-WHERE
-  name = 'Masters Swim Squad';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800'
-WHERE
-  name = 'Kids Swim Lessons';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800'
-WHERE
-  name = 'Open Water Prep';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800'
-WHERE
-  name = 'Aqua Zumba';
-
--- ===== PILATES (MAT) =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Morning Mat Pilates';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Power Pilates';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Pilates for Runners';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Prenatal Pilates';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Pilates for Back Pain';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Pilates & TRX Combo';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Core Blast';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Pilates for Swimmers';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Sunday Slow Pilates';
-
--- ===== PILATES (REFORMER / BARRE) =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Reformer Pilates';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Advanced Reformer Flow';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800'
-WHERE
-  name = 'Barre Fusion';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Stretch & Restore';
-
--- ===== YOGA =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Morning Yoga Flow';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Yin Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Hot Power Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'Sunset Stretch & Restore';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Yoga for Athletes';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Ashtanga Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Hatha Yoga Basics';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Acro Yoga Partners';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Rocket Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Yoga for Climbers';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'Restorative Yoga';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800'
-WHERE
-  name = 'Yoga Dance Fusion';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Sunrise Yoga';
-
--- ===== MEDITATION / BREATHWORK =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=800'
-WHERE
-  name = 'Yoga Nidra';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Sunday Meditation & Breathwork';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=800'
-WHERE
-  name = 'Breathwork & Cold Exposure';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800'
-WHERE
-  name = 'Mobility & Recovery';
-
--- ===== OUTDOOR CALISTHENICS / BOOT CAMP =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Boot Camp';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Calisthenics Fundamentals';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'Weekend Warrior Circuit';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Street Workout';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Outdoor Strength & Conditioning';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Weighted Calisthenics';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Outdoor HIIT Circuit';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Obstacle Course Training';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800'
-WHERE
-  name = 'Sunrise Mobility Flow';
-
--- ===== GYMNASTICS / BODYWEIGHT SKILLS =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Pull-Up Progressions';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Handstand Workshop';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Rings & Bars';
-
--- ===== HYROX / FUNCTIONAL FITNESS =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Hyrox Race Prep';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800'
-WHERE
-  name = 'Functional Strength';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Wall Ball Madness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Hyrox Doubles Training';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Functional Fitness WOD';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Tabata Blast';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Hyrox Open Workout';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=800'
-WHERE
-  name = 'AMRAP Madness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1541534260-64898e44af73?w=800'
-WHERE
-  name = 'Endurance Engine';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Friday Night Throwdown';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Burpee Broad Jump Drills';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1541534260-64898e44af73?w=800'
-WHERE
-  name = 'Sled & Erg Intervals';
-
--- ===== KETTLEBELL / STRONGMAN / LOADED CARRIES =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1604480132736-44c188fe4d20?w=800'
-WHERE
-  name = 'Kettlebell Fury';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Strongman Saturday';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1604480132736-44c188fe4d20?w=800'
-WHERE
-  name = 'Farmers Walk & Carry';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Sandbag Lunges Clinic';
-
--- ===== ROWING / SKI ERG / SLED =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1541534260-64898e44af73?w=800'
-WHERE
-  name = 'Rowing Power';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-WHERE
-  name = 'Ski Erg Technique Lab';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800'
-WHERE
-  name = 'Sled Push Masterclass';
-
--- ===== DANCE (LATIN, AFRO, BOLLYWOOD, K-POP) =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'Zumba Party';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Latin Dance Fitness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'Dance Cardio Express';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Afro Dance Fitness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'Friday Night Dance Party';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Bollywood Dance Fitness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'K-Pop Dance';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Reggaeton Burn';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'Dance Technique Basics';
-
--- ===== HIP HOP / URBAN / CONTEMPORARY / JAZZ =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Hip Hop Fitness';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800'
-WHERE
-  name = 'Contemporary Dance';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800'
-WHERE
-  name = 'Jazz Dance';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800'
-WHERE
-  name = 'Capoeira Fitness';
-
--- ===== BALLET =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800'
-WHERE
-  name = 'Ballet Barre';
-
--- ===== AEROBICS / GROUP WEIGHTS =====
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800'
-WHERE
-  name = 'Step Aerobics';
-
-UPDATE course_templates
-SET
-  banner_image_url = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800'
-WHERE
-  name = 'Body Pump';

@@ -17,6 +17,7 @@ import { CourseBookingDisplay } from '@/features/courses'
 import { cancelBooking } from '@/features/courses/actions/cancel-booking'
 import { getMyBookings } from '@/features/courses/actions/get-my-bookings'
 import { bookingColumns } from '@/features/courses/components/booking-columns'
+import { BannerImage } from '@/features/shared/components/banner-image'
 import { DataTableFacetedFilter } from '@/features/shared/components/data-table-faceted-filter'
 import { DataTablePagination } from '@/features/shared/components/data-table-pagination'
 import { DataTableSortDropdown } from '@/features/shared/components/data-table-sort-dropdown'
@@ -73,7 +74,7 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 6 })
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 12 })
 
   useEffect(() => {
     setTableData(data)
@@ -330,7 +331,7 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
       </div>
 
       {table.getRowModel().rows.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {table.getRowModel().rows.map((row) => {
             const booking = row.original
             return (
@@ -342,11 +343,9 @@ export function BookingsDataTable({ data }: BookingsDataTableProps) {
                   booking.bannerImageUrl ? 'pt-0' : ''
                 )}>
                 {booking.bannerImageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <BannerImage
                     src={booking.bannerImageUrl}
                     alt={booking.name}
-                    className="w-full h-28 object-cover rounded-t-xl"
                   />
                 )}
                 <CardHeader className={'mt-3'}>
