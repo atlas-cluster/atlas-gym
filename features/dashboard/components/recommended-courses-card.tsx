@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
+import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
 
 interface RecommendedCoursesCardProps {
   sessions: CourseSessionDisplay[]
@@ -35,38 +36,42 @@ export function RecommendedCoursesCard({
           Available courses you can still book today
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 overflow-y-auto">
-        {sessions.length > 0 ? (
-          <ul className="space-y-2">
-            {sessions.map((session) => (
-              <li
-                key={session.id}
-                className="flex items-start gap-3 rounded-md border p-3 text-sm">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{session.name}</p>
-                  <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
-                    <span className="flex items-center gap-1">
-                      <ClockIcon className="size-3" />
-                      {formatTime(session.startTime)} –{' '}
-                      {formatTime(session.endTime)}
-                    </span>
-                    {session.roomName && (
+      <CardContent className="flex-1 min-h-0 p-0">
+        <ScrollArea className="h-full px-6">
+          {sessions.length > 0 ? (
+            <ul className="space-y-2 py-1 pb-6">
+              {sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className="flex items-start gap-3 rounded-md border p-3 text-sm">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{session.name}</p>
+                    <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
                       <span className="flex items-center gap-1">
-                        <MapPinIcon className="size-3" />
-                        {session.roomName}
+                        <ClockIcon className="size-3" />
+                        {formatTime(session.startTime)} –{' '}
+                        {formatTime(session.endTime)}
                       </span>
-                    )}
-                    {session.trainerName && <span>{session.trainerName}</span>}
+                      {session.roomName && (
+                        <span className="flex items-center gap-1">
+                          <MapPinIcon className="size-3" />
+                          {session.roomName}
+                        </span>
+                      )}
+                      {session.trainerName && (
+                        <span>{session.trainerName}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed">
-            You&apos;ve booked all available courses today!
-          </p>
-        )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed mx-0 my-1">
+              You&apos;ve booked all available courses today!
+            </p>
+          )}
+        </ScrollArea>
       </CardContent>
       <CardFooter>
         <Button asChild variant="outline" size="sm" className="w-full">

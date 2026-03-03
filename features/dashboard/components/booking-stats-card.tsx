@@ -1,5 +1,8 @@
+'use client'
+
 import { format, parseISO } from 'date-fns'
 import { BookmarkIcon, TrendingUpIcon } from 'lucide-react'
+import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
 
 import { BookingDayStat } from '@/features/dashboard/actions/get-dashboard-stats'
 import {
@@ -9,23 +12,38 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/features/shared/components/ui/chart'
 
 interface BookingStatsCardProps {
   bookingsPerDay: BookingDayStat[]
   totalUpcomingBookings: number
 }
 
-const BAR_AREA_HEIGHT = 88
+const chartConfig = {
+  bookings: {
+    label: 'Bookings',
+    color: 'var(--primary)',
+  },
+} satisfies ChartConfig
 
 export function BookingStatsCard({
   bookingsPerDay,
   totalUpcomingBookings,
 }: BookingStatsCardProps) {
-  const maxCount = Math.max(...bookingsPerDay.map((d) => d.count), 1)
   const totalThisWeek = bookingsPerDay.reduce((sum, d) => sum + d.count, 0)
 
+  const chartData = bookingsPerDay.map((d) => ({
+    day: format(parseISO(d.date), 'EEE'),
+    bookings: d.count,
+  }))
+
   return (
-    <Card className="h-full overflow-hidden">
+    <Card className="h-full overflow-hidden flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUpIcon className="size-4 text-muted-foreground" />
@@ -33,7 +51,7 @@ export function BookingStatsCard({
         </CardTitle>
         <CardDescription>Activity overview</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex-1 flex flex-col gap-4">
         {/* Summary stats */}
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-md bg-muted p-3">
@@ -53,34 +71,30 @@ export function BookingStatsCard({
           </div>
         </div>
 
-        {/* Bar chart */}
-        <div className="flex items-end gap-2 h-32">
-          {bookingsPerDay.map((day) => {
-            const heightPct = (day.count / maxCount) * 100
-            const label = format(parseISO(day.date), 'EEE')
-            return (
-              <div
-                key={day.date}
-                className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-xs font-medium text-foreground">
-                  {day.count > 0 ? day.count : ''}
-                </span>
-                <div
-                  className="w-full flex items-end"
-                  style={{ height: BAR_AREA_HEIGHT }}>
-                  <div
-                    className="w-full rounded-t-sm bg-primary transition-all"
-                    style={{
-                      height: `${Math.max(heightPct, day.count > 0 ? 6 : 2)}%`,
-                      opacity: day.count > 0 ? 1 : 0.2,
-                    }}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground">{label}</span>
-              </div>
-            )
-          })}
-        </div>
+        {/* Line chart */}
+        <ChartContainer config={chartConfig} className="flex-1 w-full min-h-0">
+          <LineChart data={chartData} margin={{ left: 4, right: 4 }}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis
+              dataKey="day"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Line
+              dataKey="bookings"
+              type="monotone"
+              stroke="var(--color-bookings)"
+              strokeWidth={2}
+              dot={{ fill: 'var(--color-bookings)', r: 3 }}
+              activeDot={{ r: 5 }}
+            />
+          </LineChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   )
