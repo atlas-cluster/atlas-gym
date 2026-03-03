@@ -38,12 +38,56 @@ export async function overrideSession(
 
     const validated = sessionOverrideSchema.parse(data)
 
-    const nameOverride = validated.nameOverride || null
-    const descriptionOverride = validated.descriptionOverride || null
-    const trainerIdOverride = validated.trainerIdOverride || null
-    const roomIdOverride = validated.roomIdOverride || null
-    const startTimeOverride = validated.startTimeOverride || null
-    const endTimeOverride = validated.endTimeOverride || null
+    // Fetch original template values and session base times to compare
+    const origResult = await pool.query(
+      `SELECT ct.name, ct.description, ct.trainer_id, ct.room_id,
+              cs.start_time::text AS start_time, cs.end_time::text AS end_time
+       FROM course_sessions cs
+         JOIN course_templates ct ON ct.id = cs.template_id
+       WHERE cs.id = $1`,
+      [sessionId]
+    )
+
+    if (origResult.rows.length === 0) {
+      return {
+        success: false,
+        errorType: 'NOT_FOUND',
+        message: 'Session not found.',
+      }
+    }
+
+    const orig = origResult.rows[0]
+
+    // Set override to null when the value matches the original (no override needed)
+    const nameOverride =
+      validated.nameOverride && validated.nameOverride !== orig.name
+        ? validated.nameOverride
+        : null
+    const descriptionOverride =
+      validated.descriptionOverride &&
+      validated.descriptionOverride !== (orig.description ?? '')
+        ? validated.descriptionOverride
+        : null
+    const trainerIdOverride =
+      validated.trainerIdOverride &&
+      validated.trainerIdOverride !== (orig.trainer_id ?? '')
+        ? validated.trainerIdOverride
+        : null
+    const roomIdOverride =
+      validated.roomIdOverride &&
+      validated.roomIdOverride !== (orig.room_id ?? '')
+        ? validated.roomIdOverride
+        : null
+    const startTimeOverride =
+      validated.startTimeOverride &&
+      validated.startTimeOverride !== orig.start_time.slice(0, 5)
+        ? validated.startTimeOverride
+        : null
+    const endTimeOverride =
+      validated.endTimeOverride &&
+      validated.endTimeOverride !== orig.end_time.slice(0, 5)
+        ? validated.endTimeOverride
+        : null
 
     const result = await pool.query(
       `WITH target_session AS (

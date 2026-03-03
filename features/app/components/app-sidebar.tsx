@@ -2,11 +2,13 @@
 import {
   BookmarkIcon,
   CalendarIcon,
+  ChartNoAxesCombined,
   History,
   HomeIcon,
   Layers,
   MapPinIcon,
   PersonStandingIcon,
+  Puzzle,
   Repeat,
   UsersIcon,
 } from 'lucide-react'
@@ -37,10 +39,12 @@ const mainNavItems = [
 ]
 
 const trainerNavItems = [
-  { title: 'Members', url: '/trainers/members', icon: UsersIcon },
-  { title: 'Courses', url: '/trainers/courses', icon: CalendarIcon },
-  { title: 'Plans', url: '/trainers/plans', icon: Layers },
-  { title: 'Audit Logs', url: '/trainers/audit-logs', icon: History },
+  { title: 'Members', url: '/members', icon: UsersIcon },
+  { title: 'My Courses', url: '/my-courses', icon: CalendarIcon },
+  { title: 'Course Templates', url: '/course-templates', icon: Puzzle },
+  { title: 'Plans', url: '/plans', icon: Layers },
+  { title: 'Analytics', url: '/analytics', icon: ChartNoAxesCombined },
+  { title: 'Audit Logs', url: '/audit-logs', icon: History },
 ]
 
 export function AppSidebar() {

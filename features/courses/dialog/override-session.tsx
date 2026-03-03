@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -65,21 +65,28 @@ export function OverrideSessionDialog({
     },
   })
 
+  const prevOpenRef = useRef(false)
+
   useEffect(() => {
-    if (open && session) {
+    const wasOpen = prevOpenRef.current
+    prevOpenRef.current = open
+
+    if (open && !wasOpen && session) {
+      const hasNameOverride = session.name !== session.originalName
+      const hasDescriptionOverride =
+        (session.description ?? '') !== (session.originalDescription ?? '')
+
       form.reset({
-        nameOverride: session.hasOverrides ? (session.name ?? '') : '',
-        descriptionOverride: session.hasOverrides
+        nameOverride: hasNameOverride ? session.name : '',
+        descriptionOverride: hasDescriptionOverride
           ? (session.description ?? '')
           : '',
         trainerIdOverride: session.trainerId ?? '',
         roomIdOverride: session.roomId ?? '',
-        startTimeOverride: session.hasOverrides
-          ? new Date(session.startTime).toTimeString().slice(0, 5)
-          : '',
-        endTimeOverride: session.hasOverrides
-          ? new Date(session.endTime).toTimeString().slice(0, 5)
-          : '',
+        startTimeOverride: new Date(session.startTime)
+          .toTimeString()
+          .slice(0, 5),
+        endTimeOverride: new Date(session.endTime).toTimeString().slice(0, 5),
       })
     }
   }, [open, session, form])
@@ -124,7 +131,9 @@ export function OverrideSessionDialog({
                   <FieldLabel htmlFor="so-name">Name</FieldLabel>
                   <Input
                     id="so-name"
-                    placeholder="Leave empty for default"
+                    placeholder={
+                      session?.originalName ?? 'Leave empty for default'
+                    }
                     {...field}
                     value={field.value ?? ''}
                     autoComplete="off"
@@ -144,7 +153,9 @@ export function OverrideSessionDialog({
                   <FieldLabel htmlFor="so-desc">Description</FieldLabel>
                   <Textarea
                     id="so-desc"
-                    placeholder="Leave empty for default"
+                    placeholder={
+                      session?.originalDescription ?? 'Leave empty for default'
+                    }
                     {...field}
                     value={field.value ?? ''}
                     rows={2}
@@ -160,69 +171,86 @@ export function OverrideSessionDialog({
               <Controller
                 name="trainerIdOverride"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Trainer</FieldLabel>
-                    <Select
-                      value={field.value ?? ''}
-                      onValueChange={(val) =>
-                        field.onChange(val === '__none__' ? '' : val)
-                      }>
-                      <SelectTrigger
-                        className={cn(
-                          'w-full',
-                          fieldState.invalid && 'border-destructive!'
-                        )}>
-                        <SelectValue placeholder="Use default" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Use default</SelectItem>
-                        {trainers.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const isOverridden =
+                    session &&
+                    field.value &&
+                    field.value !== session.originalTrainerId
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Trainer</FieldLabel>
+                      <Select
+                        value={field.value ?? ''}
+                        onValueChange={(val) =>
+                          field.onChange(val === '__none__' ? '' : val)
+                        }>
+                        <SelectTrigger
+                          className={cn(
+                            'w-full',
+                            fieldState.invalid && 'border-destructive!'
+                          )}>
+                          <SelectValue placeholder="Use default" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">Use default</SelectItem>
+                          {trainers.map((t) => (
+                            <SelectItem key={t.id} value={t.id}>
+                              {isOverridden &&
+                              t.id === session?.originalTrainerId
+                                ? `${t.name} (original)`
+                                : t.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )
+                }}
               />
 
               <Controller
                 name="roomIdOverride"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Room</FieldLabel>
-                    <Select
-                      value={field.value ?? ''}
-                      onValueChange={(val) =>
-                        field.onChange(val === '__none__' ? '' : val)
-                      }>
-                      <SelectTrigger
-                        className={cn(
-                          'w-full',
-                          fieldState.invalid && 'border-destructive!'
-                        )}>
-                        <SelectValue placeholder="Use default" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Use default</SelectItem>
-                        {rooms.map((r) => (
-                          <SelectItem key={r.id} value={r.id}>
-                            {r.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const isOverridden =
+                    session &&
+                    field.value &&
+                    field.value !== session.originalRoomId
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Room</FieldLabel>
+                      <Select
+                        value={field.value ?? ''}
+                        onValueChange={(val) =>
+                          field.onChange(val === '__none__' ? '' : val)
+                        }>
+                        <SelectTrigger
+                          className={cn(
+                            'w-full',
+                            fieldState.invalid && 'border-destructive!'
+                          )}>
+                          <SelectValue placeholder="Use default" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">Use default</SelectItem>
+                          {rooms.map((r) => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {isOverridden && r.id === session?.originalRoomId
+                                ? `${r.name} (original)`
+                                : r.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )
+                }}
               />
             </div>
 
@@ -230,41 +258,67 @@ export function OverrideSessionDialog({
               <Controller
                 name="startTimeOverride"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="so-start">Start Time</FieldLabel>
-                    <Input
-                      id="so-start"
-                      type="time"
-                      className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                      {...field}
-                      value={field.value ?? ''}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const originalTime =
+                    session?.originalStartTime.slice(0, 5) ?? ''
+                  const isOverridden =
+                    field.value && field.value !== originalTime
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="so-start">
+                        Start Time{' '}
+                        {isOverridden && (
+                          <span className="text-muted-foreground font-normal">
+                            (original: {originalTime})
+                          </span>
+                        )}
+                      </FieldLabel>
+                      <Input
+                        id="so-start"
+                        type="time"
+                        className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )
+                }}
               />
 
               <Controller
                 name="endTimeOverride"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="so-end">End Time</FieldLabel>
-                    <Input
-                      id="so-end"
-                      type="time"
-                      className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                      {...field}
-                      value={field.value ?? ''}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const originalTime =
+                    session?.originalEndTime.slice(0, 5) ?? ''
+                  const isOverridden =
+                    field.value && field.value !== originalTime
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="so-end">
+                        End Time{' '}
+                        {isOverridden && (
+                          <span className="text-muted-foreground font-normal">
+                            (original: {originalTime})
+                          </span>
+                        )}
+                      </FieldLabel>
+                      <Input
+                        id="so-end"
+                        type="time"
+                        className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )
+                }}
               />
             </div>
           </FieldGroup>

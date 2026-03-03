@@ -133,7 +133,7 @@ export function UpdateCourseTemplateDialog({
     const promise = createCourseTemplate(data)
       .then((result) => {
         if (!result.success) {
-          throw new Error(result.message || 'Failed to create course')
+          throw new Error(result.message || 'Failed to create course template')
         }
         setOpen(false)
         return result
@@ -141,9 +141,9 @@ export function UpdateCourseTemplateDialog({
       .finally(() => setIsPending(false))
 
     toast.promise(promise, {
-      loading: 'Creating course...',
+      loading: 'Creating course template...',
       success: (result) => result.message,
-      error: (err) => err?.message || 'Failed to create course',
+      error: (err) => err?.message || 'Failed to create course template',
     })
   }
 
@@ -156,7 +156,7 @@ export function UpdateCourseTemplateDialog({
     const promise = updateCourseTemplate(id, data, lastUpdatedAt)
       .then((result) => {
         if (!result.success) {
-          throw new Error(result.message || 'Failed to update course')
+          throw new Error(result.message || 'Failed to update course template')
         }
         setOpen(false)
         return result
@@ -164,9 +164,9 @@ export function UpdateCourseTemplateDialog({
       .finally(() => setIsPending(false))
 
     toast.promise(promise, {
-      loading: 'Updating course...',
+      loading: 'Updating course template...',
       success: (result) => result.message,
-      error: (err) => err?.message || 'Failed to update course',
+      error: (err) => err?.message || 'Failed to update course template',
     })
   }
 
@@ -183,12 +183,12 @@ export function UpdateCourseTemplateDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-137.5">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Course' : 'Create Course'}
+            {isEditing ? 'Edit Course Template' : 'Create Course Template'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Update the course details below.'
-              : 'Create a new recurring course.'}
+              ? 'Update the course template details below.'
+              : 'Create a new recurring course template.'}
           </DialogDescription>
         </DialogHeader>
         <form

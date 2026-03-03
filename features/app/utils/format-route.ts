@@ -12,13 +12,17 @@ export function formatRoute(route: string) {
       return 'Rooms'
     case '/subscription':
       return 'Subscription'
-    case '/trainers/members':
+    case '/members':
       return 'Members'
-    case '/trainers/courses':
-      return 'Courses'
-    case '/trainers/plans':
+    case '/my-courses':
+      return 'My Courses'
+    case '/course-templates':
+      return 'Course Templates'
+    case '/plans':
       return 'Plans'
-    case '/trainers/audit-logs':
+    case '/analytics':
+      return 'Analytics'
+    case '/audit-logs':
       return 'Audit Logs'
   }
 }

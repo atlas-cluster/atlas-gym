@@ -42,6 +42,14 @@ export async function getCourseSessions(
          OR cs.room_id_override IS NOT NULL
          OR cs.start_time_override IS NOT NULL
          OR cs.end_time_override IS NOT NULL)                      AS "hasOverrides",
+       ct.name                                                     AS "originalName",
+       ct.description                                              AS "originalDescription",
+       ct.trainer_id                                               AS "originalTrainerId",
+       m.firstname || ' ' || m.lastname                            AS "originalTrainerName",
+       ct.room_id                                                  AS "originalRoomId",
+       r.name                                                      AS "originalRoomName",
+       cs.start_time::text                                         AS "originalStartTime",
+       cs.end_time::text                                           AS "originalEndTime",
        COALESCE(bc.booking_count, 0)::int                          AS "bookingCount",
        my_booking.id                                               AS "myBookingId"
      FROM course_sessions cs
@@ -75,5 +83,13 @@ export async function getCourseSessions(
     isBookedByMe: !!row.myBookingId,
     myBookingId: row.myBookingId ?? undefined,
     updatedAt: new Date(row.updatedAt),
+    originalName: row.originalName,
+    originalDescription: row.originalDescription ?? undefined,
+    originalTrainerId: row.originalTrainerId ?? undefined,
+    originalTrainerName: row.originalTrainerName ?? undefined,
+    originalRoomId: row.originalRoomId ?? undefined,
+    originalRoomName: row.originalRoomName ?? undefined,
+    originalStartTime: row.originalStartTime,
+    originalEndTime: row.originalEndTime,
   }))
 }

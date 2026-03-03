@@ -227,7 +227,7 @@ export function CourseTemplatesDataTable({
             {/* Desktop: Show input only */}
             <Input
               className={'hidden md:flex'}
-              placeholder="Search courses..."
+              placeholder="Search course templates..."
               value={globalFilter}
               onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
@@ -235,7 +235,7 @@ export function CourseTemplatesDataTable({
             <div className={'flex w-full gap-2 md:hidden'}>
               <ButtonGroup className="flex-1">
                 <Input
-                  placeholder="Search courses..."
+                  placeholder="Search course templates..."
                   value={globalFilter}
                   onChange={(e) =>
                     table.setGlobalFilter(String(e.target.value))
@@ -264,7 +264,7 @@ export function CourseTemplatesDataTable({
                 suppressHydrationWarning
                 onClick={onCreate}>
                 <PlusIcon />
-                <span className="sr-only">Create Course</span>
+                <span className="sr-only">Create Template</span>
               </Button>
             </div>
           </div>
@@ -335,7 +335,7 @@ export function CourseTemplatesDataTable({
             suppressHydrationWarning
             onClick={onCreate}>
             <PlusIcon />
-            <span className="hidden md:inline">Create Course</span>
+            <span className="hidden md:inline">Create Template</span>
           </Button>
         </div>
       </div>
@@ -377,10 +377,10 @@ export function CourseTemplatesDataTable({
                           suppressHydrationWarning
                           onClick={() => onEdit(row.original)}>
                           <PencilIcon />
-                          <span className="sr-only">Edit course</span>
+                          <span className="sr-only">Edit course template</span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Edit course</TooltipContent>
+                      <TooltipContent>Edit course template</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -390,10 +390,12 @@ export function CourseTemplatesDataTable({
                           suppressHydrationWarning
                           onClick={() => onDelete(row.original)}>
                           <TrashIcon />
-                          <span className="sr-only">Delete course</span>
+                          <span className="sr-only">
+                            Delete course template
+                          </span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Delete course</TooltipContent>
+                      <TooltipContent>Delete course template</TooltipContent>
                     </Tooltip>
                   </ButtonGroup>
                 </CardAction>
@@ -447,8 +449,8 @@ export function CourseTemplatesDataTable({
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground">
             {globalFilter || table.getState().columnFilters.length > 0
-              ? 'No courses found matching your filters.'
-              : 'No courses available.'}
+              ? 'No course templates found matching your filters.'
+              : 'No course templates available.'}
           </p>
         </div>
       )}

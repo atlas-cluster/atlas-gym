@@ -32,7 +32,7 @@ export function DeleteCourseTemplateDialog({
     const promise = deleteCourseTemplate(id, updatedAt)
       .then((result) => {
         if (!result.success) {
-          throw new Error(result.message || 'Failed to delete course')
+          throw new Error(result.message || 'Failed to delete course template')
         }
         setOpen(false)
         return result
@@ -40,9 +40,9 @@ export function DeleteCourseTemplateDialog({
       .finally(() => setIsPending(false))
 
     toast.promise(promise, {
-      loading: 'Deleting course...',
+      loading: 'Deleting course template...',
       success: (result) => result.message,
-      error: (err) => err?.message || 'Failed to delete course',
+      error: (err) => err?.message || 'Failed to delete course template',
     })
   }
 
@@ -57,7 +57,7 @@ export function DeleteCourseTemplateDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            Are you sure you want to delete this course?
+            Are you sure you want to delete this course template?
           </DialogTitle>
           <DialogDescription>
             This action cannot be undone. All associated course sessions and

@@ -41,6 +41,14 @@ export interface CourseSessionDisplay extends CourseSession {
   myBookingId?: string
   hasOverrides: boolean
   updatedAt: Date
+  originalName: string
+  originalDescription?: string
+  originalTrainerId?: string
+  originalTrainerName?: string
+  originalRoomId?: string
+  originalRoomName?: string
+  originalStartTime: string
+  originalEndTime: string
 }
 
 export interface CourseBookingDisplay {

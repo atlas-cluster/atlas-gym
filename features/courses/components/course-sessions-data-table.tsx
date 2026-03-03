@@ -371,17 +371,13 @@ export function CourseSessionsDataTable({
                 )}
                 <CardHeader className={'mt-3'}>
                   <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2 flex-wrap">
+                    <CardTitle className="flex items-center gap-2 flex-wrap leading-5.5">
                       {s.name}
                       {s.isCancelled && (
-                        <Badge variant="destructive" className="text-xs">
-                          Cancelled
-                        </Badge>
+                        <Badge variant="destructive">Cancelled</Badge>
                       )}
                       {s.hasOverrides && !s.isCancelled && (
-                        <Badge variant="outline" className="text-xs">
-                          Modified
-                        </Badge>
+                        <Badge variant="outline">Modified</Badge>
                       )}
                     </CardTitle>
                     <CardDescription className="mt-1">
