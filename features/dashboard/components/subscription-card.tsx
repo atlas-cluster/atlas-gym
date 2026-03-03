@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { Calendar, Check, PlusCircleIcon, Settings, X } from 'lucide-react'
+import { Calendar, Check, PlusCircleIcon, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { PlanDisplayMinimal } from '@/features/plans'
@@ -114,14 +114,6 @@ export function SubscriptionCard({
             </div>
           )}
         </CardContent>
-        <CardFooter>
-          <Button asChild variant="outline" size="sm" className="w-full">
-            <Link href="/subscription">
-              <Settings className="size-3.5" />
-              Manage Subscription
-            </Link>
-          </Button>
-        </CardFooter>
       </Card>
     )
   }

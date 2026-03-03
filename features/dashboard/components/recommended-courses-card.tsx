@@ -7,6 +7,16 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { CourseSessionDisplay, createBooking } from '@/features/courses'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/features/shared/components/ui/alert-dialog'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Card,
@@ -32,12 +42,15 @@ export function RecommendedCoursesCard({
 }: RecommendedCoursesCardProps) {
   const [bookedIds, setBookedIds] = useState<Set<string>>(new Set())
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [confirmSession, setConfirmSession] =
+    useState<CourseSessionDisplay | null>(null)
 
   const visibleSessions = initialSessions
     .filter((s) => !bookedIds.has(s.id))
     .slice(0, MAX_SHOWN)
 
   const handleBook = (session: CourseSessionDisplay) => {
+    setConfirmSession(null)
     setPendingId(session.id)
     const promise = createBooking(session.id)
       .then((r) => {
@@ -54,60 +67,90 @@ export function RecommendedCoursesCard({
   }
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SparklesIcon className="size-4 text-muted-foreground" />
-          Recommended Today
-        </CardTitle>
-        <CardDescription>
-          Available courses you can still book today
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 space-y-2">
-        {visibleSessions.length > 0 ? (
-          visibleSessions.map((session) => (
-            <div
-              key={session.id}
-              className="flex items-center gap-3 rounded-md border p-3 text-sm">
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{session.name}</p>
-                <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
-                  <span className="flex items-center gap-1">
-                    <ClockIcon className="size-3" />
-                    {formatTime(session.startTime)} –{' '}
-                    {formatTime(session.endTime)}
-                  </span>
-                  {session.roomName && (
+    <>
+      <AlertDialog
+        open={!!confirmSession}
+        onOpenChange={(open) => !open && setConfirmSession(null)}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Book{' '}
+              <span className="font-medium text-foreground">
+                {confirmSession?.name}
+              </span>{' '}
+              at{' '}
+              {confirmSession &&
+                `${formatTime(confirmSession.startTime)} – ${formatTime(confirmSession.endTime)}`}
+              ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              size="sm"
+              onClick={() => confirmSession && handleBook(confirmSession)}>
+              Book
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Card className="flex flex-col h-full overflow-hidden">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SparklesIcon className="size-4 text-muted-foreground" />
+            Recommended Today
+          </CardTitle>
+          <CardDescription>
+            Available courses you can still book today
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 space-y-2">
+          {visibleSessions.length > 0 ? (
+            visibleSessions.map((session) => (
+              <div
+                key={session.id}
+                className="flex items-center gap-3 rounded-md border p-3 text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{session.name}</p>
+                  <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
                     <span className="flex items-center gap-1">
-                      <MapPinIcon className="size-3" />
-                      {session.roomName}
+                      <ClockIcon className="size-3" />
+                      {formatTime(session.startTime)} –{' '}
+                      {formatTime(session.endTime)}
                     </span>
-                  )}
-                  {session.trainerName && <span>{session.trainerName}</span>}
+                    {session.roomName && (
+                      <span className="flex items-center gap-1">
+                        <MapPinIcon className="size-3" />
+                        {session.roomName}
+                      </span>
+                    )}
+                    {session.trainerName && <span>{session.trainerName}</span>}
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pendingId === session.id}
+                  onClick={() => setConfirmSession(session)}>
+                  <BookmarkIcon className="size-3.5" />
+                  Book
+                </Button>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pendingId === session.id}
-                onClick={() => handleBook(session)}>
-                <BookmarkIcon className="size-3.5" />
-                Book
-              </Button>
-            </div>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed">
-            You&apos;ve booked all available courses today!
-          </p>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button asChild variant="outline" size="sm" className="w-full">
-          <Link href="/courses">Browse All Courses</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed">
+              You&apos;ve booked all available courses today!
+            </p>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link href="/courses">Browse All Courses</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    </>
   )
 }
