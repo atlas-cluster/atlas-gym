@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { getSession } from '@/features/auth'
 import { courseTemplateSchema } from '@/features/courses/schemas/course-template'
 import { pool } from '@/features/shared/lib/db'
+import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
 export async function updateCourseTemplate(
   id: string,
@@ -17,6 +18,7 @@ export async function updateCourseTemplate(
   errorType?:
     | 'AUTH'
     | 'NOT_FOUND'
+    | 'NAME_COLLISION'
     | 'VERSION_MISMATCH'
     | 'VALIDATION'
     | 'UNKNOWN'
@@ -120,6 +122,18 @@ export async function updateCourseTemplate(
 
     return { success: true, message: 'Course template updated successfully.' }
   } catch (error: unknown) {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === PG_UNIQUE_VIOLATION
+    ) {
+      return {
+        success: false,
+        errorType: 'NAME_COLLISION',
+        message: 'A course template with this name already exists.',
+      }
+    }
     if (error instanceof z.ZodError) {
       return {
         success: false,

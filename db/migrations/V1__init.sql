@@ -107,7 +107,7 @@ CREATE TABLE subscriptions (
 
 CREATE TABLE rooms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(50) NOT NULL,
+  name VARCHAR(50) UNIQUE NOT NULL,
   description TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -117,7 +117,7 @@ CREATE TABLE course_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trainer_id UUID REFERENCES trainers (member_id) ON DELETE SET NULL,
   room_id UUID REFERENCES rooms (id) ON DELETE SET NULL,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(50) UNIQUE NOT NULL,
   description TEXT,
   banner_image_url TEXT,
   weekdays weekday[] NOT NULL CHECK (array_length(weekdays, 1) > 0),
@@ -146,7 +146,7 @@ CREATE TABLE course_sessions (
   room_id_override UUID REFERENCES rooms (id) ON DELETE SET NULL,
   start_time_override TIME,
   end_time_override TIME,
-  name_override VARCHAR(100),
+  name_override VARCHAR(50),
   description_override TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),

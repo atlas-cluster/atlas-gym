@@ -33,4 +33,4 @@ VALUES
     'Yoga Studio',
     'Quiet, warm room with mirrors and wooden flooring, ideal for yoga and meditation.'
   )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (name) DO NOTHING;
