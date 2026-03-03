@@ -48,9 +48,6 @@ const getMembersCached = unstable_cache(
                  LEFT JOIN trainers t ON m.id = t.member_id
                  LEFT JOIN subscriptions s ON m.id = s.member_id
                  LEFT JOIN plans p ON s.plan_id = p.id
-        WHERE (s.start_date > CURRENT_DATE
-           OR (s.start_date <= CURRENT_DATE AND (s.end_date IS NULL OR s.end_date >= CURRENT_DATE)))
-           OR s.id IS NULL
         ORDER BY m.lastname, m.firstname, s.start_date ASC
     `)
 

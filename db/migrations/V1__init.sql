@@ -300,3 +300,148 @@ CREATE TRIGGER trg_validate_course_session_overlap BEFORE INSERT
 OR
 UPDATE ON course_sessions FOR EACH ROW
 EXECUTE FUNCTION validate_course_session_overlap ();
+
+-- BOOKING OVERLAP VALIDATION TRIGGER
+-- Prevents a member from booking two course sessions that overlap in time on the same day.
+CREATE OR REPLACE FUNCTION validate_booking_no_overlap () RETURNS TRIGGER AS $$
+DECLARE
+  new_date  DATE;
+  new_start TIME;
+  new_end   TIME;
+  conflict  TEXT;
+BEGIN
+  -- Resolve the effective date and times for the session being booked
+  SELECT
+    cs.session_date,
+    COALESCE(cs.start_time_override, cs.start_time),
+    COALESCE(cs.end_time_override, cs.end_time)
+  INTO new_date, new_start, new_end
+  FROM course_sessions cs
+  WHERE cs.id = NEW.session_id;
+
+  -- Check for overlapping bookings by the same member on the same day
+  SELECT COALESCE(cs2.name_override, ct2.name) INTO conflict
+  FROM course_bookings cb
+  JOIN course_sessions cs2 ON cs2.id = cb.session_id
+  JOIN course_templates ct2 ON ct2.id = cs2.template_id
+  WHERE cb.member_id = NEW.member_id
+    AND cb.session_id != NEW.session_id
+    AND cs2.session_date = new_date
+    AND cs2.is_cancelled = FALSE
+    AND (new_start, new_end) OVERLAPS (
+          COALESCE(cs2.start_time_override, cs2.start_time),
+          COALESCE(cs2.end_time_override, cs2.end_time)
+        )
+  LIMIT 1;
+
+  IF FOUND THEN
+    RAISE EXCEPTION 'Booking conflict: overlaps with already booked session "%"', conflict
+      USING ERRCODE = '23P01',
+            CONSTRAINT = 'prevent_booking_time_overlap';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_booking_no_overlap BEFORE INSERT
+OR
+UPDATE ON course_bookings FOR EACH ROW
+EXECUTE FUNCTION validate_booking_no_overlap ();
+
+-- TRAINER SELF-BOOKING VALIDATION TRIGGER
+-- Prevents a trainer from booking a session they are teaching.
+CREATE OR REPLACE FUNCTION validate_no_self_booking () RETURNS TRIGGER AS $$
+DECLARE
+  eff_trainer_id UUID;
+  session_name   TEXT;
+BEGIN
+  SELECT
+    COALESCE(cs.trainer_id_override, ct.trainer_id),
+    COALESCE(cs.name_override, ct.name)
+  INTO eff_trainer_id, session_name
+  FROM course_sessions cs
+  JOIN course_templates ct ON ct.id = cs.template_id
+  WHERE cs.id = NEW.session_id;
+
+  IF eff_trainer_id IS NOT NULL AND eff_trainer_id = NEW.member_id THEN
+    RAISE EXCEPTION 'Cannot book your own session "%"', session_name
+      USING ERRCODE = '23P01',
+            CONSTRAINT = 'prevent_trainer_self_booking';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_no_self_booking BEFORE INSERT
+OR
+UPDATE ON course_bookings FOR EACH ROW
+EXECUTE FUNCTION validate_no_self_booking ();
+
+-- Auto-removes a trainer's booking when they are assigned to that session.
+CREATE OR REPLACE FUNCTION remove_self_booking_on_session_update () RETURNS TRIGGER AS $$
+DECLARE
+  eff_trainer_id UUID;
+BEGIN
+  IF NEW.trainer_id_override IS DISTINCT FROM OLD.trainer_id_override THEN
+    SELECT COALESCE(NEW.trainer_id_override, ct.trainer_id)
+    INTO eff_trainer_id
+    FROM course_templates ct
+    WHERE ct.id = NEW.template_id;
+
+    IF eff_trainer_id IS NOT NULL THEN
+      INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+      SELECT cb.member_id, 'Delete'::action_type, cb.id, 'course_booking',
+        'Booking auto-cancelled: assigned as trainer for session ' || COALESCE(NEW.name_override, ct.name)
+      FROM course_bookings cb
+      JOIN course_templates ct ON ct.id = NEW.template_id
+      WHERE cb.session_id = NEW.id
+        AND cb.member_id = eff_trainer_id;
+
+      DELETE FROM course_bookings
+      WHERE session_id = NEW.id
+        AND member_id = eff_trainer_id;
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_remove_self_booking_on_session BEFORE
+UPDATE ON course_sessions FOR EACH ROW
+EXECUTE FUNCTION remove_self_booking_on_session_update ();
+
+-- Auto-removes a trainer's bookings when they are assigned to a template,
+-- for all sessions that inherit the trainer from the template.
+CREATE OR REPLACE FUNCTION remove_self_booking_on_template_update () RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.trainer_id IS DISTINCT FROM OLD.trainer_id AND NEW.trainer_id IS NOT NULL THEN
+    -- Log before deleting
+    INSERT INTO audit_logs (member_id, action, entity_id, entity_type, description)
+    SELECT cb.member_id, 'Delete'::action_type, cb.id, 'course_booking',
+      'Booking auto-cancelled: assigned as trainer for course ' || NEW.name
+    FROM course_bookings cb
+    JOIN course_sessions cs ON cs.id = cb.session_id
+    WHERE cb.member_id = NEW.trainer_id
+      AND cs.template_id = NEW.id
+      AND cs.trainer_id_override IS NULL;
+
+    DELETE FROM course_bookings
+    WHERE member_id = NEW.trainer_id
+      AND session_id IN (
+        SELECT cs.id
+        FROM course_sessions cs
+        WHERE cs.template_id = NEW.id
+          AND cs.trainer_id_override IS NULL
+      );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_remove_self_booking_on_template BEFORE
+UPDATE ON course_templates FOR EACH ROW
+EXECUTE FUNCTION remove_self_booking_on_template_update ();

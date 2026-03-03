@@ -92,6 +92,69 @@ FROM
       (
         'horst.schroeder@web.de',
         'DE44500105175407326666'
-      )
+      ),
+      ('ingrid.wirth@gmx.de', 'DE12500105170648491777'),
+      (
+        'torsten.haas@outlook.de',
+        'DE50500105177312347888'
+      ),
+      ('katja.weber@gmx.de', 'DE89370400440532015999'),
+      ('ralph.pfeiffer@web.de', 'DE44500105175407327111'),
+      ('joerg.link@outlook.de', 'DE75512108001245128222'),
+      (
+        'elke.sauer@t-online.de',
+        'DE24500105170204386333'
+      ),
+      ('stefan.ritter@web.de', 'DE12500105170648491444'),
+      (
+        'klaus.albrecht@outlook.de',
+        'DE50500105177312347555'
+      ),
+      (
+        'sonja.adler@t-online.de',
+        'DE89370400440532016666'
+      ),
+      ('monika.stark@gmx.de', 'DE44500105175407327777'),
+      (
+        'rainer.kuhn@outlook.de',
+        'DE75512108001245128888'
+      ),
+      (
+        'christa.bock@t-online.de',
+        'DE24500105170204386999'
+      ),
+      ('wolf.pfeifer@web.de', 'DE12500105170648492111'),
+      (
+        'elfriede.herbst@t-online.de',
+        'DE50500105177312348222'
+      ),
+      (
+        'manfred.stein@outlook.de',
+        'DE89370400440532017333'
+      ),
+      (
+        'siegfried.strauss@outlook.de',
+        'DE44500105175407328444'
+      ),
+      ('ernst.vogel@web.de', 'DE75512108001245129555'),
+      ('peter.frey@outlook.de', 'DE24500105170204387666'),
+      (
+        'ursula.voss@t-online.de',
+        'DE12500105170648492777'
+      ),
+      ('gertrud.wenzel@gmx.de', 'DE50500105177312348888'),
+      ('karl.dorn@mail.de', 'DE89370400440532017999'),
+      ('gudrun.siebert@gmx.de', 'DE44500105175407329111'),
+      ('lore.wetzel@web.de', 'DE75512108001245130222'),
+      (
+        'wilfried.jansen@outlook.de',
+        'DE24500105170204388333'
+      ),
+      ('martha.seifert@gmx.de', 'DE12500105170648493444'),
+      (
+        'friedrich.kunze@mail.de',
+        'DE50500105177312349555'
+      ),
+      ('anton.geiger@mail.de', 'DE89370400440532018666')
   ) AS v (email, iban)
   JOIN members m ON m.email = v.email;

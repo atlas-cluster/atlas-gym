@@ -461,7 +461,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT
@@ -487,7 +487,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -513,7 +513,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -539,7 +539,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -565,7 +565,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -591,7 +591,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -825,7 +825,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sarah.maier@web.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -929,7 +929,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sarah.maier@web.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -955,7 +955,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sarah.maier@web.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -981,7 +981,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'daniel.werner@outlook.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -1007,7 +1007,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'daniel.werner@outlook.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -1241,7 +1241,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -1267,7 +1267,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -1293,7 +1293,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT
@@ -1319,7 +1319,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT
@@ -1631,7 +1631,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'daniel.werner@outlook.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -1657,7 +1657,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sarah.maier@web.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -1787,7 +1787,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'daniel.werner@outlook.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -1839,7 +1839,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'felix.hoffmann@gmx.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -1865,7 +1865,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'felix.hoffmann@gmx.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -1917,7 +1917,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'felix.hoffmann@gmx.de'
+        email = 'lars.nowak@mail.de'
     ),
     (
       SELECT
@@ -1969,7 +1969,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'verena.otto@web.de'
     ),
     (
       SELECT
@@ -1995,7 +1995,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -2047,7 +2047,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sophie.mueller@web.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -2099,7 +2099,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'axel.berger@t-online.de'
     ),
     (
       SELECT
@@ -2515,7 +2515,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sophie.mueller@web.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -2541,7 +2541,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sophie.mueller@web.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -2567,7 +2567,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'sophie.mueller@web.de'
+        email = 'guenter.simon@t-online.de'
     ),
     (
       SELECT
@@ -2697,7 +2697,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT
@@ -2723,7 +2723,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT
@@ -2749,7 +2749,7 @@ VALUES
       FROM
         members
       WHERE
-        email = 'maria.schmidt@t-online.de'
+        email = 'diana.reinhardt@gmx.de'
     ),
     (
       SELECT

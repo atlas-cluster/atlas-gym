@@ -80,4 +80,54 @@ VALUES
       WHERE
         email = 'daniel.werner@outlook.de'
     )
+  ),
+  (
+    (
+      SELECT
+        id
+      FROM
+        members
+      WHERE
+        email = 'verena.otto@web.de'
+    )
+  ),
+  (
+    (
+      SELECT
+        id
+      FROM
+        members
+      WHERE
+        email = 'guenter.simon@t-online.de'
+    )
+  ),
+  (
+    (
+      SELECT
+        id
+      FROM
+        members
+      WHERE
+        email = 'lars.nowak@mail.de'
+    )
+  ),
+  (
+    (
+      SELECT
+        id
+      FROM
+        members
+      WHERE
+        email = 'diana.reinhardt@gmx.de'
+    )
+  ),
+  (
+    (
+      SELECT
+        id
+      FROM
+        members
+      WHERE
+        email = 'axel.berger@t-online.de'
+    )
   );

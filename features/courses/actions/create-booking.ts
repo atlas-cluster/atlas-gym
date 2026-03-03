@@ -4,12 +4,22 @@ import { updateTag } from 'next/cache'
 
 import { getSession } from '@/features/auth'
 import { pool } from '@/features/shared/lib/db'
-import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
+import {
+  PG_EXCLUSION_VIOLATION,
+  PG_UNIQUE_VIOLATION,
+} from '@/features/shared/lib/postgres-errors'
 
 export async function createBooking(sessionId: string): Promise<{
   success: boolean
   message: string
-  errorType?: 'AUTH' | 'CANCELLED' | 'ALREADY_BOOKED' | 'NOT_FOUND' | 'UNKNOWN'
+  errorType?:
+    | 'AUTH'
+    | 'CANCELLED'
+    | 'ALREADY_BOOKED'
+    | 'OVERLAP'
+    | 'SELF_BOOKING'
+    | 'NOT_FOUND'
+    | 'UNKNOWN'
 }> {
   try {
     const { member } = await getSession()
@@ -72,16 +82,36 @@ export async function createBooking(sessionId: string): Promise<{
 
     return { success: true, message: 'Session booked successfully.' }
   } catch (error: unknown) {
-    if (
-      error !== null &&
-      typeof error === 'object' &&
-      'code' in error &&
-      error.code === PG_UNIQUE_VIOLATION
-    ) {
-      return {
-        success: false,
-        errorType: 'ALREADY_BOOKED',
-        message: 'You have already booked this session.',
+    if (error !== null && typeof error === 'object' && 'code' in error) {
+      if (error.code === PG_UNIQUE_VIOLATION) {
+        return {
+          success: false,
+          errorType: 'ALREADY_BOOKED',
+          message: 'You have already booked this session.',
+        }
+      }
+      if (
+        error.code === PG_EXCLUSION_VIOLATION &&
+        'constraint' in error &&
+        error.constraint === 'prevent_booking_time_overlap'
+      ) {
+        return {
+          success: false,
+          errorType: 'OVERLAP',
+          message:
+            'You already have a booking for another session at the same time.',
+        }
+      }
+      if (
+        error.code === PG_EXCLUSION_VIOLATION &&
+        'constraint' in error &&
+        error.constraint === 'prevent_trainer_self_booking'
+      ) {
+        return {
+          success: false,
+          errorType: 'SELF_BOOKING',
+          message: 'You cannot book a session you are teaching.',
+        }
       }
     }
     console.error('[CREATE_BOOKING_ERROR]:', error)

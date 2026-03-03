@@ -376,7 +376,350 @@ FROM
         9,
         CURRENT_DATE + INTERVAL '3 months' + INTERVAL '1 day',
         NULL
-      ) -- Chris: Gym + Courses 12M future subscription
+      ), -- Chris: Gym + Courses 12M future subscription
+      -- Active subscriptions (~55 members, no end_date)
+      (101, 1, CURRENT_DATE - INTERVAL '30 days', NULL), -- Hendrik: Flex Gym Basic
+      (102, 12, CURRENT_DATE - INTERVAL '7 months', NULL), -- Ingrid: All-In 12M
+      (103, 6, CURRENT_DATE - INTERVAL '4 months', NULL), -- Kai: Gym Basic 12M
+      (104, 9, CURRENT_DATE - INTERVAL '5 months', NULL), -- Carolin: Gym + Courses 12M
+      (105, 3, CURRENT_DATE - INTERVAL '3 months', NULL), -- Torsten: Flex All-In
+      (106, 8, CURRENT_DATE - INTERVAL '2 months', NULL), -- Verena: Gym + Courses 6M
+      (107, 11, CURRENT_DATE - INTERVAL '1 month', NULL), -- Steffen: All-In 6M
+      (108, 5, CURRENT_DATE - INTERVAL '4 months', NULL), -- Katja: Gym Basic 6M
+      (109, 22, CURRENT_DATE - INTERVAL '3 months', NULL), -- Volker: Personal Training Pro 6M
+      (110, 2, CURRENT_DATE - INTERVAL '2 months', NULL), -- Britta: Flex Gym Plus
+      (111, 14, CURRENT_DATE - INTERVAL '1 month', NULL), -- Ralph: Student Courses
+      (112, 6, CURRENT_DATE - INTERVAL '8 months', NULL), -- Diana: Gym Basic 12M
+      (113, 12, CURRENT_DATE - INTERVAL '9 months', NULL), -- Guenter: All-In 12M
+      (114, 1, CURRENT_DATE - INTERVAL '20 days', NULL), -- Heike: Flex Gym Basic
+      (115, 7, CURRENT_DATE - INTERVAL '2 months', NULL), -- Joerg: Gym + Courses 3M
+      (
+        116,
+        24,
+        CURRENT_DATE - INTERVAL '10 months',
+        NULL
+      ), -- Ute: Corporate Basic 12M
+      (117, 4, CURRENT_DATE - INTERVAL '1 month', NULL), -- Norbert: Gym Basic 3M
+      (118, 10, CURRENT_DATE - INTERVAL '2 months', NULL), -- Elke: All-In 3M
+      (119, 15, CURRENT_DATE - INTERVAL '3 months', NULL), -- Lars: Student All-In
+      (120, 3, CURRENT_DATE - INTERVAL '25 days', NULL), -- Margit: Flex All-In
+      (121, 9, CURRENT_DATE - INTERVAL '6 months', NULL), -- Stefan R: Gym + Courses 12M
+      (122, 11, CURRENT_DATE - INTERVAL '4 months', NULL), -- Petra L: All-In 6M
+      (123, 5, CURRENT_DATE - INTERVAL '3 months', NULL), -- Axel: Gym Basic 6M
+      (124, 16, CURRENT_DATE - INTERVAL '15 days', NULL), -- Renate: Senior Gym Basic
+      (125, 2, CURRENT_DATE - INTERVAL '1 month', NULL), -- Klaus: Flex Gym Plus
+      (126, 12, CURRENT_DATE - INTERVAL '6 months', NULL), -- Ines: All-In 12M
+      (127, 7, CURRENT_DATE - INTERVAL '2 months', NULL), -- Gerd: Gym + Courses 3M
+      (128, 4, CURRENT_DATE - INTERVAL '1 month', NULL), -- Sonja: Gym Basic 3M
+      (129, 21, CURRENT_DATE - INTERVAL '2 months', NULL), -- Armin: Personal Training Starter 3M
+      (130, 6, CURRENT_DATE - INTERVAL '7 months', NULL), -- Gabi: Gym Basic 12M
+      (131, 9, CURRENT_DATE - INTERVAL '4 months', NULL), -- Ernst: Gym + Courses 12M
+      (132, 1, CURRENT_DATE - INTERVAL '10 days', NULL), -- Iris: Flex Gym Basic
+      (133, 11, CURRENT_DATE - INTERVAL '5 months', NULL), -- Dieter: All-In 6M
+      (134, 14, CURRENT_DATE - INTERVAL '2 months', NULL), -- Jutta: Student Courses
+      (135, 3, CURRENT_DATE - INTERVAL '1 month', NULL), -- Peter: Flex All-In
+      (136, 8, CURRENT_DATE - INTERVAL '4 months', NULL), -- Beate: Gym + Courses 6M
+      (137, 12, CURRENT_DATE - INTERVAL '8 months', NULL), -- Franz: All-In 12M
+      (138, 17, CURRENT_DATE - INTERVAL '20 days', NULL), -- Ursula: Senior Courses
+      (139, 2, CURRENT_DATE - INTERVAL '3 months', NULL), -- Hans: Flex Gym Plus
+      (140, 6, CURRENT_DATE - INTERVAL '9 months', NULL), -- Erika: Gym Basic 12M
+      (141, 10, CURRENT_DATE - INTERVAL '1 month', NULL), -- Walter: All-In 3M
+      (
+        142,
+        25,
+        CURRENT_DATE - INTERVAL '10 months',
+        NULL
+      ), -- Monika S: Corporate All-In 12M
+      (143, 5, CURRENT_DATE - INTERVAL '2 months', NULL), -- Lothar: Gym Basic 6M
+      (144, 9, CURRENT_DATE - INTERVAL '5 months', NULL), -- Roswitha: Gym + Courses 12M
+      (145, 1, CURRENT_DATE - INTERVAL '7 days', NULL), -- Rainer: Flex Gym Basic
+      (146, 11, CURRENT_DATE - INTERVAL '3 months', NULL), -- Helga: All-In 6M
+      (
+        147,
+        23,
+        CURRENT_DATE - INTERVAL '11 months',
+        NULL
+      ), -- Detlef: Personal Training Elite 12M
+      (148, 3, CURRENT_DATE - INTERVAL '2 months', NULL), -- Christa: Flex All-In
+      (149, 7, CURRENT_DATE - INTERVAL '1 month', NULL), -- Juergen: Gym + Courses 3M
+      (150, 12, CURRENT_DATE - INTERVAL '4 months', NULL), -- Angelika: All-In 12M
+      (151, 18, CURRENT_DATE - INTERVAL '10 days', NULL), -- Wolf: Senior All-In
+      (152, 8, CURRENT_DATE - INTERVAL '5 months', NULL), -- Hannelore: Gym + Courses 6M
+      (153, 4, CURRENT_DATE - INTERVAL '2 months', NULL), -- Hartmut: Gym Basic 3M
+      (154, 6, CURRENT_DATE - INTERVAL '6 months', NULL), -- Ilse: Gym Basic 12M
+      (155, 19, CURRENT_DATE - INTERVAL '5 months', NULL), -- Manfred: Off-Peak Saver 6M
+      -- Cancelled subscriptions (~25 members, end_date in the future)
+      (
+        156,
+        5,
+        CURRENT_DATE - INTERVAL '5 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Karin: Gym Basic 6M, cancelled
+      (
+        157,
+        11,
+        CURRENT_DATE - INTERVAL '4 months',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Otto: All-In 6M, cancelled
+      (
+        158,
+        9,
+        CURRENT_DATE - INTERVAL '10 months',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Elfriede: Gym + Courses 12M, cancelled
+      (
+        159,
+        6,
+        CURRENT_DATE - INTERVAL '9 months',
+        CURRENT_DATE + INTERVAL '3 months'
+      ), -- Bernhard: Gym Basic 12M, cancelled
+      (
+        160,
+        8,
+        CURRENT_DATE - INTERVAL '3 months',
+        CURRENT_DATE + INTERVAL '3 months'
+      ), -- Ruth: Gym + Courses 6M, cancelled
+      (
+        161,
+        12,
+        CURRENT_DATE - INTERVAL '11 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Helmut: All-In 12M, cancelled
+      (
+        162,
+        7,
+        CURRENT_DATE - INTERVAL '2 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Gertrud: Gym + Courses 3M, cancelled
+      (
+        163,
+        10,
+        CURRENT_DATE - INTERVAL '2 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Horst E: All-In 3M, cancelled
+      (
+        164,
+        4,
+        CURRENT_DATE - INTERVAL '2 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Liesel: Gym Basic 3M, cancelled
+      (
+        165,
+        11,
+        CURRENT_DATE - INTERVAL '5 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Siegfried: All-In 6M, cancelled
+      (
+        166,
+        6,
+        CURRENT_DATE - INTERVAL '10 months',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Edith: Gym Basic 12M, cancelled
+      (
+        167,
+        5,
+        CURRENT_DATE - INTERVAL '4 months',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Werner: Gym Basic 6M, cancelled
+      (
+        168,
+        9,
+        CURRENT_DATE - INTERVAL '8 months',
+        CURRENT_DATE + INTERVAL '4 months'
+      ), -- Sigrid: Gym + Courses 12M, cancelled
+      (
+        169,
+        12,
+        CURRENT_DATE - INTERVAL '7 months',
+        CURRENT_DATE + INTERVAL '5 months'
+      ), -- Karl: All-In 12M, cancelled
+      (
+        170,
+        8,
+        CURRENT_DATE - INTERVAL '5 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Maria O: Gym + Courses 6M, cancelled
+      (
+        171,
+        3,
+        CURRENT_DATE - INTERVAL '1 month',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Heinrich: Flex All-In, cancelled
+      (
+        172,
+        7,
+        CURRENT_DATE - INTERVAL '2 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Gudrun: Gym + Courses 3M, cancelled
+      (
+        173,
+        10,
+        CURRENT_DATE - INTERVAL '1 month',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Erwin: All-In 3M, cancelled
+      (
+        174,
+        4,
+        CURRENT_DATE - INTERVAL '1 month',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Waltraud: Gym Basic 3M, cancelled
+      (
+        175,
+        11,
+        CURRENT_DATE - INTERVAL '3 months',
+        CURRENT_DATE + INTERVAL '3 months'
+      ), -- Wilfried: All-In 6M, cancelled
+      (
+        176,
+        6,
+        CURRENT_DATE - INTERVAL '8 months',
+        CURRENT_DATE + INTERVAL '4 months'
+      ), -- Rosemarie: Gym Basic 12M, cancelled
+      (
+        177,
+        9,
+        CURRENT_DATE - INTERVAL '9 months',
+        CURRENT_DATE + INTERVAL '3 months'
+      ), -- Alfred: Gym + Courses 12M, cancelled
+      (
+        178,
+        2,
+        CURRENT_DATE - INTERVAL '2 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Hilde: Flex Gym Plus, cancelled
+      (
+        179,
+        5,
+        CURRENT_DATE - INTERVAL '5 months',
+        CURRENT_DATE + INTERVAL '1 month'
+      ), -- Friedrich: Gym Basic 6M, cancelled
+      (
+        180,
+        12,
+        CURRENT_DATE - INTERVAL '10 months',
+        CURRENT_DATE + INTERVAL '2 months'
+      ), -- Elisabeth: All-In 12M, cancelled
+      -- Ended subscriptions (~20 members, end_date in the past)
+      (
+        181,
+        4,
+        CURRENT_DATE - INTERVAL '7 months',
+        CURRENT_DATE - INTERVAL '4 months'
+      ), -- Rudolf: Gym Basic 3M, ended
+      (
+        182,
+        7,
+        CURRENT_DATE - INTERVAL '9 months',
+        CURRENT_DATE - INTERVAL '6 months'
+      ), -- Martha: Gym + Courses 3M, ended
+      (
+        183,
+        10,
+        CURRENT_DATE - INTERVAL '8 months',
+        CURRENT_DATE - INTERVAL '5 months'
+      ), -- Gerhard: All-In 3M, ended
+      (
+        184,
+        5,
+        CURRENT_DATE - INTERVAL '11 months',
+        CURRENT_DATE - INTERVAL '5 months'
+      ), -- Hildegard: Gym Basic 6M, ended
+      (
+        185,
+        8,
+        CURRENT_DATE - INTERVAL '10 months',
+        CURRENT_DATE - INTERVAL '4 months'
+      ), -- Theo: Gym + Courses 6M, ended
+      (
+        186,
+        11,
+        CURRENT_DATE - INTERVAL '12 months',
+        CURRENT_DATE - INTERVAL '6 months'
+      ), -- Lore: All-In 6M, ended
+      (
+        187,
+        6,
+        CURRENT_DATE - INTERVAL '18 months',
+        CURRENT_DATE - INTERVAL '6 months'
+      ), -- Konrad: Gym Basic 12M, ended
+      (
+        188,
+        9,
+        CURRENT_DATE - INTERVAL '18 months',
+        CURRENT_DATE - INTERVAL '6 months'
+      ), -- Herta: Gym + Courses 12M, ended
+      (
+        189,
+        12,
+        CURRENT_DATE - INTERVAL '20 months',
+        CURRENT_DATE - INTERVAL '8 months'
+      ), -- Anton: All-In 12M, ended
+      (
+        190,
+        4,
+        CURRENT_DATE - INTERVAL '5 months',
+        CURRENT_DATE - INTERVAL '2 months'
+      ), -- Berta: Gym Basic 3M, ended
+      (
+        191,
+        7,
+        CURRENT_DATE - INTERVAL '6 months',
+        CURRENT_DATE - INTERVAL '3 months'
+      ), -- Helmut G (no sub yet, reuse 161+future): ended
+      (
+        192,
+        5,
+        CURRENT_DATE - INTERVAL '10 months',
+        CURRENT_DATE - INTERVAL '4 months'
+      ), -- Gertrud: ended
+      (
+        193,
+        10,
+        CURRENT_DATE - INTERVAL '7 months',
+        CURRENT_DATE - INTERVAL '4 months'
+      ), -- Horst E: ended (separate period)
+      (
+        194,
+        6,
+        CURRENT_DATE - INTERVAL '15 months',
+        CURRENT_DATE - INTERVAL '3 months'
+      ), -- Liesel: ended
+      (
+        195,
+        8,
+        CURRENT_DATE - INTERVAL '11 months',
+        CURRENT_DATE - INTERVAL '5 months'
+      ), -- Siegfried: ended
+      (
+        196,
+        11,
+        CURRENT_DATE - INTERVAL '13 months',
+        CURRENT_DATE - INTERVAL '7 months'
+      ), -- Edith: ended
+      (
+        197,
+        9,
+        CURRENT_DATE - INTERVAL '17 months',
+        CURRENT_DATE - INTERVAL '5 months'
+      ), -- Werner: ended
+      (
+        198,
+        4,
+        CURRENT_DATE - INTERVAL '6 months',
+        CURRENT_DATE - INTERVAL '3 months'
+      ), -- Sigrid: ended
+      (
+        199,
+        12,
+        CURRENT_DATE - INTERVAL '19 months',
+        CURRENT_DATE - INTERVAL '7 months'
+      ), -- Karl: ended
+      (
+        200,
+        7,
+        CURRENT_DATE - INTERVAL '8 months',
+        CURRENT_DATE - INTERVAL '5 months'
+      ) -- Maria O: ended
   ) AS data (member_id, plan_id, start_date, end_date)
   CROSS JOIN LATERAL (
     SELECT
