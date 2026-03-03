@@ -38,7 +38,8 @@ export default async function DashboardPage() {
   )
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    // On md+: fill viewport height (100svh minus 49px header and 1.5rem p-3 top+bottom) so all 4 cards fit without page scroll
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2 md:h-[calc(100svh-49px-1.5rem)]">
       <SubscriptionCard subscriptions={subscriptions} plans={plans} />
 
       <TodayScheduleCard

@@ -25,7 +25,7 @@ export function RecommendedCoursesCard({
   sessions,
 }: RecommendedCoursesCardProps) {
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col h-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SparklesIcon className="size-4 text-muted-foreground" />
@@ -35,7 +35,7 @@ export function RecommendedCoursesCard({
           Available courses you can still book today
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 min-h-0 overflow-y-auto">
         {sessions.length > 0 ? (
           <ul className="space-y-2">
             {sessions.map((session) => (

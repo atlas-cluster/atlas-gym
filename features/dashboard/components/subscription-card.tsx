@@ -36,7 +36,7 @@ export function SubscriptionCard({
 
   if (primary) {
     return (
-      <Card>
+      <Card className="h-full overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Subscription
@@ -61,7 +61,7 @@ export function SubscriptionCard({
           </CardTitle>
           <CardDescription>Your current membership plan</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="flex-1 min-h-0 overflow-y-auto space-y-4">
           {/* Primary subscription details */}
           <div>
             <p className="text-2xl font-bold">{primary.name}</p>
@@ -134,14 +134,14 @@ export function SubscriptionCard({
   }
 
   return (
-    <Card>
+    <Card className="h-full overflow-hidden">
       <CardHeader>
         <CardTitle>No Active Subscription</CardTitle>
         <CardDescription>
           Choose a plan to unlock all gym features and start booking courses.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex-1 min-h-0 overflow-y-auto space-y-3">
         {plans.slice(0, 3).map((plan) => (
           <div
             key={plan.id}

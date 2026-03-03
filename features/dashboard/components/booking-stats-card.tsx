@@ -25,7 +25,7 @@ export function BookingStatsCard({
   const totalThisWeek = bookingsPerDay.reduce((sum, d) => sum + d.count, 0)
 
   return (
-    <Card>
+    <Card className="h-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUpIcon className="size-4 text-muted-foreground" />

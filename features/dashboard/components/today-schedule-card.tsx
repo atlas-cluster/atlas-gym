@@ -30,7 +30,7 @@ export function TodayScheduleCard({
   isTrainer,
 }: TodayScheduleCardProps) {
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col h-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarIcon className="size-4 text-muted-foreground" />
@@ -45,7 +45,7 @@ export function TodayScheduleCard({
           })}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className="flex-1 min-h-0 overflow-y-auto space-y-4">
         {isTrainer && sessions.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
