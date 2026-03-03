@@ -1,8 +1,10 @@
 'use client'
 
 import { format } from 'date-fns'
+import { Calendar, Check, X } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 
+import { Badge } from '@/features/shared/components/ui/badge'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Dialog,
@@ -44,7 +46,7 @@ export function SubscriptionHistoryDialog({
         <DialogHeader>
           <DialogTitle>Subscription History</DialogTitle>
           <DialogDescription>
-            A list of your past subscriptions.
+            A list of all your subscriptions.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-2 space-y-2 max-h-[60vh] overflow-y-auto">
@@ -54,17 +56,37 @@ export function SubscriptionHistoryDialog({
             ))
           ) : history.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              No subscription history found.
+              No subscriptions found.
             </p>
           ) : (
             history.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-center justify-between rounded-md border px-4 py-3 text-sm">
-                <span className="font-medium">{entry.planName}</span>
-                <span className="text-muted-foreground">
+                className="flex items-center justify-between rounded-md border px-4 py-3 text-sm gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-medium truncate">{entry.planName}</span>
+                  {entry.isActive && !entry.isCancelled && (
+                    <Badge>
+                      <Check />
+                      Active
+                    </Badge>
+                  )}
+                  {entry.isCancelled && (
+                    <Badge variant="destructive">
+                      <X />
+                      Cancelled
+                    </Badge>
+                  )}
+                  {entry.isFuture && (
+                    <Badge variant="secondary">
+                      <Calendar />
+                      Future
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-muted-foreground text-nowrap">
                   {format(entry.startDate, 'dd.MM.yyyy')} –{' '}
-                  {format(entry.endDate, 'dd.MM.yyyy')}
+                  {entry.endDate ? format(entry.endDate, 'dd.MM.yyyy') : '∞'}
                 </span>
               </div>
             ))
