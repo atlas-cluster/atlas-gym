@@ -31,7 +31,7 @@ export function TodayScheduleCard({
   isTrainer,
 }: TodayScheduleCardProps) {
   return (
-    <Card className="flex flex-col h-full overflow-hidden">
+    <Card className="flex flex-col overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarIcon className="size-4 text-muted-foreground" />
@@ -46,8 +46,8 @@ export function TodayScheduleCard({
           })}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-0">
-        <ScrollArea className="h-full px-6">
+      <CardContent className="p-0">
+        <ScrollArea className="max-h-72 px-6">
           <div className="space-y-4 py-1 pb-6">
             {isTrainer && sessions.length > 0 && (
               <div className="space-y-2">

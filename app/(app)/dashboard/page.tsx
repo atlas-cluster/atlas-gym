@@ -63,17 +63,17 @@ export default async function DashboardPage() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <SubscriptionCard subscriptions={subscriptions} plans={plans} />
 
-      <TodayScheduleCard
-        bookings={todayBookings}
-        sessions={myTodaySessions}
-        isTrainer={member?.isTrainer ?? false}
+      <BookingStatsCard
+        bookingsPerDay={stats.bookingsPerDay}
+        totalUpcomingBookings={stats.totalUpcomingBookings}
       />
 
       <RecommendedCoursesCard sessions={recommendedSessions} />
 
-      <BookingStatsCard
-        bookingsPerDay={stats.bookingsPerDay}
-        totalUpcomingBookings={stats.totalUpcomingBookings}
+      <TodayScheduleCard
+        bookings={todayBookings}
+        sessions={myTodaySessions}
+        isTrainer={member?.isTrainer ?? false}
       />
     </div>
   )

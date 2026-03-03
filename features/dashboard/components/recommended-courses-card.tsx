@@ -71,7 +71,7 @@ export function RecommendedCoursesCard({
       <AlertDialog
         open={!!confirmSession}
         onOpenChange={(open) => !open && setConfirmSession(null)}>
-        <AlertDialogContent size="sm">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm booking</AlertDialogTitle>
             <AlertDialogDescription>
@@ -86,9 +86,8 @@ export function RecommendedCoursesCard({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              size="sm"
               onClick={() => confirmSession && handleBook(confirmSession)}>
               Book
             </AlertDialogAction>
