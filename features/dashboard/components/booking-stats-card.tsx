@@ -2,7 +2,7 @@
 
 import { format, parseISO } from 'date-fns'
 import { BookmarkIcon, TrendingUpIcon } from 'lucide-react'
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 import { BookingDayStat } from '@/features/dashboard/actions/get-dashboard-stats'
 import {
@@ -71,9 +71,23 @@ export function BookingStatsCard({
           </div>
         </div>
 
-        {/* Line chart */}
+        {/* Area chart */}
         <ChartContainer config={chartConfig} className="flex-1 w-full min-h-0">
-          <LineChart data={chartData} margin={{ left: 4, right: 4 }}>
+          <AreaChart data={chartData} margin={{ left: 4, right: 4 }}>
+            <defs>
+              <linearGradient id="fillBookings" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-bookings)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-bookings)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="day"
@@ -85,15 +99,16 @@ export function BookingStatsCard({
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Line
+            <Area
               dataKey="bookings"
               type="monotone"
               stroke="var(--color-bookings)"
               strokeWidth={2}
+              fill="url(#fillBookings)"
               dot={{ fill: 'var(--color-bookings)', r: 3 }}
               activeDot={{ r: 5 }}
             />
-          </LineChart>
+          </AreaChart>
         </ChartContainer>
       </CardContent>
     </Card>

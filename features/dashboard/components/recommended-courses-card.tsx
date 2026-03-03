@@ -1,8 +1,12 @@
-import { format } from 'date-fns'
-import { ClockIcon, MapPinIcon, SparklesIcon } from 'lucide-react'
-import Link from 'next/link'
+'use client'
 
-import { CourseSessionDisplay } from '@/features/courses'
+import { format } from 'date-fns'
+import { BookmarkIcon, ClockIcon, MapPinIcon, SparklesIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { toast } from 'sonner'
+
+import { CourseSessionDisplay, createBooking } from '@/features/courses'
 import { Button } from '@/features/shared/components/ui/button'
 import {
   Card,
@@ -12,7 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
-import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
+
+const MAX_SHOWN = 3
 
 interface RecommendedCoursesCardProps {
   sessions: CourseSessionDisplay[]
@@ -23,8 +28,31 @@ function formatTime(time: Date): string {
 }
 
 export function RecommendedCoursesCard({
-  sessions,
+  sessions: initialSessions,
 }: RecommendedCoursesCardProps) {
+  const [bookedIds, setBookedIds] = useState<Set<string>>(new Set())
+  const [pendingId, setPendingId] = useState<string | null>(null)
+
+  const visibleSessions = initialSessions
+    .filter((s) => !bookedIds.has(s.id))
+    .slice(0, MAX_SHOWN)
+
+  const handleBook = (session: CourseSessionDisplay) => {
+    setPendingId(session.id)
+    const promise = createBooking(session.id)
+      .then((r) => {
+        if (!r.success) throw new Error(r.message)
+        setBookedIds((prev) => new Set([...prev, session.id]))
+        return r
+      })
+      .finally(() => setPendingId(null))
+    toast.promise(promise, {
+      loading: 'Booking session...',
+      success: (r) => r.message,
+      error: (err: Error) => err?.message || 'Failed to book',
+    })
+  }
+
   return (
     <Card className="flex flex-col h-full overflow-hidden">
       <CardHeader>
@@ -36,42 +64,44 @@ export function RecommendedCoursesCard({
           Available courses you can still book today
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-0">
-        <ScrollArea className="h-full px-6">
-          {sessions.length > 0 ? (
-            <ul className="space-y-2 py-1 pb-6">
-              {sessions.map((session) => (
-                <li
-                  key={session.id}
-                  className="flex items-start gap-3 rounded-md border p-3 text-sm">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{session.name}</p>
-                    <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
-                      <span className="flex items-center gap-1">
-                        <ClockIcon className="size-3" />
-                        {formatTime(session.startTime)} –{' '}
-                        {formatTime(session.endTime)}
-                      </span>
-                      {session.roomName && (
-                        <span className="flex items-center gap-1">
-                          <MapPinIcon className="size-3" />
-                          {session.roomName}
-                        </span>
-                      )}
-                      {session.trainerName && (
-                        <span>{session.trainerName}</span>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed mx-0 my-1">
-              You&apos;ve booked all available courses today!
-            </p>
-          )}
-        </ScrollArea>
+      <CardContent className="flex-1 space-y-2">
+        {visibleSessions.length > 0 ? (
+          visibleSessions.map((session) => (
+            <div
+              key={session.id}
+              className="flex items-center gap-3 rounded-md border p-3 text-sm">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{session.name}</p>
+                <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground text-xs">
+                  <span className="flex items-center gap-1">
+                    <ClockIcon className="size-3" />
+                    {formatTime(session.startTime)} –{' '}
+                    {formatTime(session.endTime)}
+                  </span>
+                  {session.roomName && (
+                    <span className="flex items-center gap-1">
+                      <MapPinIcon className="size-3" />
+                      {session.roomName}
+                    </span>
+                  )}
+                  {session.trainerName && <span>{session.trainerName}</span>}
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={pendingId === session.id}
+                onClick={() => handleBook(session)}>
+                <BookmarkIcon className="size-3.5" />
+                Book
+              </Button>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground py-4 text-center rounded-md border border-dashed">
+            You&apos;ve booked all available courses today!
+          </p>
+        )}
       </CardContent>
       <CardFooter>
         <Button asChild variant="outline" size="sm" className="w-full">

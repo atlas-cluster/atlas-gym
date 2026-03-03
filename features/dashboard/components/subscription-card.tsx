@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
-import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
 import { SubscriptionDisplay } from '@/features/subscriptions'
 
 interface SubscriptionCardProps {
@@ -62,71 +61,63 @@ export function SubscriptionCard({
           </CardTitle>
           <CardDescription>Your current membership plan</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full px-6">
-            <div className="space-y-4 py-1 pb-6">
-              {/* Primary subscription details */}
-              <div>
-                <p className="text-2xl font-bold">{primary.name}</p>
-                {primary.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {primary.description}
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-md bg-muted p-3">
-                  <p className="text-muted-foreground">Price</p>
-                  <p className="font-semibold text-base">
-                    €{primary.price.toFixed(2)}/mo
-                  </p>
-                </div>
-                <div className="rounded-md bg-muted p-3">
-                  <p className="text-muted-foreground">Min. Duration</p>
-                  <p className="font-semibold text-base">
-                    {primary.minDurationMonths}{' '}
-                    {primary.minDurationMonths === 1 ? 'month' : 'months'}
-                  </p>
-                </div>
-                {primary.startDate && (
-                  <div className="rounded-md bg-muted p-3">
-                    <p className="text-muted-foreground">Started</p>
-                    <p className="font-semibold text-base">
-                      {format(primary.startDate, 'dd MMM yyyy')}
-                    </p>
-                  </div>
-                )}
-                {cancelled && cancelled.endDate && (
-                  <div className="rounded-md bg-muted p-3">
-                    <p className="text-muted-foreground">Ends</p>
-                    <p className="font-semibold text-base">
-                      {format(cancelled.endDate, 'dd MMM yyyy')}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Upcoming plan section — shown whenever a future sub exists alongside a cancelled/active one */}
-              {future && (active || cancelled) && (
-                <div className="rounded-md border border-dashed p-3 space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Upcoming Plan
-                  </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-medium">{future.name}</p>
-                      <p className="text-muted-foreground">
-                        Starts {format(future.startDate!, 'dd MMM yyyy')}
-                      </p>
-                    </div>
-                    <p className="font-semibold">
-                      €{future.price.toFixed(2)}/mo
-                    </p>
-                  </div>
-                </div>
-              )}
+        <CardContent className="flex-1 space-y-3">
+          {/* Primary subscription details */}
+          <div>
+            <p className="text-2xl font-bold">{primary.name}</p>
+            {primary.description && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {primary.description}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="rounded-md bg-muted p-2.5">
+              <p className="text-muted-foreground text-xs">Price</p>
+              <p className="font-semibold">€{primary.price.toFixed(2)}/mo</p>
             </div>
-          </ScrollArea>
+            <div className="rounded-md bg-muted p-2.5">
+              <p className="text-muted-foreground text-xs">Min. Duration</p>
+              <p className="font-semibold">
+                {primary.minDurationMonths}{' '}
+                {primary.minDurationMonths === 1 ? 'month' : 'months'}
+              </p>
+            </div>
+            {primary.startDate && (
+              <div className="rounded-md bg-muted p-2.5">
+                <p className="text-muted-foreground text-xs">Started</p>
+                <p className="font-semibold">
+                  {format(primary.startDate, 'dd MMM yyyy')}
+                </p>
+              </div>
+            )}
+            {cancelled && cancelled.endDate && (
+              <div className="rounded-md bg-muted p-2.5">
+                <p className="text-muted-foreground text-xs">Ends</p>
+                <p className="font-semibold">
+                  {format(cancelled.endDate, 'dd MMM yyyy')}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Upcoming plan — always visible, no scroll needed */}
+          {future && (active || cancelled) && (
+            <div className="rounded-md border border-dashed p-2.5 space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Upcoming Plan
+              </p>
+              <div className="flex items-center justify-between text-sm">
+                <div>
+                  <p className="font-medium">{future.name}</p>
+                  <p className="text-muted-foreground text-xs">
+                    Starts {format(future.startDate!, 'dd MMM yyyy')}
+                  </p>
+                </div>
+                <p className="font-semibold">€{future.price.toFixed(2)}/mo</p>
+              </div>
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <Button asChild variant="outline" size="sm" className="w-full">
@@ -148,25 +139,21 @@ export function SubscriptionCard({
           Choose a plan to unlock all gym features and start booking courses.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 p-0">
-        <ScrollArea className="h-full px-6">
-          <div className="space-y-3 py-1 pb-6">
-            {plans.slice(0, 3).map((plan) => (
-              <div
-                key={plan.id}
-                className="flex items-center justify-between rounded-md border p-3 text-sm">
-                <div>
-                  <p className="font-medium">{plan.name}</p>
-                  <p className="text-muted-foreground">
-                    {plan.minDurationMonths}{' '}
-                    {plan.minDurationMonths === 1 ? 'month' : 'months'} min.
-                  </p>
-                </div>
-                <p className="font-semibold">€{plan.price.toFixed(2)}/mo</p>
-              </div>
-            ))}
+      <CardContent className="flex-1 space-y-2">
+        {plans.slice(0, 3).map((plan) => (
+          <div
+            key={plan.id}
+            className="flex items-center justify-between rounded-md border p-2.5 text-sm">
+            <div>
+              <p className="font-medium">{plan.name}</p>
+              <p className="text-muted-foreground text-xs">
+                {plan.minDurationMonths}{' '}
+                {plan.minDurationMonths === 1 ? 'month' : 'months'} min.
+              </p>
+            </div>
+            <p className="font-semibold">€{plan.price.toFixed(2)}/mo</p>
           </div>
-        </ScrollArea>
+        ))}
       </CardContent>
       <CardFooter>
         <Button asChild size="sm" className="w-full">
