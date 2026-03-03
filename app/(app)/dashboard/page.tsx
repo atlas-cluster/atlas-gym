@@ -32,10 +32,32 @@ export default async function DashboardPage() {
     getDashboardStats(),
   ])
 
-  // Courses today that the member hasn't booked and that aren't cancelled
-  const recommendedSessions = todaySessions.filter(
-    (s) => !s.isBookedByMe && !s.isCancelled
-  )
+  // Convert a Date or "HH:MM:SS" time string to minutes-since-midnight for overlap comparison
+  const toMinutes = (t: Date | string): number => {
+    if (t instanceof Date) return t.getHours() * 60 + t.getMinutes()
+    const parts = t.split(':')
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10)
+  }
+
+  // Courses today the member can still book:
+  // - not already booked by them
+  // - not cancelled
+  // - no time overlap with an existing booking
+  // - not one of the trainer's own sessions (they're teaching it)
+  const recommendedSessions = todaySessions.filter((s) => {
+    if (s.isBookedByMe || s.isCancelled) return false
+    const sStart = toMinutes(s.startTime)
+    const sEnd = toMinutes(s.endTime)
+    if (
+      todayBookings.some(
+        (b) => sStart < toMinutes(b.endTime) && sEnd > toMinutes(b.startTime)
+      )
+    )
+      return false
+    if (!!member?.isTrainer && myTodaySessions.some((ms) => ms.id === s.id))
+      return false
+    return true
+  })
 
   return (
     // On md+: fill viewport height (100svh minus 49px header and 1.5rem p-3 top+bottom) so all 4 cards fit without page scroll

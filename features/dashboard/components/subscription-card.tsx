@@ -61,22 +61,17 @@ export function SubscriptionCard({
           </CardTitle>
           <CardDescription>Your current membership plan</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 space-y-3">
+        <CardContent className="flex-1 min-h-0 overflow-hidden space-y-2">
           {/* Primary subscription details */}
           <div>
-            <p className="text-2xl font-bold">{primary.name}</p>
-            {primary.description && (
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {primary.description}
-              </p>
-            )}
+            <p className="text-lg font-bold leading-tight">{primary.name}</p>
           </div>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-md bg-muted p-2.5">
+            <div className="rounded-md bg-muted p-2">
               <p className="text-muted-foreground text-xs">Price</p>
               <p className="font-semibold">€{primary.price.toFixed(2)}/mo</p>
             </div>
-            <div className="rounded-md bg-muted p-2.5">
+            <div className="rounded-md bg-muted p-2">
               <p className="text-muted-foreground text-xs">Min. Duration</p>
               <p className="font-semibold">
                 {primary.minDurationMonths}{' '}
@@ -84,7 +79,7 @@ export function SubscriptionCard({
               </p>
             </div>
             {primary.startDate && (
-              <div className="rounded-md bg-muted p-2.5">
+              <div className="rounded-md bg-muted p-2">
                 <p className="text-muted-foreground text-xs">Started</p>
                 <p className="font-semibold">
                   {format(primary.startDate, 'dd MMM yyyy')}
@@ -92,7 +87,7 @@ export function SubscriptionCard({
               </div>
             )}
             {cancelled && cancelled.endDate && (
-              <div className="rounded-md bg-muted p-2.5">
+              <div className="rounded-md bg-muted p-2">
                 <p className="text-muted-foreground text-xs">Ends</p>
                 <p className="font-semibold">
                   {format(cancelled.endDate, 'dd MMM yyyy')}
@@ -103,7 +98,7 @@ export function SubscriptionCard({
 
           {/* Upcoming plan — always visible, no scroll needed */}
           {future && (active || cancelled) && (
-            <div className="rounded-md border border-dashed p-2.5 space-y-1">
+            <div className="rounded-md border border-dashed p-2 space-y-1">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Upcoming Plan
               </p>
