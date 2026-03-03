@@ -1,5 +1,11 @@
 'use client'
-import { CreditCardIcon, KeyRoundIcon, LogOut, UserPenIcon } from 'lucide-react'
+import {
+  CreditCardIcon,
+  HistoryIcon,
+  KeyRoundIcon,
+  LogOut,
+  UserPenIcon,
+} from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -27,6 +33,7 @@ import {
   useSidebar,
 } from '@/features/shared/components/ui/sidebar'
 import { Skeleton } from '@/features/shared/components/ui/skeleton'
+import { SubscriptionHistoryDialog } from '@/features/subscriptions'
 
 const MemberDetails = ({
   memberExists,
@@ -70,6 +77,7 @@ export function SidebarMemberDetails() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
 
   const memberExists = Boolean(member && !loading)
 
@@ -176,6 +184,10 @@ export function SidebarMemberDetails() {
                 <KeyRoundIcon />
                 Change Password
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setHistoryDialogOpen(true)}>
+                <HistoryIcon />
+                Subscription History
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
@@ -204,6 +216,10 @@ export function SidebarMemberDetails() {
           open={passwordDialogOpen}
           onOpenChange={setPasswordDialogOpen}
           onSuccess={deferredRefresh}
+        />
+        <SubscriptionHistoryDialog
+          open={historyDialogOpen}
+          onOpenChange={setHistoryDialogOpen}
         />
       </SidebarMenuItem>
     </SidebarMenu>
