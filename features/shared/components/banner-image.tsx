@@ -1,8 +1,11 @@
 import Image, { type ImageLoader } from 'next/image'
 
+import { cn } from '@/features/shared/lib/utils'
+
 interface BannerImageProps {
   src: string
   alt: string
+  className?: string
 }
 
 const pexelsLoader: ImageLoader = ({ src }) => {
@@ -32,9 +35,13 @@ function getLoader(src: string): ImageLoader {
   return defaultLoader
 }
 
-export function BannerImage({ src, alt }: BannerImageProps) {
+export function BannerImage({ src, alt, className }: BannerImageProps) {
   return (
-    <div className="relative w-full h-30 overflow-hidden rounded-t-xl">
+    <div
+      className={cn(
+        'relative w-full h-30 overflow-hidden rounded-t-md',
+        className
+      )}>
       <Image
         loader={getLoader(src)}
         src={src}

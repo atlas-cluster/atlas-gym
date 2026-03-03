@@ -1,26 +1,8 @@
-import { CircleAlertIcon } from 'lucide-react'
+import { getDashboardData } from '@/features/dashboard/actions/get-dashboard-data'
+import { DashboardController } from '@/features/dashboard/components/dashboard-controller'
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/features/shared/components/ui/empty'
+export default async function DashboardPage() {
+  const data = await getDashboardData()
 
-export default function DashboardPage() {
-  return (
-    <Empty className={'h-full'}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <CircleAlertIcon />
-        </EmptyMedia>
-        <EmptyTitle>No Content Available</EmptyTitle>
-        <EmptyDescription>
-          There is currently no content to display here. Please check back later
-          or add new content to get started.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  )
+  return <DashboardController data={data} />
 }
