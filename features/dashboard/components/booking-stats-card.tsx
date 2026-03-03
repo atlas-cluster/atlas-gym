@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns'
-import { TrendingUpIcon } from 'lucide-react'
+import { BookmarkIcon, TrendingUpIcon } from 'lucide-react'
 
 import { BookingDayStat } from '@/features/dashboard/actions/get-dashboard-stats'
 import {
@@ -12,24 +12,48 @@ import {
 
 interface BookingStatsCardProps {
   bookingsPerDay: BookingDayStat[]
+  totalUpcomingBookings: number
 }
 
 const BAR_AREA_HEIGHT = 88
 
-export function BookingStatsCard({ bookingsPerDay }: BookingStatsCardProps) {
+export function BookingStatsCard({
+  bookingsPerDay,
+  totalUpcomingBookings,
+}: BookingStatsCardProps) {
   const maxCount = Math.max(...bookingsPerDay.map((d) => d.count), 1)
-  const total = bookingsPerDay.reduce((sum, d) => sum + d.count, 0)
+  const totalThisWeek = bookingsPerDay.reduce((sum, d) => sum + d.count, 0)
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUpIcon className="size-4 text-muted-foreground" />
-          Bookings — Last 7 Days
+          Bookings
         </CardTitle>
-        <CardDescription>{total} total bookings this week</CardDescription>
+        <CardDescription>Activity overview</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Summary stats */}
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="rounded-md bg-muted p-3">
+            <p className="text-muted-foreground">Last 7 days</p>
+            <p className="font-semibold text-base flex items-center gap-1.5 mt-0.5">
+              <BookmarkIcon className="size-3.5 text-muted-foreground" />
+              {totalThisWeek} {totalThisWeek === 1 ? 'session' : 'sessions'}
+            </p>
+          </div>
+          <div className="rounded-md bg-muted p-3">
+            <p className="text-muted-foreground">Upcoming</p>
+            <p className="font-semibold text-base flex items-center gap-1.5 mt-0.5">
+              <BookmarkIcon className="size-3.5 text-muted-foreground" />
+              {totalUpcomingBookings}{' '}
+              {totalUpcomingBookings === 1 ? 'session' : 'sessions'}
+            </p>
+          </div>
+        </div>
+
+        {/* Bar chart */}
         <div className="flex items-end gap-2 h-32">
           {bookingsPerDay.map((day) => {
             const heightPct = (day.count / maxCount) * 100

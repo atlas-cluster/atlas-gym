@@ -1,17 +1,10 @@
-import {
-  BookmarkIcon,
-  CalendarDaysIcon,
-  TrendingUpIcon,
-  UserCheckIcon,
-} from 'lucide-react'
-
 import { getSession } from '@/features/auth'
 import { getCourseSessions } from '@/features/courses/actions/get-course-sessions'
 import { getMyBookings } from '@/features/courses/actions/get-my-bookings'
 import { getMyCourseSessions } from '@/features/courses/actions/get-my-course-sessions'
 import { getDashboardStats, getPlansForMember } from '@/features/dashboard'
 import { BookingStatsCard } from '@/features/dashboard/components/booking-stats-card'
-import { StatCard } from '@/features/dashboard/components/stat-card'
+import { RecommendedCoursesCard } from '@/features/dashboard/components/recommended-courses-card'
 import { SubscriptionCard } from '@/features/dashboard/components/subscription-card'
 import { TodayScheduleCard } from '@/features/dashboard/components/today-schedule-card'
 import { getSubscriptions } from '@/features/subscriptions'
@@ -39,57 +32,27 @@ export default async function DashboardPage() {
     getDashboardStats(),
   ])
 
-  const activeSubscription = subscriptions.find(
-    (s) => s.isActive && !s.isCancelled
+  // Courses today that the member hasn't booked and that aren't cancelled
+  const recommendedSessions = todaySessions.filter(
+    (s) => !s.isBookedByMe && !s.isCancelled
   )
 
   return (
-    <div className="space-y-4">
-      {/* Stat cards row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          title="Subscription"
-          value={activeSubscription ? 'Active' : 'None'}
-          description={
-            activeSubscription ? activeSubscription.name : 'No active plan'
-          }
-          icon={UserCheckIcon}
-        />
-        <StatCard
-          title="Today's Bookings"
-          value={todayBookings.length}
-          description="courses booked today"
-          icon={BookmarkIcon}
-        />
-        <StatCard
-          title="Today's Courses"
-          value={todaySessions.length}
-          description="sessions available today"
-          icon={CalendarDaysIcon}
-        />
-        <StatCard
-          title="Upcoming Bookings"
-          value={stats.totalUpcomingBookings}
-          description="from today onwards"
-          icon={TrendingUpIcon}
-        />
-      </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <SubscriptionCard subscriptions={subscriptions} plans={plans} />
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Subscription card */}
-        <SubscriptionCard subscriptions={subscriptions} plans={plans} />
+      <TodayScheduleCard
+        bookings={todayBookings}
+        sessions={myTodaySessions}
+        isTrainer={member?.isTrainer ?? false}
+      />
 
-        {/* Today's schedule */}
-        <TodayScheduleCard
-          bookings={todayBookings}
-          sessions={myTodaySessions}
-          isTrainer={member?.isTrainer ?? false}
-        />
+      <RecommendedCoursesCard sessions={recommendedSessions} />
 
-        {/* Booking stats chart */}
-        <BookingStatsCard bookingsPerDay={stats.bookingsPerDay} />
-      </div>
+      <BookingStatsCard
+        bookingsPerDay={stats.bookingsPerDay}
+        totalUpcomingBookings={stats.totalUpcomingBookings}
+      />
     </div>
   )
 }
