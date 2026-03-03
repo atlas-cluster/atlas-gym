@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/features/shared/components/ui/card'
-import { ScrollArea } from '@/features/shared/components/ui/scroll-area'
 
 interface TodayScheduleCardProps {
   bookings: CourseBookingDisplay[]
@@ -47,7 +46,7 @@ export function TodayScheduleCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <ScrollArea className="max-h-72 px-6">
+        <div className="max-h-72 overflow-y-auto px-6">
           <div className="space-y-4 py-1 pb-6">
             {isTrainer && sessions.length > 0 && (
               <div className="space-y-2">
@@ -140,7 +139,7 @@ export function TodayScheduleCard({
               )}
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   )
