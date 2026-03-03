@@ -4,5 +4,7 @@ export * from '@/features/subscriptions/actions/cancel-subscription'
 export * from '@/features/subscriptions/actions/create-subscription'
 export * from '@/features/subscriptions/actions/revert-cancellation'
 export * from '@/features/subscriptions/actions/delete-subscription'
+export * from '@/features/subscriptions/actions/get-subscription-history'
 
 export { SubscriptionsClient as SubscriptionsTableClient } from '@/features/subscriptions/components/subscriptions-client'
+export { SubscriptionHistoryDialog } from '@/features/subscriptions/dialogs/subscription-history'
