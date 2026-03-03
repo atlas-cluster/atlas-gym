@@ -66,6 +66,14 @@ export interface CourseBookingDisplay {
   createdAt: Date
 }
 
+export interface SessionBookingMember {
+  id: string
+  firstname: string
+  lastname: string
+  email: string
+  bookedAt: Date
+}
+
 export type Weekday =
   | 'monday'
   | 'tuesday'

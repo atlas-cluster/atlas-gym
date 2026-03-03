@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { getSession } from '@/features/auth'
 import { sessionOverrideSchema } from '@/features/courses/schemas/session-override'
 import { pool } from '@/features/shared/lib/db'
+import { PG_EXCLUSION_VIOLATION } from '@/features/shared/lib/postgres-errors'
 
 export async function overrideSession(
   sessionId: string,
@@ -17,6 +18,7 @@ export async function overrideSession(
   errorType?:
     | 'AUTH'
     | 'NOT_FOUND'
+    | 'SCHEDULE_CONFLICT'
     | 'VERSION_MISMATCH'
     | 'VALIDATION'
     | 'UNKNOWN'
@@ -159,6 +161,37 @@ export async function overrideSession(
 
     return { success: true, message: 'Session updated successfully.' }
   } catch (error: unknown) {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === PG_EXCLUSION_VIOLATION
+    ) {
+      const constraint =
+        'constraint' in error ? (error.constraint as string) : ''
+      if (constraint === 'prevent_session_trainer_overlap') {
+        return {
+          success: false,
+          errorType: 'SCHEDULE_CONFLICT',
+          message:
+            'The trainer already has another session at this time on this date.',
+        }
+      }
+      if (constraint === 'prevent_session_room_overlap') {
+        return {
+          success: false,
+          errorType: 'SCHEDULE_CONFLICT',
+          message:
+            'The room already has another session at this time on this date.',
+        }
+      }
+      return {
+        success: false,
+        errorType: 'SCHEDULE_CONFLICT',
+        message:
+          'This session conflicts with an existing schedule. Please choose a different time or room.',
+      }
+    }
     if (error instanceof z.ZodError) {
       return {
         success: false,

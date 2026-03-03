@@ -178,3 +178,125 @@ CREATE TABLE audit_logs (
 CREATE INDEX idx_audit_logs_entity ON audit_logs (entity_type, entity_id);
 
 CREATE INDEX idx_audit_logs_member ON audit_logs (member_id);
+
+-- OVERLAP VALIDATION TRIGGERS
+CREATE OR REPLACE FUNCTION validate_course_template_overlap () RETURNS TRIGGER AS $$
+DECLARE
+  conflict RECORD;
+BEGIN
+  -- Check trainer overlap
+  IF NEW.trainer_id IS NOT NULL THEN
+    SELECT ct.name INTO conflict
+    FROM course_templates ct
+    WHERE ct.id != NEW.id
+      AND ct.trainer_id = NEW.trainer_id
+      AND ct.weekdays && NEW.weekdays
+      AND (NEW.start_time, NEW.end_time) OVERLAPS (ct.start_time, ct.end_time)
+      AND daterange(NEW.start_date, COALESCE(NEW.end_date, 'infinity'), '[]')
+       && daterange(ct.start_date, COALESCE(ct.end_date, 'infinity'), '[]')
+    LIMIT 1;
+
+    IF FOUND THEN
+      RAISE EXCEPTION 'Trainer schedule conflict: overlaps with course "%"', conflict.name
+        USING ERRCODE = '23P01',
+              CONSTRAINT = 'prevent_trainer_time_overlap';
+    END IF;
+  END IF;
+
+  -- Check room overlap
+  IF NEW.room_id IS NOT NULL THEN
+    SELECT ct.name INTO conflict
+    FROM course_templates ct
+    WHERE ct.id != NEW.id
+      AND ct.room_id = NEW.room_id
+      AND ct.weekdays && NEW.weekdays
+      AND (NEW.start_time, NEW.end_time) OVERLAPS (ct.start_time, ct.end_time)
+      AND daterange(NEW.start_date, COALESCE(NEW.end_date, 'infinity'), '[]')
+       && daterange(ct.start_date, COALESCE(ct.end_date, 'infinity'), '[]')
+    LIMIT 1;
+
+    IF FOUND THEN
+      RAISE EXCEPTION 'Room schedule conflict: overlaps with course "%"', conflict.name
+        USING ERRCODE = '23P01',
+              CONSTRAINT = 'prevent_room_time_overlap';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_course_template_overlap BEFORE INSERT
+OR
+UPDATE ON course_templates FOR EACH ROW
+EXECUTE FUNCTION validate_course_template_overlap ();
+
+CREATE OR REPLACE FUNCTION validate_course_session_overlap () RETURNS TRIGGER AS $$
+DECLARE
+  eff_trainer_id UUID;
+  eff_room_id    UUID;
+  eff_start      TIME;
+  eff_end        TIME;
+  conflict       RECORD;
+BEGIN
+  SELECT
+    COALESCE(NEW.trainer_id_override, ct.trainer_id),
+    COALESCE(NEW.room_id_override, ct.room_id),
+    COALESCE(NEW.start_time_override, NEW.start_time),
+    COALESCE(NEW.end_time_override, NEW.end_time)
+  INTO eff_trainer_id, eff_room_id, eff_start, eff_end
+  FROM course_templates ct
+  WHERE ct.id = NEW.template_id;
+  IF eff_trainer_id IS NOT NULL THEN
+    SELECT COALESCE(cs.name_override, ct.name) AS session_name INTO conflict
+    FROM course_sessions cs
+    JOIN course_templates ct ON ct.id = cs.template_id
+    WHERE cs.id != NEW.id
+      AND (TG_OP != 'INSERT' OR cs.template_id != NEW.template_id)
+      AND cs.session_date = NEW.session_date
+      AND cs.is_cancelled = FALSE
+      AND COALESCE(cs.trainer_id_override, ct.trainer_id) = eff_trainer_id
+      AND (eff_start, eff_end) OVERLAPS (
+            COALESCE(cs.start_time_override, cs.start_time),
+            COALESCE(cs.end_time_override, cs.end_time)
+          )
+    LIMIT 1;
+
+    IF FOUND THEN
+      RAISE EXCEPTION 'Session trainer conflict on %: overlaps with session "%"', NEW.session_date, conflict.session_name
+        USING ERRCODE = '23P01',
+              CONSTRAINT = 'prevent_session_trainer_overlap';
+    END IF;
+  END IF;
+
+  -- Check room overlap on the same date
+  IF eff_room_id IS NOT NULL THEN
+    SELECT COALESCE(cs.name_override, ct.name) AS session_name INTO conflict
+    FROM course_sessions cs
+    JOIN course_templates ct ON ct.id = cs.template_id
+    WHERE cs.id != NEW.id
+      AND (TG_OP != 'INSERT' OR cs.template_id != NEW.template_id)
+      AND cs.session_date = NEW.session_date
+      AND cs.is_cancelled = FALSE
+      AND COALESCE(cs.room_id_override, ct.room_id) = eff_room_id
+      AND (eff_start, eff_end) OVERLAPS (
+            COALESCE(cs.start_time_override, cs.start_time),
+            COALESCE(cs.end_time_override, cs.end_time)
+          )
+    LIMIT 1;
+
+    IF FOUND THEN
+      RAISE EXCEPTION 'Session room conflict on %: overlaps with session "%"', NEW.session_date, conflict.session_name
+        USING ERRCODE = '23P01',
+              CONSTRAINT = 'prevent_session_room_overlap';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_course_session_overlap BEFORE INSERT
+OR
+UPDATE ON course_sessions FOR EACH ROW
+EXECUTE FUNCTION validate_course_session_overlap ();

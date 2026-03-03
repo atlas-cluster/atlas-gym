@@ -181,24 +181,25 @@ export function OverrideSessionDialog({
                       <FieldLabel>Trainer</FieldLabel>
                       <Select
                         value={field.value ?? ''}
-                        onValueChange={(val) =>
-                          field.onChange(val === '__none__' ? '' : val)
-                        }>
+                        onValueChange={field.onChange}>
                         <SelectTrigger
                           className={cn(
                             'w-full',
                             fieldState.invalid && 'border-destructive!'
                           )}>
-                          <SelectValue placeholder="Use default" />
+                          <SelectValue placeholder="Select trainer" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="__none__">Use default</SelectItem>
                           {trainers.map((t) => (
                             <SelectItem key={t.id} value={t.id}>
+                              {t.name}
                               {isOverridden &&
-                              t.id === session?.originalTrainerId
-                                ? `${t.name} (original)`
-                                : t.name}
+                                t.id === session?.originalTrainerId && (
+                                  <span className="text-muted-foreground">
+                                    {' '}
+                                    (original)
+                                  </span>
+                                )}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -224,23 +225,25 @@ export function OverrideSessionDialog({
                       <FieldLabel>Room</FieldLabel>
                       <Select
                         value={field.value ?? ''}
-                        onValueChange={(val) =>
-                          field.onChange(val === '__none__' ? '' : val)
-                        }>
+                        onValueChange={field.onChange}>
                         <SelectTrigger
                           className={cn(
                             'w-full',
                             fieldState.invalid && 'border-destructive!'
                           )}>
-                          <SelectValue placeholder="Use default" />
+                          <SelectValue placeholder="Select room" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="__none__">Use default</SelectItem>
                           {rooms.map((r) => (
                             <SelectItem key={r.id} value={r.id}>
-                              {isOverridden && r.id === session?.originalRoomId
-                                ? `${r.name} (original)`
-                                : r.name}
+                              {r.name}
+                              {isOverridden &&
+                                r.id === session?.originalRoomId && (
+                                  <span className="text-muted-foreground">
+                                    {' '}
+                                    (original)
+                                  </span>
+                                )}
                             </SelectItem>
                           ))}
                         </SelectContent>

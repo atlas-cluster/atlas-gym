@@ -12,8 +12,6 @@ INSERT INTO
     end_date
   )
 VALUES
-  -- ===== SPINNING ROOM =====
-  -- Max Neumann: Primary spinning trainer
   (
     (
       SELECT
@@ -170,8 +168,6 @@ VALUES
     '2025-01-11',
     NULL
   ),
-  -- ===== BOXING RING =====
-  -- Sarah Maier: Primary boxing trainer
   (
     (
       SELECT
@@ -328,8 +324,6 @@ VALUES
     '2025-02-04',
     NULL
   ),
-  -- ===== POOL =====
-  -- Felix Hoffmann: Primary swim trainer
   (
     (
       SELECT
@@ -486,8 +480,6 @@ VALUES
     '2025-01-12',
     NULL
   ),
-  -- ===== PILATES STUDIO =====
-  -- Maria Schmidt: Primary pilates trainer
   (
     (
       SELECT
@@ -670,8 +662,6 @@ VALUES
     '2025-01-10',
     NULL
   ),
-  -- ===== CALISTHENICS OUTDOOR AREA =====
-  -- Daniel Werner & Jonas Weber
   (
     (
       SELECT
@@ -854,8 +844,6 @@ VALUES
     '2025-01-12',
     NULL
   ),
-  -- ===== HYROX TRAINING AREA =====
-  -- Jonas Weber & Sarah Maier & Daniel Werner
   (
     (
       SELECT
@@ -929,8 +917,8 @@ VALUES
     'Tire flips, farmer walks, atlas stones — weekend warrior edition.',
     'https://images.pexels.com/photos/3253499/pexels-photo-3253499.jpeg',
     ARRAY['saturday']::weekday[],
-    '09:00',
-    '11:00',
+    '11:30',
+    '13:30',
     '2025-01-11',
     NULL
   ),
@@ -1007,8 +995,8 @@ VALUES
     'Partner-based Hyrox simulation for the doubles category.',
     'https://images.pexels.com/photos/4944437/pexels-photo-4944437.jpeg',
     ARRAY['saturday']::weekday[],
-    '13:00',
-    '14:30',
+    '14:00',
+    '15:30',
     '2025-01-11',
     NULL
   ),
@@ -1085,13 +1073,11 @@ VALUES
     'Swings, cleans, snatches — all kettlebell, all the time.',
     'https://images.pexels.com/photos/3766211/pexels-photo-3766211.jpeg',
     ARRAY['sunday']::weekday[],
-    '10:00',
     '11:00',
+    '12:00',
     '2025-01-12',
     NULL
   ),
-  -- ===== DANCE STUDIO =====
-  -- Sophie Mueller: Primary dance trainer
   (
     (
       SELECT
@@ -1300,8 +1286,6 @@ VALUES
     '2025-01-12',
     NULL
   ),
-  -- ===== YOGA STUDIO =====
-  -- Maria Schmidt: Primary yoga trainer
   (
     (
       SELECT
@@ -1323,8 +1307,8 @@ VALUES
     'Energizing vinyasa flow to start your day. All levels welcome.',
     'https://images.pexels.com/photos/6454061/pexels-photo-6454061.jpeg',
     ARRAY['monday', 'wednesday', 'friday']::weekday[],
-    '07:00',
-    '08:00',
+    '08:15',
+    '09:15',
     '2025-01-06',
     NULL
   ),
@@ -1349,8 +1333,8 @@ VALUES
     'Slow, deep stretching held for minutes. Targets connective tissue.',
     'https://images.pexels.com/photos/4056513/pexels-photo-4056513.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
-    '09:00',
     '10:15',
+    '11:00',
     '2025-01-07',
     NULL
   ),
@@ -1510,7 +1494,6 @@ VALUES
     '2025-02-03',
     NULL
   ),
-  -- ===== CROSS-ROOM EVENING SPECIALS =====
   (
     (
       SELECT
@@ -1584,12 +1567,11 @@ VALUES
     'End your week on the dance floor. All styles, all fun.',
     'https://images.pexels.com/photos/5152546/pexels-photo-5152546.jpeg',
     ARRAY['friday']::weekday[],
-    '19:00',
-    '20:30',
+    '20:15',
+    '21:45',
     '2025-01-10',
     NULL
   ),
-  -- ===== ADDITIONAL SPINNING ROOM =====
   (
     (
       SELECT
@@ -1689,8 +1671,8 @@ VALUES
     'Pedal to the beat — music-driven spin class with choreography on the bike.',
     'https://images.pexels.com/photos/4162595/pexels-photo-4162595.jpeg',
     ARRAY['tuesday', 'thursday']::weekday[],
-    '18:00',
-    '18:45',
+    '19:00',
+    '19:45',
     '2025-02-04',
     NULL
   ),
@@ -1715,12 +1697,11 @@ VALUES
     '30 minutes spinning followed by 15 minutes guided stretching.',
     'https://images.pexels.com/photos/7689280/pexels-photo-7689280.jpeg',
     ARRAY['wednesday']::weekday[],
-    '17:00',
-    '17:45',
+    '16:00',
+    '16:45',
     '2025-01-08',
     NULL
   ),
-  -- ===== ADDITIONAL BOXING RING =====
   (
     (
       SELECT
@@ -1851,7 +1832,6 @@ VALUES
     '2025-01-12',
     NULL
   ),
-  -- ===== ADDITIONAL POOL =====
   (
     (
       SELECT
@@ -1873,8 +1853,8 @@ VALUES
     'Zero-impact running in deep water with flotation belts. Excellent rehab workout.',
     'https://images.pexels.com/photos/261185/pexels-photo-261185.jpeg',
     ARRAY['monday', 'wednesday']::weekday[],
-    '12:00',
-    '12:45',
+    '13:30',
+    '14:15',
     '2025-02-03',
     NULL
   ),
@@ -1982,7 +1962,6 @@ VALUES
     '2025-01-10',
     NULL
   ),
-  -- ===== ADDITIONAL PILATES STUDIO =====
   (
     (
       SELECT
@@ -2134,12 +2113,11 @@ VALUES
     'Mindful, slow-tempo pilates with extended holds. Deep work.',
     'https://images.pexels.com/photos/8957639/pexels-photo-8957639.jpeg',
     ARRAY['sunday']::weekday[],
-    '10:00',
-    '11:00',
+    '12:15',
+    '13:15',
     '2025-01-12',
     NULL
   ),
-  -- ===== ADDITIONAL CALISTHENICS OUTDOOR AREA =====
   (
     (
       SELECT
@@ -2161,8 +2139,8 @@ VALUES
     'Progressive handstand training — wall drills to freestanding holds.',
     'https://images.pexels.com/photos/5369001/pexels-photo-5369001.jpeg',
     ARRAY['friday']::weekday[],
-    '08:00',
-    '09:30',
+    '10:00',
+    '11:30',
     '2025-01-10',
     NULL
   ),
@@ -2213,8 +2191,8 @@ VALUES
     'Dips, pull-ups, and push-ups with added weight. Strength-focused.',
     'https://i.shgcdn.com/923ea405-3f2b-4949-a081-604f5ffb2d88/-/format/auto/-/preview/3000x3000/-/quality/lighter/',
     ARRAY['monday', 'wednesday']::weekday[],
-    '12:00',
     '13:00',
+    '14:00',
     '2025-01-06',
     NULL
   ),
@@ -2265,8 +2243,8 @@ VALUES
     'Spartan/Tough Mudder prep — climbing, crawling, jumping, and carrying.',
     'https://images.pexels.com/photos/36182422/pexels-photo-36182422.jpeg',
     ARRAY['saturday']::weekday[],
-    '12:00',
-    '13:30',
+    '13:00',
+    '14:30',
     '2025-01-11',
     NULL
   ),
@@ -2296,7 +2274,6 @@ VALUES
     '2025-02-04',
     NULL
   ),
-  -- ===== ADDITIONAL HYROX TRAINING AREA =====
   (
     (
       SELECT
@@ -2474,8 +2451,8 @@ VALUES
     'As Many Rounds As Possible — mixed modality, clock is ticking.',
     'https://images.unsplash.com/photo-1743993414579-9ad1bb84038b',
     ARRAY['tuesday', 'friday']::weekday[],
-    '08:00',
-    '08:45',
+    '10:15',
+    '11:00',
     '2025-01-07',
     NULL
   ),
@@ -2526,12 +2503,11 @@ VALUES
     'Long chipper-style workout mixing running, rowing, and ski erg.',
     'https://images.unsplash.com/photo-1743993414579-9ad1bb84038b',
     ARRAY['saturday']::weekday[],
-    '15:00',
-    '16:30',
+    '17:00',
+    '18:30',
     '2025-01-11',
     NULL
   ),
-  -- ===== ADDITIONAL DANCE STUDIO =====
   (
     (
       SELECT
@@ -2605,8 +2581,8 @@ VALUES
     'Latin urban dance fitness — perreo meets cardio.',
     'https://images.unsplash.com/photo-1714738045959-3bd0634bdce2',
     ARRAY['thursday']::weekday[],
-    '19:30',
     '20:15',
+    '21:00',
     '2025-02-06',
     NULL
   ),
@@ -2714,7 +2690,6 @@ VALUES
     '2025-01-11',
     NULL
   ),
-  -- ===== ADDITIONAL YOGA STUDIO =====
   (
     (
       SELECT
@@ -2788,8 +2763,8 @@ VALUES
     'Partner-based acro yoga — flying, basing, and spotting fundamentals.',
     'https://images.unsplash.com/photo-1758274537594-ae71243befa5',
     ARRAY['saturday']::weekday[],
-    '14:00',
-    '15:30',
+    '16:00',
+    '17:30',
     '2025-02-01',
     NULL
   ),
@@ -2814,8 +2789,8 @@ VALUES
     'Fast-paced, dynamic Ashtanga-derived flow. Arm balances and inversions.',
     'https://images.unsplash.com/photo-1766069565396-b63c9254bbf0',
     ARRAY['monday', 'friday']::weekday[],
+    '16:00',
     '17:00',
-    '18:00',
     '2025-01-06',
     NULL
   ),
@@ -2866,8 +2841,8 @@ VALUES
     'Wim Hof inspired breathing techniques and mindset training.',
     'https://images.unsplash.com/photo-1737993705699-f71abda85ef5',
     ARRAY['saturday']::weekday[],
-    '11:00',
-    '12:00',
+    '13:00',
+    '14:00',
     '2025-02-01',
     NULL
   ),

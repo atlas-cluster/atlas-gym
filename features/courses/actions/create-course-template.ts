@@ -6,14 +6,22 @@ import { z } from 'zod'
 import { getSession } from '@/features/auth'
 import { courseTemplateSchema } from '@/features/courses/schemas/course-template'
 import { pool } from '@/features/shared/lib/db'
-import { PG_UNIQUE_VIOLATION } from '@/features/shared/lib/postgres-errors'
+import {
+  PG_EXCLUSION_VIOLATION,
+  PG_UNIQUE_VIOLATION,
+} from '@/features/shared/lib/postgres-errors'
 
 export async function createCourseTemplate(
   data: z.infer<typeof courseTemplateSchema>
 ): Promise<{
   success: boolean
   message: string
-  errorType?: 'AUTH' | 'NAME_COLLISION' | 'VALIDATION' | 'UNKNOWN'
+  errorType?:
+    | 'AUTH'
+    | 'NAME_COLLISION'
+    | 'SCHEDULE_CONFLICT'
+    | 'VALIDATION'
+    | 'UNKNOWN'
 }> {
   try {
     const { member } = await getSession()
@@ -82,6 +90,37 @@ export async function createCourseTemplate(
         success: false,
         errorType: 'NAME_COLLISION',
         message: 'A course template with this name already exists.',
+      }
+    }
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === PG_EXCLUSION_VIOLATION
+    ) {
+      const constraint =
+        'constraint' in error ? (error.constraint as string) : ''
+      if (constraint === 'prevent_trainer_time_overlap') {
+        return {
+          success: false,
+          errorType: 'SCHEDULE_CONFLICT',
+          message:
+            'The trainer already has a course scheduled at this time on one or more of the selected weekdays.',
+        }
+      }
+      if (constraint === 'prevent_room_time_overlap') {
+        return {
+          success: false,
+          errorType: 'SCHEDULE_CONFLICT',
+          message:
+            'The room already has a course scheduled at this time on one or more of the selected weekdays.',
+        }
+      }
+      return {
+        success: false,
+        errorType: 'SCHEDULE_CONFLICT',
+        message:
+          'This course conflicts with an existing schedule. Please choose a different time, day, or room.',
       }
     }
     if (error instanceof z.ZodError) {
