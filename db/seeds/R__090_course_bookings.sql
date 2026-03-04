@@ -2,7 +2,7 @@ UPDATE course_sessions
 SET
   is_cancelled = FALSE
 WHERE
-  session_date >= CURRENT_DATE
+  session_date >= CURRENT_DATE - INTERVAL '1 month'
   AND session_date <= CURRENT_DATE + INTERVAL '1 month';
 
 UPDATE course_sessions
@@ -15,7 +15,7 @@ WHERE
     FROM
       course_sessions
     WHERE
-      session_date >= CURRENT_DATE
+      session_date >= CURRENT_DATE - INTERVAL '1 month'
       AND session_date <= CURRENT_DATE + INTERVAL '1 month'
     ORDER BY
       md5('cancel-seed' || id::text)
@@ -26,7 +26,7 @@ WHERE
         FROM
           course_sessions
         WHERE
-          session_date >= CURRENT_DATE
+          session_date >= CURRENT_DATE - INTERVAL '1 month'
           AND session_date <= CURRENT_DATE + INTERVAL '1 month'
       )
   );
@@ -39,7 +39,7 @@ WHERE
     FROM
       course_sessions
     WHERE
-      session_date >= CURRENT_DATE
+      session_date >= CURRENT_DATE - INTERVAL '1 month'
       AND session_date <= CURRENT_DATE + INTERVAL '1 month'
   );
 
@@ -56,7 +56,7 @@ BEGIN
       FROM members m
       JOIN subscriptions sub ON sub.member_id = m.id
       WHERE sub.start_date <= CURRENT_DATE
-        AND (sub.end_date IS NULL OR sub.end_date >= CURRENT_DATE)
+        AND (sub.end_date IS NULL OR sub.end_date >= CURRENT_DATE - INTERVAL '1 month')
       ORDER BY m.email
     LOOP
       FOR s IN
@@ -66,12 +66,12 @@ BEGIN
                COALESCE(cs.end_time_override, cs.end_time) AS eff_end
         FROM course_sessions cs
         JOIN course_templates ct ON ct.id = cs.template_id
-        WHERE cs.session_date >= CURRENT_DATE
+        WHERE cs.session_date >= CURRENT_DATE - INTERVAL '1 month'
           AND cs.session_date <= CURRENT_DATE + INTERVAL '1 month'
           AND cs.is_cancelled = FALSE
           AND COALESCE(cs.trainer_id_override, ct.trainer_id) != m_id
         ORDER BY md5(pass::text || m_id::text || cs.id::text)
-        LIMIT 10
+        LIMIT 20
       LOOP
         SELECT EXISTS (
           SELECT 1

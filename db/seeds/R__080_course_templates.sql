@@ -2899,3 +2899,42 @@ VALUES
     NULL
   )
 ON CONFLICT (name) DO NOTHING;
+
+-- Generate course sessions for the past month so we have historical data for seeding
+DO $$
+DECLARE
+    t RECORD;
+    d DATE;
+    wd TEXT;
+    target_dow INT;
+    range_start DATE;
+    range_end DATE;
+BEGIN
+    FOR t IN SELECT * FROM course_templates LOOP
+        range_start := GREATEST(t.start_date, CURRENT_DATE - INTERVAL '1 month');
+        range_end   := CURRENT_DATE - INTERVAL '1 day';
+
+        FOREACH wd IN ARRAY t.weekdays LOOP
+            target_dow := CASE wd
+                              WHEN 'monday'    THEN 1
+                              WHEN 'tuesday'   THEN 2
+                              WHEN 'wednesday' THEN 3
+                              WHEN 'thursday'  THEN 4
+                              WHEN 'friday'    THEN 5
+                              WHEN 'saturday'  THEN 6
+                              WHEN 'sunday'    THEN 0
+                          END;
+
+            d := range_start + ((target_dow - EXTRACT(DOW FROM range_start)::INT + 7) % 7);
+
+            WHILE d <= range_end LOOP
+                INSERT INTO course_sessions (template_id, session_date, start_time, end_time)
+                VALUES (t.id, d, t.start_time, t.end_time)
+                ON CONFLICT (template_id, session_date) DO NOTHING;
+
+                d := d + 7;
+            END LOOP;
+        END LOOP;
+    END LOOP;
+END;
+$$;
