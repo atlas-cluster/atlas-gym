@@ -260,10 +260,7 @@ export function CourseSessionsDataTable({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [globalFilter, columnFilters])
 
-  const fmt = (d: Date) => {
-    const dt = new Date(d)
-    return `${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}`
-  }
+  const fmt = (t: string) => t.slice(0, 5)
 
   return (
     <div className="w-full space-y-3">

@@ -20,8 +20,8 @@ const getRoomsCached = unstable_cache(
                COALESCE(cs.description_override, ct.description) AS session_description,
                COALESCE(m_override.firstname || ' ' || m_override.lastname,
                         m.firstname || ' ' || m.lastname)        AS trainer_name,
-               cs.session_date + COALESCE(cs.start_time_override, cs.start_time) AS session_start,
-               cs.session_date + COALESCE(cs.end_time_override, cs.end_time)     AS session_end,
+               COALESCE(cs.start_time_override, cs.start_time)::text AS session_start,
+               COALESCE(cs.end_time_override, cs.end_time)::text     AS session_end,
                cs.is_cancelled AS session_cancelled
         FROM course_sessions cs
           JOIN course_templates ct ON ct.id = cs.template_id
@@ -74,8 +74,8 @@ const getRoomsCached = unstable_cache(
           description: row.session_description ?? undefined,
           roomName: row.room_name,
           trainerName: row.trainer_name,
-          startTime: new Date(row.session_start),
-          endTime: new Date(row.session_end),
+          startTime: row.session_start.slice(0, 5),
+          endTime: row.session_end.slice(0, 5),
           isCancelled: row.session_cancelled,
         } as CourseSessionDisplay)
       }

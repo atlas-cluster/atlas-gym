@@ -83,10 +83,8 @@ export function OverrideSessionDialog({
           : '',
         trainerIdOverride: session.trainerId ?? '',
         roomIdOverride: session.roomId ?? '',
-        startTimeOverride: new Date(session.startTime)
-          .toTimeString()
-          .slice(0, 5),
-        endTimeOverride: new Date(session.endTime).toTimeString().slice(0, 5),
+        startTimeOverride: session.startTime,
+        endTimeOverride: session.endTime,
       })
     }
   }, [open, session, form])

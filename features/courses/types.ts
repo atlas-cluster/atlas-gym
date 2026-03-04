@@ -20,8 +20,8 @@ export interface CourseTemplateDisplay extends CourseTemplate {
 }
 
 export interface CourseSession {
-  startTime: Date
-  endTime: Date
+  startTime: string
+  endTime: string
   isCancelled: boolean
 }
 

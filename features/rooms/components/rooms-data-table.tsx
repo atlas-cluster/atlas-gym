@@ -73,26 +73,22 @@ function getRoomStatus(
 ): RoomStatus {
   const activeSessions = sessions
     .filter((s) => !s.isCancelled)
-    .sort(
-      (a, b) =>
-        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-    )
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
-  const fmt = (d: Date) =>
-    `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
   for (const s of activeSessions) {
-    const start = new Date(s.startTime)
-    const end = new Date(s.endTime)
+    const start = new Date(`${today}T${s.startTime}:00`)
+    const end = new Date(`${today}T${s.endTime}:00`)
     if (now >= start && now < end) {
-      return { status: 'occupied', until: fmt(end), sessionName: s.name }
+      return { status: 'occupied', until: s.endTime, sessionName: s.name }
     }
   }
 
   for (const s of activeSessions) {
-    const start = new Date(s.startTime)
+    const start = new Date(`${today}T${s.startTime}:00`)
     if (start > now) {
-      return { status: 'free-until', until: fmt(start), sessionName: s.name }
+      return { status: 'free-until', until: s.startTime, sessionName: s.name }
     }
   }
 
@@ -420,11 +416,7 @@ export function RoomsDataTable({
                   <ScrollArea className="h-48">
                     <div className="space-y-2">
                       {Room.original.sessions
-                        .sort(
-                          (a, b) =>
-                            new Date(a.startTime).getTime() -
-                            new Date(b.startTime).getTime()
-                        )
+                        .sort((a, b) => a.startTime.localeCompare(b.startTime))
                         .map((session, i) => (
                           <div key={i}>
                             {i > 0 && <Separator className="mb-2" />}
@@ -436,9 +428,9 @@ export function RoomsDataTable({
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <ClockIcon className="h-3 w-3" />
-                                    {`${new Date(session.startTime).getHours().toString().padStart(2, '0')}:${new Date(session.startTime).getMinutes().toString().padStart(2, '0')}`}
+                                    {session.startTime}
                                     {' – '}
-                                    {`${new Date(session.endTime).getHours().toString().padStart(2, '0')}:${new Date(session.endTime).getMinutes().toString().padStart(2, '0')}`}
+                                    {session.endTime}
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <UserIcon className="h-3 w-3" />
