@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDownIcon, XIcon } from 'lucide-react'
+import { ChevronDownIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -505,64 +505,47 @@ export function UpdateCourseTemplateDialog({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>End Date</FieldLabel>
-                    <div className="flex gap-2">
-                      <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              'flex-1 justify-between font-normal',
-                              fieldState.error && 'border-destructive!'
-                            )}>
-                            {field.value
-                              ? String(field.value)
-                                  .split('-')
-                                  .reverse()
-                                  .join('.')
-                              : 'No end date'}
-                            <ChevronDownIcon />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto overflow-hidden p-0"
-                          align="start">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              field.value
-                                ? new Date(String(field.value))
-                                : undefined
-                            }
-                            captionLayout="dropdown"
-                            onSelect={(date) => {
-                              if (date) {
-                                const offset = date.getTimezoneOffset() * 60000
-                                const adjusted = new Date(
-                                  date.getTime() - offset
-                                )
-                                field.onChange(
-                                  adjusted.toISOString().split('T')[0]
-                                )
-                              } else {
-                                field.onChange(undefined)
-                              }
-                              setEndDateOpen(false)
-                            }}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {field.value && (
+                    <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+                      <PopoverTrigger asChild>
                         <Button
                           type="button"
                           variant="outline"
-                          size="icon"
-                          aria-label="Clear end date"
-                          onClick={() => field.onChange(undefined)}>
-                          <XIcon className="size-4" />
+                          className={cn(
+                            'w-full justify-between font-normal',
+                            fieldState.error && 'border-destructive!'
+                          )}>
+                          {field.value
+                            ? String(field.value).split('-').reverse().join('.')
+                            : 'No end date'}
+                          <ChevronDownIcon />
                         </Button>
-                      )}
-                    </div>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                        align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value
+                              ? new Date(String(field.value))
+                              : undefined
+                          }
+                          captionLayout="dropdown"
+                          onSelect={(date) => {
+                            if (date) {
+                              const offset = date.getTimezoneOffset() * 60000
+                              const adjusted = new Date(date.getTime() - offset)
+                              field.onChange(
+                                adjusted.toISOString().split('T')[0]
+                              )
+                            } else {
+                              field.onChange('')
+                            }
+                            setEndDateOpen(false)
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
