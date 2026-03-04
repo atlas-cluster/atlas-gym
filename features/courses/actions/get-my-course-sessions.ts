@@ -23,10 +23,10 @@ export async function getMyCourseSessions(
        COALESCE(cs.name_override, ct.name)                         AS "name",
        COALESCE(cs.description_override, ct.description)           AS "description",
        ct.banner_image_url                                         AS "bannerImageUrl",
-       cs.session_date + COALESCE(cs.start_time_override, cs.start_time) AS "startTime",
-       cs.session_date + COALESCE(cs.end_time_override, cs.end_time)     AS "endTime",
-       COALESCE(cs.start_time_override, cs.start_time)::text       AS "startTimeRaw",
-       COALESCE(cs.end_time_override, cs.end_time)::text           AS "endTimeRaw",
+       cs.session_date + COALESCE(cs.start_time_override, cs.start_time) AS "startTimeTs",
+       cs.session_date + COALESCE(cs.end_time_override, cs.end_time)     AS "endTimeTs",
+       COALESCE(cs.start_time_override, cs.start_time)::text       AS "startTime",
+       COALESCE(cs.end_time_override, cs.end_time)::text           AS "endTime",
        cs.is_cancelled                                             AS "isCancelled",
        COALESCE(cs.trainer_id_override, ct.trainer_id)             AS "trainerId",
        COALESCE(
@@ -73,8 +73,8 @@ export async function getMyCourseSessions(
 
   return result.rows.map((row) => ({
     ...row,
-    startTime: new Date(row.startTime),
-    endTime: new Date(row.endTime),
+    startTime: row.startTime.slice(0, 5),
+    endTime: row.endTime.slice(0, 5),
     trainerId: row.trainerId ?? undefined,
     trainerName: row.trainerName ?? undefined,
     roomId: row.roomId ?? undefined,
