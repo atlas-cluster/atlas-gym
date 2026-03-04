@@ -539,7 +539,7 @@ export function UpdateCourseTemplateDialog({
                                 adjusted.toISOString().split('T')[0]
                               )
                             } else {
-                              field.onChange(undefined)
+                              field.onChange('')
                             }
                             setEndDateOpen(false)
                           }}
