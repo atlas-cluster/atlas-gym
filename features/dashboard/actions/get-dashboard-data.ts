@@ -148,7 +148,7 @@ const getDashboardDataCached = unstable_cache(
         : undefined,
       currentSubscriptionDescription: subRow?.description ?? undefined,
       subscriptionStartDate: subRow?.start_date
-        ? new Date(subRow.start_date).toLocaleDateString('de-DE', {
+        ? new Date(subRow.start_date).toLocaleDateString('en-GB', {
             month: 'short',
             year: 'numeric',
           })

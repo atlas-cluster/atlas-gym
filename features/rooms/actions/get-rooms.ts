@@ -41,8 +41,8 @@ const getRoomsCached = unstable_cache(
                NULL::TEXT AS session_name,
                NULL::TEXT AS session_description,
                NULL::TEXT AS trainer_name,
-               NULL::TIMESTAMP AS session_start,
-               NULL::TIMESTAMP AS session_end,
+               NULL::TEXT AS session_start,
+               NULL::TEXT AS session_end,
                NULL::BOOLEAN AS session_cancelled
         FROM rooms r
         WHERE r.id NOT IN (SELECT room_id FROM room_sessions)

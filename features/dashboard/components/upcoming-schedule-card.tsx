@@ -199,7 +199,7 @@ function UpcomingCourseItem({
   course: DashboardUpcomingCourse
   onAction: (action: () => Promise<void>) => void
 }) {
-  const dateLabel = new Date(course.sessionDate).toLocaleDateString('de-DE', {
+  const dateLabel = new Date(course.sessionDate).toLocaleDateString('en-GB', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
