@@ -1,10 +1,17 @@
 INSERT INTO
-  subscriptions (member_id, plan_id, start_date, end_date)
+  subscriptions (
+    member_id,
+    plan_id,
+    start_date,
+    end_date,
+    created_at
+  )
 SELECT
   m.id,
   p.id,
   start_date,
-  end_date
+  end_date,
+  start_date::timestamptz
 FROM
   (
     VALUES
@@ -448,6 +455,14 @@ FROM
       (153, 4, CURRENT_DATE - INTERVAL '2 months', NULL), -- Hartmut: Gym Basic 3M
       (154, 6, CURRENT_DATE - INTERVAL '6 months', NULL), -- Ilse: Gym Basic 12M
       (155, 19, CURRENT_DATE - INTERVAL '5 months', NULL), -- Manfred: Off-Peak Saver 6M
+      -- Very recent subscriptions (current month) so subscription flow chart has data
+      (89, 1, CURRENT_DATE - INTERVAL '2 days', NULL), -- Recent: Flex Gym Basic, 2 days ago
+      (91, 3, CURRENT_DATE - INTERVAL '1 day', NULL), -- Recent: Flex All-In, yesterday
+      (93, 2, CURRENT_DATE, NULL), -- Recent: Flex Gym Plus, today
+      (95, 6, CURRENT_DATE - INTERVAL '3 days', NULL), -- Recent: Gym Basic 12M, 3 days ago
+      (97, 9, CURRENT_DATE - INTERVAL '1 day', NULL), -- Recent: Gym + Courses 12M, yesterday
+      (99, 12, CURRENT_DATE - INTERVAL '2 days', NULL), -- Recent: All-In 12M, 2 days ago
+      (100, 11, CURRENT_DATE, NULL), -- Recent: All-In 6M, today
       -- Cancelled subscriptions (~25 members, end_date in the future)
       (
         156,
@@ -752,3 +767,68 @@ FROM
     OFFSET
       (data.plan_id - 1)
   ) p;
+
+-- Now that subscriptions exist, backfill realistic created_at timestamps.
+-- Members WITH subscriptions: created 1-14 days before their first subscription.
+-- Members WITHOUT subscriptions: spread across the last 18 months.
+UPDATE members
+SET
+  created_at = sub.new_created_at
+FROM
+  (
+    SELECT
+      m.id,
+      (
+        MIN(s.start_date) - ((HASHTEXT (m.id::text) & 13) + 1) * INTERVAL '1 day'
+      )::timestamptz AS new_created_at
+    FROM
+      members m
+      JOIN subscriptions s ON s.member_id = m.id
+    GROUP BY
+      m.id
+    UNION ALL
+    SELECT
+      m.id,
+      (
+        CURRENT_DATE - INTERVAL '18 months' + (
+          ROW_NUMBER() OVER (
+            ORDER BY
+              m.id
+          )
+        ) * INTERVAL '5 days'
+      )::timestamptz
+    FROM
+      members m
+      LEFT JOIN subscriptions s ON s.member_id = m.id
+    WHERE
+      s.id IS NULL
+  ) sub
+WHERE
+  members.id = sub.id;
+
+-- Trainers: created_at matches their member created_at
+UPDATE trainers
+SET
+  created_at = m.created_at
+FROM
+  members m
+WHERE
+  trainers.member_id = m.id;
+
+-- Credit cards: created_at matches their member created_at
+UPDATE credit_cards
+SET
+  created_at = m.created_at
+FROM
+  members m
+WHERE
+  credit_cards.member_id = m.id;
+
+-- Bank accounts: created_at matches their member created_at
+UPDATE bank_accounts
+SET
+  created_at = m.created_at
+FROM
+  members m
+WHERE
+  bank_accounts.member_id = m.id;
