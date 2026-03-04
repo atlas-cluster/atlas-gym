@@ -199,11 +199,8 @@ function UpcomingCourseItem({
   course: DashboardUpcomingCourse
   onAction: (action: () => Promise<void>) => void
 }) {
-  const dateLabel = new Date(course.sessionDate).toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
-  })
+  const sessionDate = new Date(course.sessionDate)
+  const dateLabel = `${sessionDate.toLocaleDateString('en-GB', { weekday: 'short' })}, ${sessionDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`
 
   const handleClick = () => {
     if (course.role === 'trainer' && !course.isCancelled && course.updatedAt) {
